@@ -1,23 +1,23 @@
 Name$	Text$	ERM	Value	On	NoMP	Cosmetic	Hint$	LongHint$	(comment)-
 Enabled	Neutral Options						TODO: Proper text, hint and description
 
-group:	General
-FizzleFade	Replace fade-to-black animation with blending when entering/leaving a town or combat			true		true	TODO: Proper text, hint and description
-ChooseRMGTemplate	Choose RMG template when starting a random map					true	TODO: Proper text, hint and description
-FasterAI	Faster AI (smaller thinking radius)						TODO: Proper text, hint and description	Sets thinking radius to WoG 3.58 default (4096) instead of SoD default (32000).
-WoG 3.59 normally uses SoD default.
+group:	Uncompatible with HD Mod
+FizzleFade	Replace fade-to-black animation with blending when entering/leaving a town or combat			true		true	Purely cosmetic feature, fade-to-black replaced with bleding effect. Easier to see on your own tha explain. Doesn't work with HD Mod
+NewGrid	New battlefield grid look			true		true	Modified combat grid. Doesn't work with HD Mod
+SoftGridShadow	Light combat grid shadow			true		true	Modified combat grid shadow. Doesn't work with HD Mod
 
-group:	Adventure Map
-SoftShadow	Light shadows on adventure map			true		true	TODO: Proper text, hint and description
-FasterAdvMap	Faster adventure map animation			true		true	1.2 times faster	TODO: Proper text, hint and description
+group:	Quality of life
+ChooseRMGTemplate	Choose RMG template when starting a random map			true		true	At the beginning of game with random map, show dialog to choose RMG template. 
+FasterAI	Faster AI (smaller thinking radius)						Sets AI thinking radius to 4096	Sets thinking radius to WoG 3.58 default (4096) instead of SoD default (32000). WoG 3.59 normally uses SoD default.
+FasterCombat	Faster combat (changes Normal and Fast combat speeds)			true		true	Old "fast" becomes normal, "fast' is even faster
+
+group:	Cosmetic
+SoftShadow	Light shadows on adventure map			true		true	Less dark shadows on adventure map
+FasterAdvMap	Faster adventure map animation			true		true	1.2 times faster	All animations of objects on adventure map becomes 1.2 times faster, resulting in more smooth animations.
+MonStandAnim	Enable "standing" animation of monsters			true		true	Monster breath, move and animate all the time
 
 group:	Trees
-Trees	Standard trees		false			true	TODO: Proper text, hint and description
-Trees	A bit brighter green trees		"bright"			true	TODO: Proper text, hint and description	Made for "Soft shadows on adventure map" option
-Trees	Animated brighter trees and lakes		"move"	true		true	TODO: Proper text, hint and description
-
-group:	Combat
-MonStandAnim	Enable "standing" animation of monsters			true		true	TODO: Proper text, hint and description
-NewGrid	New battlefield grid look			true		true	TODO: Proper text, hint and description
-SoftGridShadow	Light combat grid shadow			true		true	TODO: Proper text, hint and description
-FasterCombat	Faster combat (changes Normal and Fast combat speeds)			true		true	TODO: Proper text, hint and description
+Trees	Standard trees		false			true	No animation, just standard trees like in SoD
+Trees	A bit brighter green trees		"bright"			true	No animation, changed textures to brighter
+Trees	Animated brighter trees and lakes		"move"	true		true	Brighter trees with smooth animation
+Trees	Old WoG animated trees and lakes		"oldwog"	true		true	Trees animated like in WoG 3.58f + animated lakes
