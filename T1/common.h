@@ -383,7 +383,7 @@ extern PEr GEr;
 #define STARTC(x,y)   int GErLeveL = GEr.Add(x,y);
 #define START(x)      int GErLeveL = GEr.Add(x,0);
 #define STARTNA(x,y)  int GErLeveL = GEr.AddN(__FILENUM__*1000000 + x,y);
-//#define STOP          {PEr::Del(GErLeveL);}  // use RETURNV instead
+#define STOP          {PEr::Del(GErLeveL);}  // use RETURNV instead
 #define RETURN(x)     {PEr::Del(GErLeveL); return(x);}
 #define RETURNV       {PEr::Del(GErLeveL); return;}
 

@@ -26,6 +26,10 @@
 #include "TOWNS/towns.h"
 #define __FILENUM__ 8
 
+ // TEMPORARY
+#pragma comment(lib, "User32.lib")
+#pragma comment(lib, "Gdi32.lib")
+
 #ifdef DEBUG
 	#define DSNUM 100
 	#define DP(X)  (long)X,#X
