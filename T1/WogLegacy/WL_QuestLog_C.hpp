@@ -101,15 +101,15 @@ int ERM_Qwest(char Cmd,int Num,_ToDo_* /*sp*/,Mes *Mp)
 			CHECK_ParamsMin(1);
 			if(Apply(&value,4,Mp,0)) { MError("\"!!QW:M\"-cannot get or check value."); RETURN(0) }
 			if(value < 0 || value > 2) { MError("\"!!QW:M\"-invalid value."); RETURN(0) }
-			if(value!=2) { PL_WoGOptions[0][WLG_Questlog_mode] = value; }
+			if(value!=2) { PL_WoGOptions[0][WL_Questlog_mode] = value; }
 			
 			if(value == 2)
 			{
 				CHECK_ParamsNum(2);
 				if(Apply(&func_to_call,4,Mp,1)) { MError("\"!!QW:M\"-cannot get or check number of function to call."); RETURN(0) }
 				if(func_to_call < 1 || func_to_call > WL_FUNC_COUNT) { MError("\"!!QW:M\"-invalid function number."); RETURN(0) }
-				PL_WoGOptions[0][WLG_Questlog_mode] = value;
-				PL_WoGOptions[0][WLG_Questlog_func] = func_to_call;
+				PL_WoGOptions[0][WL_Questlog_mode] = value;
+				PL_WoGOptions[0][WL_Questlog_func] = func_to_call;
 			}
 			break;
 		}
@@ -126,12 +126,12 @@ int _MakeQuestLog(void)
 	STARTNA(__LINE__, 0)
 	
 	// Mode 2 - calling function instead. Copied from ERM_Function
-	if(PL_WoGOptions[0][WLG_Questlog_mode] == 2)
+	if(PL_WoGOptions[0][WL_Questlog_mode] == 2)
 	{
 		int OldX[16];
 		int i;
 		for(i=0;i<16;i++) { OldX[i]=ERMVarX[i]; ERMVarX[i]=0; }
-		FUCall(PL_WoGOptions[0][WLG_Questlog_func], 0, 0);
+		FUCall(PL_WoGOptions[0][WL_Questlog_func], 0, 0);
 		for(i=0;i<16;i++) { ERMVarX[i]=OldX[i]; }
 		RETURN(0)
 	}
@@ -152,14 +152,14 @@ int _MakeQuestLog(void)
 	}
 	if(ind!=0){ // что-то было
 		// Standard reaction
-		if(PL_WoGOptions[0][WLG_Questlog_mode] == 0)
+		if(PL_WoGOptions[0][WL_Questlog_mode] == 0)
 		{
 			if(WoGType){ StrCanc(MQL_MesBuf,30000,MQL_MesBuf,"\n{Хотите} {посмотреть} {QuestLog?}"); }
 			else{ StrCanc(MQL_MesBuf,30000,MQL_MesBuf,"\n{Do you want} {to} {see} {the} {QuestLog?}"); }
 			RETURN(Request0(MQL_MesBuf))
 		}
 		// Override old questlog
-		if(PL_WoGOptions[0][WLG_Questlog_mode] == 1)
+		if(PL_WoGOptions[0][WL_Questlog_mode] == 1)
 		{
 			Message(MQL_MesBuf);
 			RETURN(0)
