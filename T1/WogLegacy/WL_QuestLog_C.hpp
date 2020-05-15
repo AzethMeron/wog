@@ -126,20 +126,22 @@ int _MakeQuestLog(void)
 	STARTNA(__LINE__, 0)
 	
 	// Mode 2 - calling function instead. Copied from ERM_Function
+
+	int ind,hero,owner;
+	hero=MQL_hp->Number;
+	owner=MQL_hp->Owner;
 	if(PL_WoGOptions[0][WL_Questlog_mode] == 2)
 	{
 		int OldX[16];
 		int i;
 		for(i=0;i<16;i++) { OldX[i]=ERMVarX[i]; ERMVarX[i]=0; }
+		ERMVarX[0] = owner;
+		ERMVarX[1] = hero;
 		FUCall(PL_WoGOptions[0][WL_Questlog_func], 0, 0);
 		for(i=0;i<16;i++) { ERMVarX[i]=OldX[i]; }
 		RETURN(0)
 	}
-
-	int ind,hero,owner;
 	_QuestLog_ *qlp;
-	hero=MQL_hp->Number;
-	owner=MQL_hp->Owner;
 	ind=0; MQL_MesBuf[0]=0;
 	if(WoGType){ StrCanc(MQL_MesBuf,30000,MQL_MesBuf,"{Папирус}\n\n"); }
 	else{ StrCanc(MQL_MesBuf,30000,MQL_MesBuf,"{Papyrus}\n\n"); }
