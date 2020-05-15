@@ -1,5 +1,28 @@
-#define VAR_COUNT_V (10000)
-#define VAR_COUNT_LZ (20)
+#define PL_ExtDwellStd PL_WoGOptions[0][0]// 0-стандартные двелинги 8-го уровня
+#define PL_TowerStd    PL_WoGOptions[0][1]
+#define PL_MLeaveStd   PL_WoGOptions[0][2]
+#define PL_NoNPC       PL_WoGOptions[0][3]
+#define PL_NoTownDem   PL_WoGOptions[0][4]
+#define PL_ApplyWoG    PL_WoGOptions[0][5]
+#define PL_NPC2Hire    PL_WoGOptions[0][6]
+#define PL_DwellAccum  PL_WoGOptions[0][7]
+#define PL_GuardAccum  PL_WoGOptions[0][8]
+#define PL_CentElf     PL_WoGOptions[0][9]
+#define PL_MLeaveStyle PL_WoGOptions[0][10]
+#define PL_CrExpEnable PL_WoGOptions[0][900]
+#define PL_CrExpStyle  PL_WoGOptions[0][901]
+#define PL_LeaveArt    PL_WoGOptions[0][902]
+#define PL_CheatDis    PL_WoGOptions[0][903]
+#define PL_ERMErrDis   PL_WoGOptions[0][904]
+#define PL_ERMError    PL_WoGOptions[0][905]
+#define PL_ExpGainDis  PL_WoGOptions[0][906]
+#define PL_NewHero     PL_WoGOptions[0][907]
+
+#include "WogLegacy/WLA_ERM.hpp"
+
+#define PL_WONUM (WL_PL_WONUM + WL_PL_WONUM_SPEC)
+extern int PL_WoGOptions[2][PL_WONUM]; // все опции
+
 #define BAD_INDEX_V(vi) ((vi<1) || (vi > VAR_COUNT_V + (ErrString.str == LuaErrorString ? 16 : 0) ))
 #define BAD_INDEX_LZ(vi) ((vi < -VAR_COUNT_LZ) || (vi==0))
 #define BAD_INDEX_LZ_ALLOW_0(vi) (vi < -VAR_COUNT_LZ)
@@ -22,27 +45,6 @@ extern int ERM_GM_ai;   // кто посетил объект
 extern _Hero_ *ERM_HeroStr;  // герой, посетивший объект
 extern int ERM_PosX, ERM_PosY, ERM_PosL;
 extern int EnableMithrill;
-#define PL_WONUM 1000
-#define PL_ExtDwellStd PL_WoGOptions[0][0]// 0-стандартные двелинги 8-го уровня
-#define PL_TowerStd    PL_WoGOptions[0][1]
-#define PL_MLeaveStd   PL_WoGOptions[0][2]
-#define PL_NoNPC       PL_WoGOptions[0][3]
-#define PL_NoTownDem   PL_WoGOptions[0][4]
-#define PL_ApplyWoG    PL_WoGOptions[0][5]
-#define PL_NPC2Hire    PL_WoGOptions[0][6]
-#define PL_DwellAccum  PL_WoGOptions[0][7]
-#define PL_GuardAccum  PL_WoGOptions[0][8]
-#define PL_CentElf     PL_WoGOptions[0][9]
-#define PL_MLeaveStyle PL_WoGOptions[0][10]
-#define PL_CrExpEnable PL_WoGOptions[0][900]
-#define PL_CrExpStyle  PL_WoGOptions[0][901]
-#define PL_LeaveArt    PL_WoGOptions[0][902]
-#define PL_CheatDis    PL_WoGOptions[0][903]
-#define PL_ERMErrDis   PL_WoGOptions[0][904]
-#define PL_ERMError    PL_WoGOptions[0][905]
-#define PL_ExpGainDis  PL_WoGOptions[0][906]
-#define PL_NewHero     PL_WoGOptions[0][907]
-extern int PL_WoGOptions[2][PL_WONUM]; // все опции
 extern int EnableChest[];
 extern int MithrillVal[8];
 extern union _ErrorCmd_{
