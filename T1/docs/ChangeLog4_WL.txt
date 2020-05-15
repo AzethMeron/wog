@@ -1,0 +1,25 @@
+!!QW:M#; Set Papyrus mode. TO DO: Get/check syntax
+#=0 standard
+#=1 override old questlog
+!!QW:M2/#; Custom mode
+Call function with number # instead
+
+Wog Legacy naming convention:
+- All new files are in WogLegacy dir
+- All new files starts with WL
+- A means addition to
+- New header files ends with hpp
+- Ending _C.hpp means it is extension of some .cpp file
+So, WLA_ERM_C.hpp means Wog Legacy addition to erm.cpp
+
+There are much more Wog Options (UN:P) than before. In WLA_ERM.hpp there are 2 constants:
+#define WL_PL_WONUM (1000)
+#define WL_PL_WONUM_SPEC (100)
+First one means 'number of normal UN:P' - no changes to those.
+Second one are new - you can't edit them via UN:P. They are used to store data by me in source. 
+It is very easy way to make variables that are automatically stored in savefile and shared in multiplayer.
+Im not experienced enough yet to make my own variables. Note that every change to any of consts will make saves uncompatible, and you still can change those values
+for example via WoG options dialog.
+
+[+] New v-vars: v10001-v10100
+[ ] Old saves will NOT work.
