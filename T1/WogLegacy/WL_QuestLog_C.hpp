@@ -165,6 +165,7 @@ int _MakeQuestLog(void)
 			RETURN(0)
 		}
 	}
+	if(PL_WoGOptions[0][WL_Questlog_mode] == 1) { RETURN(0) }
 	RETURN(1)
 }
 
