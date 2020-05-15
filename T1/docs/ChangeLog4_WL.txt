@@ -1,8 +1,12 @@
 !!QW:M#; Set Papyrus mode. TO DO: Get/check syntax
 #=0 standard
 #=1 override old questlog
+
 !!QW:M2/#; Custom mode
 Call function with number # instead
+Inside FU trigger you have arguments
+x1 - hero owner
+x2 - hero number
 
 Wog Legacy naming convention:
 - All new files are in WogLegacy dir
