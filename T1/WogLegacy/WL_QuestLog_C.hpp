@@ -101,16 +101,14 @@ int ERM_Qwest(char Cmd,int Num,_ToDo_* /*sp*/,Mes *Mp)
 			CHECK_ParamsMin(1);
 			if(Apply(&value,4,Mp,0)) { MError("\"!!QW:M\"-cannot get or check value."); RETURN(0) }
 			if(value < 0 || value > 2) { MError("\"!!QW:M\"-invalid value."); RETURN(0) }
-			if(value!=2) { PL_WoGOptions[0][WL_Questlog_mode] = value; }
-			
 			if(value == 2)
 			{
 				CHECK_ParamsNum(2);
 				if(Apply(&func_to_call,4,Mp,1)) { MError("\"!!QW:M\"-cannot get or check number of function to call."); RETURN(0) }
 				if(func_to_call < 1 || func_to_call > WL_FUNC_COUNT) { MError("\"!!QW:M\"-invalid function number."); RETURN(0) }
-				PL_WoGOptions[0][WL_Questlog_mode] = value;
 				PL_WoGOptions[0][WL_Questlog_func] = func_to_call;
 			}
+			PL_WoGOptions[0][WL_Questlog_mode] = value;
 			break;
 		}
 		default: EWrongCommand(); RETURN(0)
@@ -126,21 +124,16 @@ int _MakeQuestLog(void)
 	STARTNA(__LINE__, 0)
 	
 	// Mode 2 - calling function instead. Copied from ERM_Function
-
 	int ind,hero,owner;
 	hero=MQL_hp->Number;
 	owner=MQL_hp->Owner;
 	if(PL_WoGOptions[0][WL_Questlog_mode] == 2)
 	{
-		int OldX[16];
-		int i;
-		for(i=0;i<16;i++) { OldX[i]=ERMVarX[i]; ERMVarX[i]=0; }
-		ERMVarX[0] = owner;
-		ERMVarX[1] = hero;
-		FUCall(PL_WoGOptions[0][WL_Questlog_func], 0, 0);
-		for(i=0;i<16;i++) { ERMVarX[i]=OldX[i]; }
+		int args[2] = { owner, hero };
+		Call_Function(PL_WoGOptions[0][WL_Questlog_func],args,2);
 		RETURN(0)
 	}
+	// Mode 0 and 1
 	_QuestLog_ *qlp;
 	ind=0; MQL_MesBuf[0]=0;
 	if(WoGType){ StrCanc(MQL_MesBuf,30000,MQL_MesBuf,"{Папирус}\n\n"); }
@@ -167,6 +160,7 @@ int _MakeQuestLog(void)
 			RETURN(0)
 		}
 	}
+	// Empty papyrus
 	if(PL_WoGOptions[0][WL_Questlog_mode] == 1) { RETURN(0) }
 	RETURN(1)
 }
