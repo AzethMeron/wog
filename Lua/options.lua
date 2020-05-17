@@ -52,6 +52,8 @@ SetupPath = SetupPath..ReadIniString("WoGification", "SetupFile", "Setup.lua")
 local UN_P = ERM.UN.P
 local ?v = ?v
 
+local wog_options_num 1200
+
 ----------- No globals from this point ------------
 
 local _NOGLOBALS
@@ -139,12 +141,12 @@ end
 _G.Options = setmetatableW({}, {__index = Options_index, __newindex = Options_newindex})
 
 function internal.CopyToWogOptions()
-	local base = WogOptionsPtr + 1000*4
-	mem_copy(WogOptionsPtr, base, 1000*4)
+	local base = WogOptionsPtr + wog_options_num*4
+	mem_copy(WogOptionsPtr, base, wog_options_num*4)
 	for k, erm in pairs(OptionERM) do
 		SetWogOption(erm, internal.CurOptions.Active[k])
 	end
-	mem_copy(base, WogOptionsPtr, 1000*4)
+	mem_copy(base, WogOptionsPtr, wog_options_num*4)
 end
 
 function internal.CopyFromWogOptions()
@@ -371,8 +373,8 @@ function internal.AllOptionsLoaded()
 		fname = path_FindFirst(fname) or path_FindFirst("WoGSetupEx.dat")
 		if fname then
 			local s = io_LoadString(fname)
-			mem_copy(WogOptionsPtr, s, min(#s, 1000*4))
-			mem_copy(WogOptionsPtr + 1000*4, WogOptionsPtr, 1000*4)
+			mem_copy(WogOptionsPtr, s, min(#s, wog_options_num*4))
+			mem_copy(WogOptionsPtr + wog_options_num*4, WogOptionsPtr, wog_options_num*4)
 		end
 		internal.CopyFromWogOptions()
 	end
