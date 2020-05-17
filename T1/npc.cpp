@@ -2679,7 +2679,7 @@ void _ClickNPC(void)
 	}
 	MixedPos(&MC_x,&MC_y,&MC_l,MC_MixPos);
 	MC_Std=1;
-	pointer=30310; //
+	pointer=WL_FUNC_COUNT+310; //
 	ProcessERM();
 	if(MC_changed==1){
 		if(MC_MouseStr.Item==0) MC_MouseStr.Item=37;

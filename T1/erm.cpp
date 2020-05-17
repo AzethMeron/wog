@@ -70,7 +70,7 @@ char  ERMString[1000][512];  char ERMStringMacro[1000][16];
 char  ERMStringUsed[1000];
 static char  Std_ERMLString[VAR_COUNT_LZ][512];
 char  (*ERMLString)[512] = Std_ERMLString;
-char  ERMFunUsed[30000];
+char  ERMFunUsed[WL_FUNC_COUNT];
 char  ERMTimerUsed[100];
 int   ERMVarUsedStore=0; //делать ли дамп использования переменных
 int   ERMVarCheck4DblStore=0; // проверять на дублирование
@@ -959,7 +959,7 @@ void ClearVarUsedList(void)
 	for(i=0;i<200;i++)   ERMVarHUsed[i]=0;
 	for(i=0;i<1000;i++)  ERMStringUsed[i]=0;
 	for(i=0;i<1000;i++)  ERMFlagsUsed[i]=0;
-	for(i=0;i<30000;i++) ERMFunUsed[i]=0;
+	for(i=0;i<WL_FUNC_COUNT;i++) ERMFunUsed[i]=0;
 	for(i=0;i<100;i++)   ERMTimerUsed[i]=0;
 	RETURNV
 }
@@ -1055,7 +1055,7 @@ void WriteVarUsed(void)
 	}
 	StrCopy(cp,81,"Functions triggers [t] and receivers/instructions [r,d] [FU(DO)1...FU(DO)30000]:"); cp+=80;
 	*cp++=0x0D; *cp++=0x0A;
-	for(i=0;i<30000;i++){
+	for(i=0;i<WL_FUNC_COUNT;i++){
 		if(ERMFunUsed[i]==0) continue;
 		*cp++='F'; *cp++='U';
 		len=i2a(i+1,buf); buf[len]=0;
@@ -1179,7 +1179,7 @@ void LogTriggerConditions(_Cmd_ *cp,char *Line)
 void LogERMFunctionTrigger(int fn,char *Line,int flag=ERMVarCheck4DblStore) // 1...30000
 {
 	STARTNA(__LINE__, 0)
-	if((fn<1)||(fn>30000)){
+	if((fn<1)||(fn>WL_FUNC_COUNT)){
 		Message("Cannot LOG index of function [trigger]",1);
 		Message(Line,1);
 		RETURNV
@@ -1222,7 +1222,7 @@ void LogERMAnyReceiver(Word Id,VarNum Par,char * /*Line*/,int flag=ERMVarCheck4D
 	}
 	switch(Id){
 		case 'UF':// VC 'FU':
-			if((ind<1)||(ind>30000)){
+			if((ind<1)||(ind>WL_FUNC_COUNT)){
 //        MError("Function receiver or instruction cannot be logged (variable value is not defined yet).");
 //        Message(Line,1);
 //        просто пропустем
@@ -1232,7 +1232,7 @@ void LogERMAnyReceiver(Word Id,VarNum Par,char * /*Line*/,int flag=ERMVarCheck4D
 			ERMFunUsed[ind-1]|=2; // receiver or instruction
 			break;
 		case 'OD':// VC 'DO':
-			if((ind<1)||(ind>30000)){
+			if((ind<1)||(ind>WL_FUNC_COUNT)){
 //        MError("Cycle receiver or instruction cannot be logged (variable value is not defined yet).");
 //        Message(Line,1);
 //        просто пропустем
@@ -2350,7 +2350,7 @@ int __fastcall ChangeFlagColor(_MapItem_ *mip, int r)
 	FCstruct = &fc;
 
 	Map2Coord(mip, &ERM_PosX, &ERM_PosY, &ERM_PosL);
-	pointer = 30375;
+	pointer = WL_FUNC_COUNT+375;
 	ProcessERM();
 
 	FCstruct = old;
@@ -2409,7 +2409,7 @@ int __fastcall DigGrailTrigger(_Hero_ * hero, int r, int x, int y, int z)
 	ERM_GM_ai = IsThis(hero->Owner);
 	ERM_HeroStr = hero;
 	ERM_PosX = x; ERM_PosY = y; ERM_PosL = z;
-	pointer = 30376;
+	pointer = WL_FUNC_COUNT+376;
 	ProcessERM();
 
 	DGstruct = old;
@@ -4639,46 +4639,48 @@ struct _ERM_Trigger_{ // triggers with 1 or no parameters
 	Byte post;
 } ERM_Triggers[]=
 {
-	{'IP',30330,0,3},          // IP#;
-	{'BA',30300,0,1},          // BA#;
-	{'BA',30350,50,54},        // BA#;
-	{'BF',30800,0,1},          // BF#;
-	{'BR',30302},              // BR;
-	{'MM',30317,0,1},          // MM; перем мауса (0-битва,1-город)
-	{'AE',30315,0,1},          // AE; одевание артифакта (0-снять,1-одеть)
-	{'BG',30303,0,1},          // BG;
-	{'CM',30310,0,4},          // CM;
-	{'CM',30319,5,5},          // CM;
-	{'MW',30305,0,1},          // MW#;
-	{'TH',30324,0,1},          // TH#;
-	{'HE',30100,0,HERNUM-1},   // HE#;
-	{'HM',30400,-1,HERNUM-1},  // HM#; -1 - every hero moves
-	{'HL',30600,-1,HERNUM-1},  // HL#; -1 - every hero gains level
-	{'CO',30340,0,3},          // CO
-	{'MP',30320},              // MP; переключение MP3
-	{'MG',30322,0,1},          // MG; magic casting on adv. map
-	{'SN',30321},              // SN; переключение Sound
+	{'IP',WL_FUNC_COUNT+330,0,3},          // IP#;
+	{'BA',WL_FUNC_COUNT+300,0,1},          // BA#;
+	{'BA',WL_FUNC_COUNT+350,50,54},        // BA#;
+	{'BF',WL_FUNC_COUNT+800,0,1},          // BF#;
+	{'BR',WL_FUNC_COUNT+302},              // BR;
+	{'MM',WL_FUNC_COUNT+317,0,1},          // MM; перем мауса (0-битва,1-город)
+	{'AE',WL_FUNC_COUNT+315,0,1},          // AE; одевание артифакта (0-снять,1-одеть)
+	{'BG',WL_FUNC_COUNT+303,0,1},          // BG;
+	{'CM',WL_FUNC_COUNT+310,0,4},          // CM;
+	{'CM',WL_FUNC_COUNT+319,5,5},          // CM;
+	{'MW',WL_FUNC_COUNT+305,0,1},          // MW#;
+	{'TH',WL_FUNC_COUNT+324,0,1},          // TH#;
+	{'HE',WL_POINTER_HE,0,HERNUM-1},   // HE#;
+	{'HM',WL_POINTER_HM,-1,HERNUM-1},  // HM#; -1 - every hero moves
+	{'HL',WL_POINTER_HL,-1,HERNUM-1},  // HL#; -1 - every hero gains level
+	{'CO',WL_FUNC_COUNT+340,0,3},          // CO
+	{'MP',WL_FUNC_COUNT+320},              // MP; переключение MP3
+	{'MG',WL_FUNC_COUNT+322,0,1},          // MG; magic casting on adv. map
+	{'SN',WL_FUNC_COUNT+321},              // SN; переключение Sound
 // 3.58
-	{'MR',30307,0,2},          // MR; Magic Resistance in Battle
-	{'MF',30801,0,1},          // MF; Monster abilities in a Battle
-	{'GM',30360,0,1},          // GM#; After Load(0), Before Save(1) game trigger
-	{'PI',30370},              // PI; post instruction call
+	{'MR',WL_FUNC_COUNT+307,0,2},          // MR; Magic Resistance in Battle
+	{'MF',WL_FUNC_COUNT+801,0,1},          // MF; Monster abilities in a Battle
+	{'GM',WL_FUNC_COUNT+360,0,1},          // GM#; After Load(0), Before Save(1) game trigger
+	{'PI',WL_FUNC_COUNT+370},              // PI; post instruction call
 // 3.59
-	{'TL',30900,0,4},          // TL#; timer # is number
-	{'DL',30371},              // DL; dialog call back
-	{'HD',30372},              // HD; Hint Display - Get Hint Text
-	{'CI',30373,0,1},          // CI; Castle Income
-	{'FC',30375},              // FC; Flag Color
-	{'DG',30376},              // DG; Dig Grail
-	{'HL',31200,-1,HERNUM-1,true},  // HL#; -1 - every hero gains level post-trigger
-	{'AI',30377},              // AI; Get Map Position Importance
+	{'TL',WL_FUNC_COUNT+900,0,4},          // TL#; timer # is number
+	{'DL',WL_FUNC_COUNT+371},              // DL; dialog call back
+	{'HD',WL_FUNC_COUNT+372},              // HD; Hint Display - Get Hint Text
+	{'CI',WL_FUNC_COUNT+373,0,1},          // CI; Castle Income
+	{'FC',WL_FUNC_COUNT+375},              // FC; Flag Color
+	{'DG',WL_FUNC_COUNT+376},              // DG; Dig Grail
+	{'HL',WL_POINTER_HP,-1,HERNUM-1,true},  // HL#; -1 - every hero gains level post-trigger
+	{'AI',WL_FUNC_COUNT+377},              // AI; Get Map Position Importance
 	{0,0}
 };
 
 //////////////////////////////
+// Wog Legacy introduced WL_FUNC_COUNT, so this list is outdated. But it still can give you general idea how ERM triggers works
+// Generally: 30100 -> WL_FUNC_COUNT+100
 // 0-30000 functions
 // 30000-30100 timers
-// 30100-30300 heroes (!!! must change for new town)
+// 30100-30300 !!! empty
 // 30300 to battle
 // 30301 from battle
 // 30302 next battle turn
@@ -4730,8 +4732,8 @@ struct _ERM_Trigger_{ // triggers with 1 or no parameters
 // 30376 Dig Grail (!?DG)
 // 30377 Get Map Position Importance for AI (!?AI)
 // ...
-// 30400-30600 hero every movement (!!! must change for new town)
-// 30600-30800 hero gain level (!!! must change for new town)
+// 30400-30600 !!! empty
+// 30600-30800 !!! empty
 // 30800 setup battle field
 // 30801 MFCall(0); !?MF0; - Defence coefficient
 // 30802 MFCall(1); !?MF1; - Block ability
@@ -4740,7 +4742,13 @@ struct _ERM_Trigger_{ // triggers with 1 or no parameters
 // 30900-30904 ; TL - timer #-seconds to call
 // 31000-31099 - 100 local functions
 // 31100-31199 - autotimers (!?TM#1/#2/#3/#4)
-// 31200-31400 - hero gain level post-trigger (!!! must change for new town)
+// 31200-31400 - !!! empty
+// ...
+// WL ADDITION 32000-... using old notation (for HERNUM=199)
+// 32000-32199 -- heroes
+// 32200-32399 -- hero every movement
+// 32400-32599 -- hero gain level pretrigger
+// 32600-32799 -- hero gain level posttrigger
 // ...
 // 0x04000000 ... макс используемый тип - уровень
 // 0x10000000+ OB position enter
@@ -7950,7 +7958,7 @@ _found5:
 			if(Num!=1){ EWrongParamsNum(); goto l_exit; }
 			if((M.n[0]<-100)||(M.n[0]==0)||(M.n[0]>WL_FUNC_COUNT)){ MError2("wrong function index (-100...30000)."); goto l_exit; }
 			int funind=M.n[0];
-			if(funind<0) funind=-funind+31000-1; // local functions
+			if(funind<0) funind=-funind+WL_FUNC_COUNT+1000-1; // local functions
 			cp->Event=funind;
 //              cp->Par[0]=M.VarI[0]; cp->ParSet=1;
 			if(ERMVarUsedStore==1) LogERMFunctionTrigger(M.n[0],&M.m.s[M.i]);
@@ -7960,12 +7968,12 @@ _found5:
 			{
 				int i = AddTimer(M.n[0], M.n[1], M.n[2], M.n[3]);
 				if (i<0) goto l_exit;
-				cp->Event = i + 31000;
+				cp->Event = i + WL_FUNC_COUNT+1000;
 				break;
 			}
 			if(Num!=1){ EWrongParamsNum(); goto l_exit; }
 			if((M.n[0]<1)||(M.n[0]>100)){ MError2("wrong timer index (1...100)."); goto l_exit; }
-			cp->Event=M.n[0]-1+30000; // сдвигаем
+			cp->Event=M.n[0]-1+WL_FUNC_COUNT; // сдвигаем
 //              cp->Par[0]=M.VarI[0]; cp->ParSet=1;
 			if(ERMVarUsedStore==1) LogERMTimerTrigger(M.n[0],&M.m.s[M.i]);
 			break;
@@ -8654,7 +8662,7 @@ void ProcessERM(bool needLocals)
 	while(cp!=0 && cp->Event!=0){
 		if(cp->Event==ev) // нашли тригер
 		{
-			if((ev>=31000)&&(ev<31100)) // local function should be in the same scope
+			if((ev>=(WL_FUNC_COUNT+1000))&&(ev<(WL_FUNC_COUNT+1100))) // local function should be in the same scope
 				if(cp->Scope!=GlobalCurrentScope) goto _Cont;
 
 			if(--TriggerGoTo >= 0) goto _Cont;
@@ -8679,7 +8687,7 @@ void ProcessERM(bool needLocals)
 				if(!LocalsStored && needLocals)
 				{
 					LocalsStored = true;
-					StoreVars((cp->Event<30000)||((cp->Event>=31000)&&(cp->Event<31100)));
+					StoreVars((cp->Event<WL_FUNC_COUNT)||((cp->Event>=(WL_FUNC_COUNT+1000))&&(cp->Event<(WL_FUNC_COUNT+1100))));
 				}
 
 				if(cp->Efl[0][0][0].Type == 255) // Lua trigger
@@ -8695,7 +8703,7 @@ void ProcessERM(bool needLocals)
 					GlobalCurrentScope=cp->Scope;
 
 					// backward compatibility - zero out y-1..y-100, f-1..f-100
-					if(cp->Event >= 30000 && (cp->Event < 31000 || cp->Event >= 31100))
+					if(cp->Event >= WL_FUNC_COUNT && (cp->Event < (WL_FUNC_COUNT+1000) || cp->Event >= (WL_FUNC_COUNT+1100)))
 					{
 						for(i=0;i<100;i++){ ERMVarYT[i]=0; }
 						for(i=0;i<100;i++){ ERMVarFT[i]=0; }
@@ -8760,7 +8768,7 @@ _Cont:;
 
 	if (LocalsStored)
 	{
-		StoreVars((ev<30000)||((ev>=31000)&&(ev<31100)), true);
+		StoreVars((ev<WL_FUNC_COUNT)||((ev>=(WL_FUNC_COUNT+1000))&&(ev<(WL_FUNC_COUNT+1100))), true);
 	}
 	IsLuaCall = WasLuaCall;
 	ErrString = LastErrString;
@@ -8778,10 +8786,10 @@ void FUCall(int n, Mes *Mp, int Num, bool needLocals)
 	int lastNum = LastFUNum;
 	LastFUMes = Mp;
 	LastFUNum = Num;
-	if(n>30000){ MError("Function Index out of range (1...30000)"); RETURNV }
+	if(n>WL_FUNC_COUNT){ MError("Function Index out of range (1...30000)"); RETURNV }
 	if(n<0){ // 3.59
 		if(n<-100){ MError("Local Function Index out of range (-100...-1)"); RETURNV }
-		n=-n+31000-1;
+		n=-n+(WL_FUNC_COUNT+1000)-1;
 	}
 	pointer=n;
 	ProcessERM(needLocals);
@@ -8794,7 +8802,7 @@ void FUCall(int n, Mes *Mp, int Num, bool needLocals)
 void _PostInstrCall(void){
 	STARTNA(__LINE__, 0)
 	if(GameWasLoaded==0){ // если только новая игра
-		pointer=30370;
+		pointer=WL_FUNC_COUNT+370;
 		ProcessERM();
 	}
 	RETURNV
@@ -8811,7 +8819,7 @@ void PostInstrCall(void){
 void COCall(Dword n,_Hero_ *hp)
 {
 	STARTNA(__LINE__, 0)
-	pointer=n+30340;
+	pointer=n+WL_FUNC_COUNT+340;
 	ERM_GM_ai=IsThis(hp->Owner);
 	ERM_HeroStr=hp;
 	ERM_PosX=hp->x; ERM_PosY=hp->y; ERM_PosL=hp->l;
@@ -8819,10 +8827,10 @@ void COCall(Dword n,_Hero_ *hp)
 	RETURNV
 }
 // battle
-void BACall(Dword n,_Hero_ *hp)
+void BACall(Dword n,_Hero_ *hp) // BA0,1,50,51, 52,53
 {
 	STARTNA(__LINE__, 0)
-	pointer=n+30300;
+	pointer=n+(WL_FUNC_COUNT+300);
 	ERM_GM_ai=!G2B_CompleteAI;
 //  ERM_PosX=0;ERM_PosY=0;ERM_PosL=0;
 	ERM_HeroStr=hp; // 3.57f 29.01.03
@@ -8833,18 +8841,18 @@ void BACall(Dword n,_Hero_ *hp)
 void TLCall(Dword timesec)
 {
 	STARTNA(__LINE__, 0)
-	if(timesec%60 == 0){ pointer=30904; ProcessERM(); }
-	if(timesec%10 == 0){ pointer=30903; ProcessERM(); }
-	if(timesec%5 == 0){ pointer=30902; ProcessERM(); }
-	if(timesec%2 == 0){ pointer=30901; ProcessERM(); }
-	pointer=30900; ProcessERM();
+	if(timesec%60 == 0){ pointer=WL_FUNC_COUNT+904; ProcessERM(); }
+	if(timesec%10 == 0){ pointer=WL_FUNC_COUNT+903; ProcessERM(); }
+	if(timesec%5 == 0){ pointer=WL_FUNC_COUNT+902; ProcessERM(); }
+	if(timesec%2 == 0){ pointer=WL_FUNC_COUNT+901; ProcessERM(); }
+	pointer=WL_FUNC_COUNT+900; ProcessERM();
 	RETURNV
 }
 
 void DlgCallBack(int dlg,int item,int action)
 {
 	STARTNA(__LINE__, 0)
-	pointer=30371; 
+	pointer=WL_FUNC_COUNT+371; 
 	ERM_PosX=dlg; ERM_PosY=item; ERM_PosL=action;
 	ProcessERM();
 	RETURNV
@@ -8853,7 +8861,7 @@ void DlgCallBack(int dlg,int item,int action)
 void DlgSpellCallBack(int dlg,int x,int y,int action)
 {
 	STARTNA(__LINE__, 0)
-	pointer=30372; 
+	pointer=WL_FUNC_COUNT+372; 
 	ERM_PosX=x; ERM_PosY=y; ERM_PosL=action;
 	ProcessERM();
 	RETURNV
@@ -8863,16 +8871,16 @@ void DlgSpellCallBack(int dlg,int x,int y,int action)
 void TriggerIP(Dword n)
 {
 	STARTNA(__LINE__, 0)
-	pointer=n+30330;
+	pointer=n+WL_FUNC_COUNT+330;
 	ProcessERM();
 	RETURNV
 }
 // battle каждый раунд
-void BACall2(Dword /*n*/,int Day)
+void BACall2(Dword /*n*/,int Day) // BR trigger actually
 {
 	STARTNA(__LINE__, 0)
-//  pointer=n+30300;
-	pointer=30302;
+//  pointer=n+(WL_FUNC_COUNT+300);
+	pointer=WL_FUNC_COUNT+302;
 //  ERM_PosX=0;ERM_PosY=0;ERM_PosL=0;
 	ERMVar2[996]=Day;
 	ProcessERM();
@@ -8882,7 +8890,7 @@ void BACall2(Dword /*n*/,int Day)
 void MP3Call(void)
 {
 	STARTNA(__LINE__, 0)
-	pointer=30320;
+	pointer=WL_FUNC_COUNT+320;
 	ProcessERM();
 	RETURNV
 }
@@ -8890,7 +8898,7 @@ void MP3Call(void)
 void SoundCall(void)
 {
 	STARTNA(__LINE__, 0)
-	pointer=30321;
+	pointer=WL_FUNC_COUNT+321;
 	ProcessERM();
 	RETURNV
 }
@@ -8898,7 +8906,7 @@ void SoundCall(void)
 void AdvMagicCastCall(int beforeAFTER)
 {
 	STARTNA(__LINE__, 0)
-	pointer=30322+beforeAFTER;
+	pointer=WL_FUNC_COUNT+322+beforeAFTER;
 	ProcessERM();
 	RETURNV
 }
@@ -8935,11 +8943,11 @@ void AdvMagicManager(void)
 	__asm   popa
 }
 
-void BACall3(int beforeAFTER,int Day)
+void BACall3(int beforeAFTER,int Day) // BG trigger actually
 {
 	STARTNA(__LINE__, 0)
-//  pointer=n+30300;
-	pointer=30303+beforeAFTER;
+//  pointer=n+(WL_FUNC_COUNT+300);
+	pointer=WL_FUNC_COUNT+303+beforeAFTER;
 //  ERM_PosX=0;ERM_PosY=0;ERM_PosL=0;
 	ERMVar2[996]=Day;
 	ProcessERM();
@@ -8949,7 +8957,7 @@ void BACall3(int beforeAFTER,int Day)
 void MRCall(int beforeAFTER)
 {
 	STARTNA(__LINE__, 0)
-	pointer=30307+beforeAFTER;
+	pointer=WL_FUNC_COUNT+307+beforeAFTER;
 	ERM_GM_ai=!G2B_CompleteAI;
 	ProcessERM();
 	RETURNV
@@ -8957,7 +8965,7 @@ void MRCall(int beforeAFTER)
 void MFCall(int CallType)
 {
 	STARTNA(__LINE__, 0)
-	pointer=30801+CallType;
+	pointer=WL_FUNC_COUNT+801+CallType;
 	ERM_GM_ai=!G2B_CompleteAI;
 	ProcessERM();
 	RETURNV
@@ -8966,7 +8974,7 @@ void MFCall(int CallType)
 void BFCall(void)
 {
 	STARTNA(__LINE__, 0)
-	pointer=30800;
+	pointer=WL_FUNC_COUNT+800;
 	ProcessERM();
 	RETURNV
 }
@@ -8977,7 +8985,7 @@ int IsDisabled(Dword MixPos,int Owner)
 	_ERM_Object_ *obj;
 	if((Owner<0)||(Owner>8)) RETURN(1)
 	if((MixPos&0x10000000)==0){ // герой
-		RETURN(ERM_Hero[MixPos-30100].Disabled[Owner])
+		RETURN(ERM_Hero[MixPos-(WL_POINTER_HE)].Disabled[Owner])
 	}else{
 		MixPos&=0x0FFFFFFF; // восстановим нормальный вид
 		obj=FindObj(MixPos);
@@ -9002,7 +9010,7 @@ int ERM2Object(int GM_ai,Dword MixPos,_MapItem_ *Mi,_Hero_ *Hr)
 		dpointer=MixPos&0x07FF03FF;
 		dpointer|=0x10000000;
 	}else{ // герой
-		dpointer=Mi->SetUp+30100;
+		dpointer=Mi->SetUp+(WL_POINTER_HE);
 	}
 //  IsDisabled(dpointer,Hr->Owner);
 	if(Mi->OType!=0x22){ // объект
@@ -9051,7 +9059,7 @@ int ERM2Object(int prePOST,int GM_ai,Dword MixPos,_MapItem_ *Mi,_Hero_ *Hr,int o
 		lpointer=MixPos&0x07FF03FF;
 		lpointer|=0x10000000; if(prePOST) lpointer|=0x08000000;
 	}else{ // герой
-		lpointer=Mi->SetUp+30100;
+		lpointer=Mi->SetUp+(WL_POINTER_HE);
 	}
 	pointer=lpointer;
 	ProcessERM();
@@ -9074,10 +9082,10 @@ void HeroMove(_Hero_ *hp, int NewX, int NewY, int NewL)
 	ERM_HeroStr=hp;
 	ERM_PosX=NewX; ERM_PosY=NewY; ERM_PosL=NewL;
 	// любой герой
-	pointer=30400;
+	pointer=WL_POINTER_HM;
 	ProcessERM();
 	// конкретный герой
-	pointer=30401+hp->Number;
+	pointer=WL_POINTER_HM+1+hp->Number;
 	ProcessERM();
 	RETURNV
 }
@@ -9105,10 +9113,10 @@ void DoGainLevel(void)
 	ERM_HeroStr=GL_Hp;
 //  ERM_PosX=NewX; ERM_PosY=NewY; ERM_PosL=NewL;
 	// любой герой
-	pointer=30600;
+	pointer=WL_POINTER_HL;
 	ProcessERM();
 	// конкретный герой
-	pointer=30601+GL_Hp->Number;
+	pointer=WL_POINTER_HL+1+GL_Hp->Number;
 	ProcessERM();
 	if(GL_SSkill[0] == -1 && GL_SSkill[1] != -1)
 	{
@@ -9181,10 +9189,10 @@ void __fastcall PostGainLevel(int skill1, int skill2)
 	ERM_GM_ai = !IsAI(GL_Hp->Owner);
 	ERM_HeroStr = GL_Hp;
 	// любой герой
-	pointer = 31200;
+	pointer = WL_POINTER_HP;
 	ProcessERM();
 	// конкретный герой
-	pointer = 31201 + GL_Hp->Number;
+	pointer = WL_POINTER_HP +1 + GL_Hp->Number;
 	ProcessERM();
 	RETURNV
 }
@@ -9338,7 +9346,7 @@ void RunTimer(int Owner)
 		del=day-ERMTimer[i].FirstDay;
 		if((del%ERMTimer[i].Period)!=0) continue;
 		ERM_GM_ai=!IsAI(Owner);
-		pointer = i + (i < 100 ? 30000 : 31000);
+		pointer = i + (i < 100 ? WL_FUNC_COUNT : (WL_FUNC_COUNT+1000));
 		ProcessERM();
 	}
 	RETURNV
@@ -9480,7 +9488,7 @@ void __fastcall HintTrigger(_HC_MsgParams_ *MsgParams)
 		}
 	}
 
-	pointer = 30372;
+	pointer = WL_FUNC_COUNT+372;
 	ERM_GM_ai = -1;
 	Map2Coord(HC_Map, &ERM_PosX, &ERM_PosY, &ERM_PosL);
 	HC_MsgParams = MsgParams;
@@ -9780,9 +9788,9 @@ void _MouseClick(int type)
 	MixedPos(&MC_x,&MC_y,&MC_l,MC_MixPos);
 	MC_Std=1;
 	if(type){ // левый клик
-		pointer=30319;
+		pointer=WL_FUNC_COUNT+319;
 	}else{ // правый клик
-		pointer=30310;
+		pointer=WL_FUNC_COUNT+310;
 	}
 	ProcessERM();
 	if(MC_changed==1){
@@ -9990,7 +9998,7 @@ int _MouseClickTown(void)
 	Copy((Byte *)MCT_msp,(Byte *)&MC_MouseStr,sizeof(_MouseStr_));
 	MC_MouseStr.Item=GetRealItem(MCT_TownMan,&MC_MouseStr);
 	MC_Std=1;
-	pointer=30311; //
+	pointer=WL_FUNC_COUNT+311; //
 	ProcessERM();
 	Copy((Byte *)&MC_MouseStr,(Byte *)MCT_msp,sizeof(_MouseStr_));
 	if(MC_Std==0){ // не надо стандартной реакции
@@ -10013,7 +10021,7 @@ int _MouseOverTown(void)
 	STARTNA(__LINE__, 0)
 	Copy((Byte *)MCT_msp,(Byte *)&MC_MouseStr,sizeof(_MouseStr_));
 	MC_Std=1;
-	pointer=30318; //
+	pointer=WL_FUNC_COUNT+318; //
 	ProcessERM();
 	Copy((Byte *)&MC_MouseStr,(Byte *)MCT_msp,sizeof(_MouseStr_));
 	RETURN(MC_Std)
@@ -10037,7 +10045,7 @@ void __stdcall MouseOverTown(_MouseStr_ *MStr)
 void _EnterTownHall(int Type)
 {
 	STARTNA(__LINE__, 0)
-	pointer=30324+Type; //
+	pointer=WL_FUNC_COUNT+324+Type; //
 	ProcessERM();
 	RETURNV
 }
@@ -10060,7 +10068,7 @@ int MouseClickHero(_MouseStr_ *msp,_Hero_ *hp)
 	MC_Std=1;
 	ERM_HeroStr=hp;
 	MC_lhp=hp->Number;
-	pointer=30312; //
+	pointer=WL_FUNC_COUNT+312; //
 	ProcessERM();
 	Copy((Byte *)&MC_MouseStr,(Byte *)msp,sizeof(_MouseStr_));
 	if(MC_Std==0){ // не надо стандартной реакции
@@ -10135,7 +10143,7 @@ void _MouseClick2Hero(void)
 //  ERM_HeroStr=hp;
 	MC_lhp=((_Hero_ *)MC2H_sm[0x40/4])->Number;
 	MC_rhp=((_Hero_ *)MC2H_sm[0x44/4])->Number;
-	pointer=30313; //
+	pointer=WL_FUNC_COUNT+313; //
 	ProcessERM();
 	Copy((Byte *)&MC_MouseStr,(Byte *)MC2H_msp,sizeof(_MouseStr_));
 	if(MC_Std==0){ // не надо стандартной реакции
@@ -10164,7 +10172,7 @@ void _MouseClickBattle(void)
 	STARTNA(__LINE__, 0)
 	Copy((Byte *)MCB_msp,(Byte *)&MC_MouseStr,sizeof(_MouseStr_));
 	MC_Std=1;
-	pointer=30314; //
+	pointer=WL_FUNC_COUNT+314; //
 	ProcessERM();
 	Copy((Byte *)&MC_MouseStr,(Byte *)MCB_msp,sizeof(_MouseStr_));
 	if(MC_Std==0){ // не надо стандартной реакции
@@ -10186,7 +10194,7 @@ void MouseClickBattle(void)
 void _MouseMoveBattle(void)
 {
 	STARTNA(__LINE__, 0)
-	pointer=30317;
+	pointer=WL_FUNC_COUNT+317;
 	ProcessERM();
 	RETURNV
 }
@@ -10252,7 +10260,7 @@ int ERM_MouseMove(char Cmd,int Num,_ToDo_* /*sp*/,Mes *Mp)
 /////////////////////////////
 static void GameSaveLoadTR(int st){
 	STARTNA(__LINE__, 0)
-	pointer=30360+st;
+	pointer=WL_FUNC_COUNT+360+st;
 	ProcessERM();
 	RETURNV
 }
@@ -10282,7 +10290,7 @@ void ArtifactOnOff(int ONoff)
 	STARTNA(__LINE__, 0)
 	ERM_HeroStr=ART_hp;
 	ERM_PosX=ART_art; ERM_PosY=ART_pos;
-	pointer=30315+ONoff; //
+	pointer=WL_FUNC_COUNT+315+ONoff; //
 	ProcessERM();
 	RETURNV
 }

@@ -603,7 +603,7 @@ void CallWMKilled(int moind)
 	STARTNA(__LINE__, 0)
 	ERM_GM_ai=-1;
 	ERMVar2[996]=moind+1;
-	pointer=30306;
+	pointer=WL_FUNC_COUNT+306;
 	ProcessERM();
 	RETURNV
 }
@@ -612,7 +612,7 @@ void CallWMDest(int moind)
 	STARTNA(__LINE__, 0)
 	ERM_GM_ai=-1;
 	ERMVar2[996]=moind+1;
-	pointer=30305;
+	pointer=WL_FUNC_COUNT+305;
 	ProcessERM();
 	RETURNV
 }

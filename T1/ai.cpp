@@ -272,7 +272,7 @@ int __fastcall GetAIMapPosValue(int val, _Hero_ *hp, int *dist, int baseDist, in
 	ERM_GM_ai = IsThis(hp->Owner);
 	ERM_HeroStr = hp;
 	MixedPos(&ERM_PosX, &ERM_PosY, &ERM_PosL, mixPo);
-	pointer = 30377;
+	pointer = WL_FUNC_COUNT+377;
 	ProcessERM();
 
 	AIstruct = old;

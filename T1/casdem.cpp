@@ -1740,7 +1740,7 @@ int __fastcall CorrectTownIncome(_CastleSetup_ * town, int income)
 	ci.Level = -1;
 	CIstruct = &ci;
 
-	pointer = 30373;
+	pointer = WL_FUNC_COUNT+373;
 	ProcessERM();
 
 	CIstruct = old;
