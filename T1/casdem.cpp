@@ -1759,7 +1759,7 @@ int __fastcall CorrectTownGrowth(_CastleSetup_ * town, int income, int level)
 	ci.Level = level;
 	CIstruct = &ci;
 
-	pointer = 30374;
+	pointer = WL_FUNC_COUNT+374;
 	ProcessERM();
 
 	CIstruct = old;
