@@ -26,4 +26,9 @@ Im not experienced enough yet to make my own variables. Note that every change t
 for example via WoG options dialog.
 
 [+] New v-vars: v10001-v10100
+[+] New functions (FU30001-FU40000) BUT those are for tests only. Number will be decreased when API will be proven to work fine.
+[+] HE, HL, HM triggers now supports number of heroes above 199.
 [ ] Old saves will NOT work.
+
+Self-caused bugs
+[-] options.lua was scrapping Wog Options. Fixed, but you need to manually change constant value in both C++ header and Lua file.
