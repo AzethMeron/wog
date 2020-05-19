@@ -469,6 +469,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\WogLegacy\WLA_Common.hpp"
+				>
+			</File>
+			<File
 				RelativePath=".\WogLegacy\WLA_ERM.hpp"
 				>
 			</File>
@@ -909,7 +913,15 @@
 				</FileConfiguration>
 			</File>
 			<File
+				RelativePath=".\WogLegacy\WL_Numeric_C.hpp"
+				>
+			</File>
+			<File
 				RelativePath=".\WogLegacy\WL_QuestLog_C.hpp"
+				>
+			</File>
+			<File
+				RelativePath=".\WogLegacy\WLA_Common_C.hpp"
 				>
 			</File>
 			<File

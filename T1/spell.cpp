@@ -111,7 +111,7 @@ int ERM_Spell(char Cmd,int Num,_ToDo_*sp,Mes *Mp)
 			//if(Apply(&ZVars[ind][2+vv],4,Mp,1)) break;
 			//txt=GetText(ind,2+vv); if(txt!=NULL) Spell->Descript[vv]=txt;
 			break;
-		default: EWrongCommand(); RETURN(0)
+		default: WL_EWrongCommand(); RETURN(0)
 	}
 	RETURN(1)
 }

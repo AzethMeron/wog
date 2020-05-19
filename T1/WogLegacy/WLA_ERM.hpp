@@ -22,8 +22,8 @@
 
 // List of used hidden options - primarly to not overlap
 // Please use [WL_PL_WONUM]+(number) instead of indexing directly, like 1050
-#define WL_Questlog_mode (WL_PL_WONUM+0)
-#define WL_Questlog_func (WL_PL_WONUM+1)
+#define WL_Questlog_mode (PL_WoGOptions[0][WL_PL_WONUM + 0])
+#define WL_Questlog_func (PL_WoGOptions[0][WL_PL_WONUM + 1])
 
 // Pointers for ERM triggers - don't change
 #define WL_POINTER_HE (WL_FUNC_COUNT+2000) // Hero triggers

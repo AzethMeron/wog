@@ -926,7 +926,7 @@ int ERM_Dlg(char Cmd,int Num,_ToDo_*sp,Mes *Mp)
 			}
 			else
 			{ 
-				if (Mp->m.s[Mp->i] != STRCH) { EWrongSyntax(); RETURN(0)}
+				if (Mp->m.s[Mp->i] != STRCH) { WL_EWrongSyntax(); RETURN(0)}
 				int L;
 				hint = ERM2String(&Mp->m.s[Mp->i], 0, &L);
 				Mp->i += L;
@@ -950,7 +950,7 @@ int ERM_Dlg(char Cmd,int Num,_ToDo_*sp,Mes *Mp)
 			if(refresh) dlg->Refresh(id);
 			ERMFlags[0]=1;
 			break;}
-		default: EWrongCommand(); RETURN(0)
+		default: WL_EWrongCommand(); RETURN(0)
 	}
 	RETURN(1)
 }

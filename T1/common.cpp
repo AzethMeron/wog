@@ -16,6 +16,8 @@
 #include "erm_lua.h"
 #define __FILENUM__ 4
 
+#include "WogLegacy/WLA_Common_C.hpp"
+
 int   IDummy;
 Dword DDummy;
 char  CDummy;

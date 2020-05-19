@@ -245,7 +245,7 @@ int ERM_TL(char Cmd,int Num,_ToDo_* /*sp*/,Mes *Mp)
 			else    AIRDelThis((short)h,(short)o,(short)n);
 			break;
 */
-		default: EWrongCommand(); RETURN(0)
+		default: WL_EWrongCommand(); RETURN(0)
 	}
 	RETURN(1)
 }

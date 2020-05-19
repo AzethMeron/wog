@@ -276,7 +276,7 @@ int ERM_LODs(char Cmd,int Num,_ToDo_* /*sp*/,Mes *Mp)
 			Lod::UnloadCustomLOD(ind);
 			break;
 		}
-		default: EWrongCommand(); RETURN(0)
+		default: WL_EWrongCommand(); RETURN(0)
 	}
 	RETURN(1)
 }

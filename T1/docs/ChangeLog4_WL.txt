@@ -16,6 +16,8 @@ Wog Legacy naming convention:
 - Ending _C.hpp means it is extension of some .cpp file
 So, WLA_ERM_C.hpp means Wog Legacy addition to erm.cpp
 
+In source: WL_ means macro or global variable, while wl_ means new function. No new functions yet.
+
 There are much more Wog Options (UN:P) than before. In WLA_ERM.hpp there are 2 constants:
 #define WL_PL_WONUM (1000)
 #define WL_PL_WONUM_SPEC (200)
@@ -28,6 +30,7 @@ for example via WoG options dialog.
 [+] New v-vars: v10001-v10100
 [+] New functions (FU30001-FU40000) BUT those are for tests only. Number will be decreased when API will be proven to work fine.
 [+] HE, HL, HM triggers now supports number of heroes above 199.
+[+] New macros for ERM errors, should make debugging scripts easier. Old macros are not replaced yet. 
 [ ] Old saves will NOT work.
 
 Self-caused bugs

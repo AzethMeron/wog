@@ -7,5 +7,6 @@
 */
 
 #include "WL_QuestLog_C.hpp" 
+#include "WL_Numeric_C.hpp" 
 
 #endif

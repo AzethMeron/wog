@@ -2,7 +2,7 @@
 #define WL_QuestLog_C_HPP
 
 /* by Jakub Grzana
-	This file is not supposed to be included anywhere except erm.cpp. 
+	This file is not supposed to be included anywhere except WLA_ERM.hpp. 
 	Simple addition, to separate old and new code. Don't try to compile this file seperately
 */
 
@@ -99,16 +99,16 @@ int ERM_Qwest(char Cmd,int Num,_ToDo_* /*sp*/,Mes *Mp)
 		case 'M':
 		{
 			CHECK_ParamsMin(1);
-			if(Apply(&value,4,Mp,0)) { MError("\"!!QW:M\"-cannot get or check value."); RETURN(0) }
-			if(value < 0 || value > 2) { MError("\"!!QW:M\"-invalid value."); RETURN(0) }
+			if(Apply(&value,4,Mp,0)) { WL_MError2("cannot get or check value."); RETURN(0) }
+			if(value < 0 || value > 2) { WL_EWrongParam2("mode",value); RETURN(0) }
 			if(value == 2)
 			{
 				CHECK_ParamsNum(2);
-				if(Apply(&func_to_call,4,Mp,1)) { MError("\"!!QW:M\"-cannot get or check number of function to call."); RETURN(0) }
-				if(func_to_call < 1 || func_to_call > WL_FUNC_COUNT) { MError("\"!!QW:M\"-invalid function number."); RETURN(0) }
-				PL_WoGOptions[0][WL_Questlog_func] = func_to_call;
+				if(Apply(&func_to_call,4,Mp,1)) { WL_MError2("cannot get or check number of function to call."); RETURN(0) }
+				if(func_to_call < 1 || func_to_call > WL_FUNC_COUNT) { WL_EWrongParam2("function",func_to_call); RETURN(0) }
+				WL_Questlog_func = func_to_call;
 			}
-			PL_WoGOptions[0][WL_Questlog_mode] = value;
+			WL_Questlog_mode = value;
 			break;
 		}
 		default: EWrongCommand(); RETURN(0)
@@ -127,10 +127,10 @@ int _MakeQuestLog(void)
 	int ind,hero,owner;
 	hero=MQL_hp->Number;
 	owner=MQL_hp->Owner;
-	if(PL_WoGOptions[0][WL_Questlog_mode] == 2)
+	if(WL_Questlog_mode == 2)
 	{
 		int args[2] = { owner, hero };
-		Call_Function(PL_WoGOptions[0][WL_Questlog_func],args,2);
+		Call_Function(WL_Questlog_func,args,2);
 		RETURN(0)
 	}
 	// Mode 0 and 1
@@ -147,21 +147,21 @@ int _MakeQuestLog(void)
 	}
 	if(ind!=0){ // что-то было
 		// Standard reaction
-		if(PL_WoGOptions[0][WL_Questlog_mode] == 0)
+		if(WL_Questlog_mode == 0)
 		{
 			if(WoGType){ StrCanc(MQL_MesBuf,30000,MQL_MesBuf,"\n{Хотите} {посмотреть} {QuestLog?}"); }
 			else{ StrCanc(MQL_MesBuf,30000,MQL_MesBuf,"\n{Do you want} {to} {see} {the} {QuestLog?}"); }
 			RETURN(Request0(MQL_MesBuf))
 		}
 		// Override old questlog
-		if(PL_WoGOptions[0][WL_Questlog_mode] == 1)
+		if(WL_Questlog_mode == 1)
 		{
 			Message(MQL_MesBuf);
 			RETURN(0)
 		}
 	}
 	// Empty papyrus
-	if(PL_WoGOptions[0][WL_Questlog_mode] == 1) { RETURN(0) }
+	if(WL_Questlog_mode == 1) { RETURN(0) }
 	RETURN(1)
 }
 
