@@ -1050,14 +1050,14 @@ int ERM_CasDem(char Cmd,int Num,_ToDo_*,Mes *Mp)
 			break;
 		case 'E': // Etown_type/build_type/exp_val опыт героя для разрушения
 			CHECK_ParamsMin(3);
-			if((Mp->n[0]<0)||(Mp->n[0]>8)){ EWrongParam(); RETURN(0) }
-			if((Mp->n[1]<0)||(Mp->n[1]>43)){ EWrongParam(); RETURN(0) }
+			if((Mp->n[0]<0)||(Mp->n[0]>8)){ WL_EWrongParam2("town type",Mp->n[0]); RETURN(0) }
+			if((Mp->n[1]<0)||(Mp->n[1]>43)){ WL_EWrongParam2("structure id",Mp->n[1]); RETURN(0) }
 			Apply(&CSCheck[Mp->n[1]].Town[Mp->n[0]].MinHeroExp,4,Mp,2);
 			break;
 		case 'A': // Atown_type/build_type/army_hp сила армии тероя для разрушения
 			CHECK_ParamsMin(3);
-			if((Mp->n[0]<0)||(Mp->n[0]>8)){ EWrongParam(); RETURN(0) }
-			if((Mp->n[1]<0)||(Mp->n[1]>43)){ EWrongParam(); RETURN(0) }
+			if((Mp->n[0]<0)||(Mp->n[0]>8)){ WL_EWrongParam2("town type",Mp->n[0]); RETURN(0) }
+			if((Mp->n[1]<0)||(Mp->n[1]>43)){ WL_EWrongParam2("structure id",Mp->n[1]); RETURN(0) }
 			Apply(&CSCheck[Mp->n[1]].Town[Mp->n[0]].MinArmyPow,4,Mp,2);
 			break;
 		// 3.59
@@ -1769,7 +1769,7 @@ int __fastcall CorrectTownGrowth(_CastleSetup_ * town, int income, int level)
 int ERM_CastleIncome(char Cmd, int Num, _ToDo_*, Mes *Mp)
 {
 	STARTNA(__LINE__,&Mp->m.s[Mp->i])
-	if (CIstruct == 0) { MError2("not in !?CI trigger"); RETURN(0) }
+	if (CIstruct == 0) { WL_MError2("not in !?CI trigger"); RETURN(0) }
 	switch(Cmd)
 	{
 		case 'I':
@@ -1784,7 +1784,7 @@ int ERM_CastleIncome(char Cmd, int Num, _ToDo_*, Mes *Mp)
 			Apply(&CIstruct->Level, 4, Mp, 0);
 			break;
 		default:
-			EWrongCommand(); RETURN(0)
+			WL_EWrongCommand() RETURN(0)
 	}
 	RETURN(1)
 }
@@ -1953,8 +1953,8 @@ int ERM_Castle(char Cmd,int Num,_ToDo_*sp,Mes *Mp)
 					Apply(&dp->MagicHild[Mp->n[0]],1,Mp,1);
 					break;
 				case 3: // G$/$/$ заклинания
-					if((Mp->n[0]<0)||(Mp->n[0]>4)){ EWrongParam(); RETURN(0) }
-					if((Mp->n[1]<0)||(Mp->n[1]>5)){ EWrongParam(); RETURN(0) }
+					if((Mp->n[0]<0)||(Mp->n[0]>4)){ WL_EWrongParam2("magic guild level",Mp->n[0]); RETURN(0) }
+					if((Mp->n[1]<0)||(Mp->n[1]>5)){ WL_EWrongParam2("guild slot",Mp->n[0]); RETURN(0) }
 					Apply(&dp->Spels[Mp->n[0]][Mp->n[1]],4,Mp,2);
 					break;
 				default: MError("\"!!CA:G\"-incorrect command type (1...3)."); RETURN(0)
@@ -1993,7 +1993,7 @@ int ERM_Castle(char Cmd,int Num,_ToDo_*sp,Mes *Mp)
 					}
 					Apply(&j, 4, Mp, 2);
 					break;
-				default: MError2("incorrect command type (1...4)."); RETURN(0)
+				default: WL_MError2("incorrect command type (1...4)."); RETURN(0)
 			}
 			break;
 		case 'B': // здания

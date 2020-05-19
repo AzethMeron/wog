@@ -119,14 +119,9 @@ void Terminate(char *File,int Line);
 // !!
 #define TError(X) _TError(__FILENUM__,__LINE__,X)
 
-#define EWrongCommand() MError2("unknown command.")
-#define EWrongSyntax() MError2("wrong syntax.")
-#define EWrongParam() MError2("invalid parameter value.")
-#define EWrongParamsNum() MError2("wrong number of parameters.")
-
 #define CHECK_ParamsNum(n) if(Num!=n) { WL_EWrongParamsNum(Num,"equal",n); RETURN(0) }
-#define CHECK_ParamsMax(n) if(Num>n) { WL_EWrongParamsNum(Num,"below",n); RETURN(0) }
-#define CHECK_ParamsMin(n) if(Num<n) { WL_EWrongParamsNum(Num,"above",n); RETURN(0) }
+#define CHECK_ParamsMax(n) if(Num>n) { WL_EWrongParamsNum(Num,"maximum ",n); RETURN(0) }
+#define CHECK_ParamsMin(n) if(Num<n) { WL_EWrongParamsNum(Num,"minimum",n); RETURN(0) }
 
 char* __cdecl Format(const char* str, ...);
 char* __cdecl Format2(const char* str, ...);

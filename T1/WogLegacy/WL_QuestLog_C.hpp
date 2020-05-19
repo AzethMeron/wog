@@ -111,7 +111,7 @@ int ERM_Qwest(char Cmd,int Num,_ToDo_* /*sp*/,Mes *Mp)
 			WL_Questlog_mode = value;
 			break;
 		}
-		default: EWrongCommand(); RETURN(0)
+		default: WL_EWrongCommand(); RETURN(0)
 	}
 	RETURN(1)
 }

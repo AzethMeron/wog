@@ -287,7 +287,7 @@ int ERM_AIRun(char Cmd,int Num,_ToDo_* /*sp*/,Mes *Mp)
 	int   h,o,n,ind,chk,x,y,l;
 	Dword mixpos,AIval;
 	Word  flags;
-	if(Cmd != 'S' && Cmd != 'D' && AIstruct == 0) { MError2("not in !?AI trigger"); RETURN(0) }
+	if(Cmd != 'S' && Cmd != 'D' && AIstruct == 0) { WL_MError2("not in !?AI trigger"); RETURN(0) }
 	switch(Cmd){
 		case 'S': // S#герой/#хоз€ин/#номер/$x/$y/$l/$значимость/$флаги
 			CHECK_ParamsMin(8);
@@ -342,7 +342,7 @@ int ERM_AIRun(char Cmd,int Num,_ToDo_* /*sp*/,Mes *Mp)
 			else
 				Apply(AIstruct->Dist, 4, Mp, 0);
 			break;
-		default: EWrongCommand(); RETURN(0)
+		default: WL_EWrongCommand() RETURN(0)
 	}
 	RETURN(1)
 }

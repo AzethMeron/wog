@@ -3096,7 +3096,7 @@ int ERM_NPC(char Cmd,int Num,_ToDo_*sp,Mes *Mp)
 			}
 			break;
 		default:
-			EWrongCommand();
+			WL_EWrongCommand();
 			RETURN(0)
 	}
 	RETURN(1)
