@@ -383,7 +383,7 @@ int LoadA160(int /*ver*/)
 	STARTNA(__LINE__, 0)
 	ResetA160();
 	char buf[4]; if(Loader(buf,4)) RETURN(1)
-	if(buf[0]!='A'||buf[1]!='1'||buf[2]!='6'||buf[3]!='0') {MError("LoadA160 cannot start loading"); RETURN(1)}
+	if(buf[0]!='A'||buf[1]!='1'||buf[2]!='6'||buf[3]!='0') {WL_MError("LoadA160 cannot start loading"); RETURN(1)}
 	if(Loader(ClosedTowns,sizeof(ClosedTowns))) RETURN(1)
 	RETURN(0)
 }

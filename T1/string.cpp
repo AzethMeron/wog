@@ -20,7 +20,7 @@ String::~String(){ Clear(); }
 String::String(){Ind=0; Text=0;}
 void String::Set(int ind,char *txt){
 	STARTNA(__LINE__,txt) //  STARTC("String: Set",txt)
-	if(ind<1){ MError("String: Index is below 1, Item is ignored."); }
+	if(ind<1){ WL_MError1("String: Index is below 1, Item is ignored.\nIncorrect value: %d",ind); }
 	if(ind<1000){ // установим и z переменную также
 		for(int i=0;i<512;i++){
 		 ERMString[ind-1][i]=txt[i];

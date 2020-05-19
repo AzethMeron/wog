@@ -1175,7 +1175,7 @@ int ERM_Curse(Mes &M, int Num, int hn)
 	STARTNA(__LINE__, 0)
 	CHECK_ParamsMin(3);
 	if(Num<4)  M.n[3] = 1;
-	if(M.n[3]<0 || M.n[3]>3){ WL_MError3("wrong action kind (0...3).\nParameter value: %d",M.n[0]); RETURN(1) }
+	if(M.n[3]<0 || M.n[3]>3){ WL_MError3("wrong action kind (0...3).\nIncorrect value: %d",M.n[0]); RETURN(1) }
 	if(M.n[3]==3 && !M.VarI[1].Check && !M.VarI[2].Check)
 		RETURN(AddCurse(0, 0, 0, 3, hn));
 

@@ -460,7 +460,7 @@ static int ERM_Var(lua_State *L)
 		switch (c)
 		{
 			case 0: // flag
-				if((i<1)||(i>1000)){ lua_settop(L, 0); WL_MError3("wrong flag index (1...1000).\nParameter value: %d",i); RETURN(0) }
+				if((i<1)||(i>1000)){ lua_settop(L, 0); WL_MError3("wrong flag index (1...1000).\nIncorrect value: %d",i); RETURN(0) }
 				if(lua_gettop(L) < 3)
 				{
 					lua_settop(L, 0);
@@ -478,7 +478,7 @@ _string:
 				if(lua_gettop(L) < 3)
 				{
 					lua_settop(L, 0);
-					if((i<-VAR_COUNT_LZ)||(i==0)){ WL_MError3("wrong z var index (-20...-1,1...1000+).\nParameter value: %d",i); RETURN(0) }
+					if((i<-VAR_COUNT_LZ)||(i==0)){ WL_MError3("wrong z var index (-20...-1,1...1000+).\nIncorrect value: %d",i); RETURN(0) }
 					char buf[512];
 					StrCopy(buf, 512, GetErmString(i));
 					lua_pushstring(L, buf);
@@ -486,14 +486,14 @@ _string:
 				else
 				{ // set
 					const char* str = lua_tostring(L, 3);
-					if((i<-VAR_COUNT_LZ)||(i==0)||(i>1000)){ lua_settop(L, 0); WL_MError3("wrong z var index (-20...-1,1...1000).\nParameter value: %d",i); RETURN(0) }
+					if((i<-VAR_COUNT_LZ)||(i==0)||(i>1000)){ lua_settop(L, 0); WL_MError3("wrong z var index (-20...-1,1...1000).\nIncorrect value: %d",i); RETURN(0) }
 					StrCopy(GetPureErmString(i),512,str);
 					lua_settop(L, 0);
 					lua_pushboolean(L, 1);
 				}
 				RETURN(1)
 			case 'e':
-				if((i<-100)||(i==0)||(i>100)){ lua_settop(L, 0); WL_MError3("wrong e var index (-100...-1,1...100).\nParameter value: %d",i); RETURN(0) }
+				if((i<-100)||(i==0)||(i>100)){ lua_settop(L, 0); WL_MError3("wrong e var index (-100...-1,1...100).\nIncorrect value: %d",i); RETURN(0) }
 				float *var;
 				if(i>0) var = &ERMVarF[i-1];
 				else    var = &ERMVarFT[-i-1];

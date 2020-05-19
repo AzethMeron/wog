@@ -529,7 +529,7 @@ int GetCurDate(void){
 
 void SetCurDate(int day){
 	STARTNA(__LINE__, 0)
-		if (day <= 0) { WL_MError3("attempt to set current day to a negative value or zero\nParameter value: %d",day); RETURNV }
+		if (day <= 0) { WL_MError3("attempt to set current day to a negative value or zero\nIncorrect value: %d",day); RETURNV }
 	_Date_ *p=CurDate;
 	day--;
 	p->Day=(Word)(day % 7 + 1);     // 1...
@@ -1896,7 +1896,7 @@ Byte *GamerStruc(int hn)
 		__asm mov BPDummy,eax
 		RETURN(BPDummy)
 	}  
-	if((hn<0)||(hn>7)){ WL_MError1("\"GamerStruc\"-wrong player number.\nParameter value: %d",hn); RETURN(0) }
+	if((hn<0)||(hn>7)){ WL_MError1("\"GamerStruc\"-wrong player number.\nIncorrect value: %d",hn); RETURN(0) }
 	__asm{
 		mov    eax,hn
 		lea    eax,[eax+4*eax]
@@ -3655,7 +3655,7 @@ int ArtDisabled(int art)
 {
 	STARTNA(__LINE__, 0)
 	char *en;
-	if((art<0)||(art>=ARTNUM)){ WL_MError1("\"ArtDisabled\" wrong Artifact number.\nParameter value: %d",art); RETURN(0) }
+	if((art<0)||(art>=ARTNUM)){ WL_MError1("\"ArtDisabled\" wrong Artifact number.\nIncorrect value: %d",art); RETURN(0) }
 	__asm{
 		mov  eax,BASE
 		mov  eax,[eax]
@@ -3670,7 +3670,7 @@ void ArtDisabledSet(int art,int disab)
 {
 	STARTNA(__LINE__, 0)
 	char *en;
-	if((art<0)||(art>=ARTNUM)){ WL_MError1("\"ArtDisabbledSet\" wrong Artifact number.\nParameter value: %d",art); RETURNV }
+	if((art<0)||(art>=ARTNUM)){ WL_MError1("\"ArtDisabbledSet\" wrong Artifact number.\nIncorrect value: %d",art); RETURNV }
 	__asm{ 
 		mov  eax,BASE
 		mov  eax,[eax]
@@ -4493,9 +4493,9 @@ int GetObel(int Player,int Index){
 		mov    op,eax
 	}
 	if(Player==-1) Player=CurrentUser();
-	if((Player<0)||(Player>7)){ WL_MError1("\"GetObel\" wrong Player index (0...7)\nParameter value: %d",Player); RETURN(0) }
+	if((Player<0)||(Player>7)){ WL_MError1("\"GetObel\" wrong Player index (0...7)\nIncorrect value: %d",Player); RETURN(0) }
 	mask=(Byte)(1<<Player);
-	if((Index<0)||(Index>47)){ WL_MError1("\"GetObel\" wrong Obelisk index (0...47)\nParameter value: %d",Index); RETURN(0) }
+	if((Index<0)||(Index>47)){ WL_MError1("\"GetObel\" wrong Obelisk index (0...47)\nIncorrect value: %d",Index); RETURN(0) }
 	st=op[Index];
 	if(st&mask) RETURN(1)
 	RETURN(0)
@@ -4517,19 +4517,19 @@ void SetObel(int Player,int Index,int State)
 			for(i=0;i<48;i++){ if(State) op[i]=1; else op[i]=0; }
 			RETURNV
 		}
-		if((Index<0)||(Index>47)){ WL_MError1("\"SetObel\" wrong Obelisk index (0...47)\nParameter value: %d",Index); RETURNV }
+		if((Index<0)||(Index>47)){ WL_MError1("\"SetObel\" wrong Obelisk index (0...47)\nIncorrect value: %d",Index); RETURNV }
 		stp=&op[Index];
 		if(State) *stp=1; else *stp=0;
 		RETURNV
 	}
 	if(Player==-1) Player=CurrentUser();
-	if((Player<0)||(Player>7)){ WL_MError1("\"SetObel\" wrong Player index (0...7)\nParameter value: %d",Player); RETURNV }
+	if((Player<0)||(Player>7)){ WL_MError1("\"SetObel\" wrong Player index (0...7)\nIncorrect value: %d",Player); RETURNV }
 	mask=(Byte)(1<<Player);
 	if(Index==-1){ // все
 		for(i=0;i<48;i++){ if(State) op[i]|=mask; else op[i]&=Byte(~mask); }
 		RETURNV
 	}
-	if((Index<0)||(Index>47)){ WL_MError1("\"SetObel\" wrong Obelisk index (0...47)\nParameter value: %d",Index); RETURNV }
+	if((Index<0)||(Index>47)){ WL_MError1("\"SetObel\" wrong Obelisk index (0...47)\nIncorrect value: %d",Index); RETURNV }
 	stp=&op[Index];
 	if(State) *stp|=mask; else *stp&=Byte(~mask);
 	RETURNV

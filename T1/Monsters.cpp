@@ -61,7 +61,7 @@ int ERM_MonAtr(char Cmd,int Num,_ToDo_*,Mes *Mp)
 		case 'C': // ÷ена C#/#/$ по номерам ресурсов (0...6)
 			CHECK_ParamsNum(3);
 			l=Mp->n[1];  // номер ресурса
-			if((l<0)||(l>6)) { WL_MError3("resource index out of bounds (0...6)\nParameter value: %d", l); RETURN(0)}
+			if((l<0)||(l>6)) { WL_MError3("resource index out of bounds (0...6)\nIncorrect value: %d", l); RETURN(0)}
 			if(Apply(&MonTable[k].CostRes[l],4,Mp,2)) break;
 			CrIsChanged(k);
 			break;
@@ -3244,20 +3244,20 @@ int ERM_MAction(char Cmd,int Num,_ToDo_* /*sp*/,Mes *Mp)
 			CHECK_ParamsNum(1);
 			v=M2B_GetMonNum(bm);
 			if(Apply(&v,4,Mp,0)) break;
-			if(v < 0 || v > 41){ WL_MError3("incorrect stack index.\nParameter value: %d",v); RETURN(0) }
+			if(v < 0 || v > 41){ WL_MError3("incorrect stack index.\nIncorrect value: %d",v); RETURN(0) }
 			CombatMan_SetCurrentMon(combatManager, (v > 20) ? 1 : 0, v % 21);
 			break;
 		case 'V':{ // 3.59 V$stack/$varind/$varval
 			CHECK_ParamsMin(3);
 			int ind=0,st=0;
-			Apply(&st,4,Mp,0);  if(st <0 || st >99){ WL_MError3("incorrect stack index.\nParameter value: %d",st); RETURN(0) }
-			Apply(&ind,4,Mp,1); if(ind<0 || ind>99){ WL_MError3("incorrect value index.\nParameter value: %d",ind); RETURN(0) }
+			Apply(&st,4,Mp,0);  if(st <0 || st >99){ WL_MError3("incorrect stack index.\nIncorrect value: %d",st); RETURN(0) }
+			Apply(&ind,4,Mp,1); if(ind<0 || ind>99){ WL_MError3("incorrect value index.\nIncorrect value: %d",ind); RETURN(0) }
 			Apply(&Tmp_BtlStackVars[st][ind],4,Mp,2);
 			break;}
 		case 'C':{ // 3.59 C or C$stack - clean up all or stack vars
 			CHECK_ParamsNum(1);
 			int st=0;
-			Apply(&st,4,Mp,0);  if(st <-1 || st >99){ WL_MError3("incorrect stack index.\nParameter value: %d",st); RETURN(0) }
+			Apply(&st,4,Mp,0);  if(st <-1 || st >99){ WL_MError3("incorrect stack index.\nIncorrect value: %d",st); RETURN(0) }
 			if(st==-1){
 				memset(Tmp_BtlStackVars,0,sizeof(Tmp_BtlStackVars));
 			}else{
@@ -5352,7 +5352,7 @@ int ERM_BRound(char Cmd,int Num,_ToDo_*sp,Mes *Mp) //!!BM
 	int mn=GetVarVal(&sp->Par[0]);
 	//  if(Num<2){ MError("\"!!BR:\"-wrong syntax."); return 0; }
 	if((mn<-1)||(mn>41)){
-		WL_MError3("monster index is incorrect (-1, 0...41).\nParameter value: %d",mn);
+		WL_MError3("monster index is incorrect (-1, 0...41).\nIncorrect value: %d",mn);
 		RETURN(0)
 	}
 	bm = combatManager;
@@ -5409,7 +5409,7 @@ int ERM_BRound(char Cmd,int Num,_ToDo_*sp,Mes *Mp) //!!BM
 			CHECK_ParamsMin(3);
 			if(Apply(&Spell,4,Mp,0)){ WL_MError2("par 1 may be set only."); RETURN(0) }
 			//  Ќо то, что проверки нет, уже используетс€ в скриптах
-			if(Spell*4+0x198 < 0 || Spell*4+0x198 >= 0x548){ WL_MError3("spell index is incorrect.\nParameter value: %d",Spell); RETURN(0) }
+			if(Spell*4+0x198 < 0 || Spell*4+0x198 >= 0x548){ WL_MError3("spell index is incorrect.\nIncorrect value: %d",Spell); RETURN(0) }
 			val = *(int*)&mon[Spell*4+0x198]; // last duration
 			Apply((int *)&mon[Spell*4+0x198],4,Mp,1); // длительность
 			if (Spell*4+0x2DC >= 0x548) break; // »спользование в качестве хака дл€ получени€/изменени€ параметров монстра
@@ -5548,7 +5548,7 @@ int ERM_BHero(char Cmd,int Num,_ToDo_*sp,Mes *Mp)
 	}
 	int hn=GetVarVal(&sp->Par[0]);
 	if((hn<0)||(hn>1)){
-		WL_MError3("hero side index is incorrect (0...1).\nParameter value: %d",hn);
+		WL_MError3("hero side index is incorrect (0...1).\nIncorrect value: %d",hn);
 		RETURN(0)
 	}
 	__asm{
@@ -5630,7 +5630,7 @@ int ERM_BUniversal(char Cmd,int Num,_ToDo_*,Mes *Mp)
 			CHECK_ParamsNum(1);
 			if(Mp->VarI[0].Type!=7){ WL_MError2("not a Z variable."); RETURN(0) }
 			sind=GetVarVal(&Mp->VarI[0]);
-			if(BAD_INDEX_LZ(sind)||(sind>1000)){ WL_MError3("wrong z (destination) index (-20...-1,1...1000).\nParameter value: %d", sind); RETURN(0) }
+			if(BAD_INDEX_LZ(sind)||(sind>1000)){ WL_MError3("wrong z (destination) index (-20...-1,1...1000).\nIncorrect value: %d", sind); RETURN(0) }
 			if(Mp->VarI[0].Check!=0){ WL_MError2("can use only set syntax."); RETURN(0) }
 			if(sind>0) txtp=ERMString[sind-1];
 			else       txtp=ERMLString[-sind-1];
@@ -6570,7 +6570,7 @@ int ERM_Battle(char Cmd,int Num,_ToDo_*,Mes *Mp)
 		case 'H': // H0...1/$ - герой
 			CHECK_ParamsMin(2);
 			ind=Mp->n[0];
-			if((ind<0)||(ind>1)){ WL_MError3("side out of range (0,1).\nParameter value: %d",ind); RETURN(0) }
+			if((ind<0)||(ind>1)){ WL_MError3("side out of range (0,1).\nIncorrect value: %d",ind); RETURN(0) }
 			if(ind){ hp=G2B_HrD; }else{ hp=G2B_HrA; }
 			if(hp!=0) val=hp->Number; else val=-2;
 			if(Apply(&val,4,Mp,1)) break;
@@ -6580,8 +6580,8 @@ int ERM_Battle(char Cmd,int Num,_ToDo_*,Mes *Mp)
 			break;
 		case 'M': // M0..1/0...6/type/number - монстры
 			CHECK_ParamsMin(4);
-			ind=Mp->n[0];  if((ind<0)||(ind>1)){ WL_MError3("\"side out of range (0,1).\nParameter value: %d",ind); RETURN(0) }
-			slot=Mp->n[1]; if((slot<0)||(slot>6)){ WL_MError3("slot out of range (0...6).\nParameter value: %d",slot); RETURN(0) }
+			ind=Mp->n[0];  if((ind<0)||(ind>1)){ WL_MError3("\"side out of range (0,1).\nIncorrect value: %d",ind); RETURN(0) }
+			slot=Mp->n[1]; if((slot<0)||(slot>6)){ WL_MError3("slot out of range (0...6).\nIncorrect value: %d",slot); RETURN(0) }
 			if(ind) ma=G2B_MArrD; else ma=G2B_MArrA;
 			if(ma==0){ WL_MError2("mon pointer=0(internal error)."); RETURN(0) }
 			v=0;
@@ -6659,7 +6659,7 @@ int ERM_Battle(char Cmd,int Num,_ToDo_*,Mes *Mp)
 				StrCopy(BFBackGrUDef,255,ERM2String(&Mp->m.s[Mp->i],0,&vv));
 				Mp->i+=vv;
 			}else{
-				if((v<-1)||(v>25)){ WL_MError3("wrong BA background index.\nParameter value: %d",v); RETURN(0) }
+				if((v<-1)||(v>25)){ WL_MError3("wrong BA background index.\nIncorrect value: %d",v); RETURN(0) }
 			}
 			BF_BatFieldNum=v;
 			break;
