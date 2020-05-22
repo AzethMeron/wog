@@ -13,7 +13,7 @@ About
 ---
 
 This is Alpha, so anything may change in the future.  
-Team interaction would happen via Skype: sergroj_(my GitHub nickname). Everyone's welcome!
+If you want to contact me, you can do it via Discord group: https://discord.gg/5HMkZDr
 WoG 3.59 is going to be a platform hosting different mods, somewhat like Era II in that sense, but different.  
 Alpha version executable is called WogT1.exe for historic reasons. Executable of final version will be called h3wog.exe as usual.
 WogDialogs.dll source code can be found in MMExtension source code archive: https://www.dropbox.com/s/91xvgzbchx3h1bc/MMExtensionSrc.rar?dl=1
