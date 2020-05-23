@@ -1050,13 +1050,13 @@ int ERM_CasDem(char Cmd,int Num,_ToDo_*,Mes *Mp)
 			break;
 		case 'E': // Etown_type/build_type/exp_val опыт героя для разрушения
 			CHECK_ParamsMin(3);
-			if((Mp->n[0]<0)||(Mp->n[0]>TOWNNUM)){ WL_EWrongParam2("town type",Mp->n[0]); RETURN(0) }
+			if((Mp->n[0]<0)||(Mp->n[0]>=TOWNNUM)){ WL_EWrongParam2("town type",Mp->n[0]); RETURN(0) }
 			if((Mp->n[1]<0)||(Mp->n[1]>43)){ WL_EWrongParam2("structure id",Mp->n[1]); RETURN(0) }
 			Apply(&CSCheck[Mp->n[1]].Town[Mp->n[0]].MinHeroExp,4,Mp,2);
 			break;
 		case 'A': // Atown_type/build_type/army_hp сила армии тероя для разрушения
 			CHECK_ParamsMin(3);
-			if((Mp->n[0]<0)||(Mp->n[0]>TOWNNUM)){ WL_EWrongParam2("town type",Mp->n[0]); RETURN(0) }
+			if((Mp->n[0]<0)||(Mp->n[0]>=TOWNNUM)){ WL_EWrongParam2("town type",Mp->n[0]); RETURN(0) }
 			if((Mp->n[1]<0)||(Mp->n[1]>43)){ WL_EWrongParam2("structure id",Mp->n[1]); RETURN(0) }
 			Apply(&CSCheck[Mp->n[1]].Town[Mp->n[0]].MinArmyPow,4,Mp,2);
 			break;

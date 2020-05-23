@@ -1597,7 +1597,7 @@ int ERM_UniversalEx(char Cmd,int Num,_ToDo_*,Mes *Mp)
 		{
 			CHECK_ParamsNum(2);
 			int n = Mp->n[0];
-			if(n < 0 || n > TOWNNUM){ WL_MError3("town type out of range (0...8).\nIncorrect value: %d",n); RETURN(0) }
+			if(n < 0 || n >= TOWNNUM){ WL_MError3("town type out of range (0...8).\nIncorrect value: %d",n); RETURN(0) }
 			if (Apply(&GrailEnabled[n], 4, Mp, 1)) break;
 			UpdateGrailEnabled(n);
 			break;
