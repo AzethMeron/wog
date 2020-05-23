@@ -1597,7 +1597,7 @@ int ERM_UniversalEx(char Cmd,int Num,_ToDo_*,Mes *Mp)
 		{
 			CHECK_ParamsNum(2);
 			int n = Mp->n[0];
-			if(n < 0 || n > 8){ WL_MError3("town type out of range (0...8).\nIncorrect value: %d",n); RETURN(0) }
+			if(n < 0 || n > TOWNNUM){ WL_MError3("town type out of range (0...8).\nIncorrect value: %d",n); RETURN(0) }
 			if (Apply(&GrailEnabled[n], 4, Mp, 1)) break;
 			UpdateGrailEnabled(n);
 			break;
@@ -7951,7 +7951,7 @@ _found5:
 					if(PostFlag) cp->Event|=0x08000000;
 //                  cp->Par[0]=M.VarI[0]; cp->Par[1]=M.VarI[1]; cp->Par[2]=M.VarI[2]; cp->ParSet=3;
 					break;
-				default: WL_EWrongParamsNum(Num,"between 1 and",3); goto l_exit;
+				default: WL_EWrongSyntax(); goto l_exit;
 			}
 			break;
 		case 'FU':{ // FU#;
