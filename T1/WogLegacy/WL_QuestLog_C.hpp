@@ -68,7 +68,6 @@ int ERM_Qwest(char Cmd,int Num,_ToDo_* /*sp*/,Mes *Mp)
 {
 	STARTNA(__LINE__,&Mp->m.s[Mp->i])
 	int num,hero,owner;
-	int value, func_to_call;
 	_QuestLog_ *qlp;
 	switch(Cmd){
 		case 'A': // Anum/hero/owner/zvar;
@@ -99,16 +98,16 @@ int ERM_Qwest(char Cmd,int Num,_ToDo_* /*sp*/,Mes *Mp)
 		case 'M':
 		{
 			CHECK_ParamsMin(1);
-			if(Apply(&value,4,Mp,0)) { WL_MError2("cannot get or check value."); RETURN(0) }
-			if(value < 0 || value > 2) { WL_EWrongParam2("mode",value); RETURN(0) }
-			if(value == 2)
+			int cpy_mode = WL_Questlog_mode;
+			if(Apply(&WL_Questlog_mode,4,Mp,0)) { WL_MError2("cannot get or check value."); WL_Questlog_mode = cpy_mode; RETURN(0) }
+			if(WL_Questlog_mode < 0 || WL_Questlog_mode > 2) { WL_EWrongParam2("mode",WL_Questlog_mode); WL_Questlog_mode = cpy_mode; RETURN(0) }
+			if((WL_Questlog_mode == 2) && (Num > 1))
 			{
 				CHECK_ParamsNum(2);
-				if(Apply(&func_to_call,4,Mp,1)) { WL_MError2("cannot get or check number of function to call."); RETURN(0) }
-				if(func_to_call < 1 || func_to_call > WL_FUNC_COUNT) { WL_EWrongParam2("function",func_to_call); RETURN(0) }
-				WL_Questlog_func = func_to_call;
+				int cpy_func = WL_Questlog_func;
+				if(Apply(&WL_Questlog_func,4,Mp,1)) { WL_MError2("cannot get or check number of function to call."); WL_Questlog_func = cpy_func; RETURN(0) }
+				if(WL_Questlog_func < 1 || WL_Questlog_func > WL_FUNC_COUNT) { WL_EWrongParam2("function",WL_Questlog_func); WL_Questlog_func = cpy_func; RETURN(0) }
 			}
-			WL_Questlog_mode = value;
 			break;
 		}
 		default: WL_EWrongCommand(); RETURN(0)

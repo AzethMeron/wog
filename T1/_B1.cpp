@@ -68,7 +68,7 @@ char *ManName[]={
 //int MSUB = -804; // Diakon
 //int GENMONNUM = 0xC5;
 //int GENMON = GENMONNUM -1;
-///////////////////////////////////////////////
+/////////////////////////////////////////////
 
 ///////////////////////////////////////////////
 // тип игры 0-английская, 1-русская
@@ -181,7 +181,7 @@ _MonInfo_ _MonAdd[MONNUM-MONNUM_0]={          // все не боятся страха
 {-1,3,"monk","ZM194Z.def",  0x00000010},// 194 Werewolf
 {-1,5,"bgor","ZM195Z.def",  0x00024019},// 195 Fire Horse
 { 4,6,"ghdr","ZM196Z.def",  0x8006148F},// 196 Dracolish
-//{-1,1,"pike","cpkman.def",  0x00000000},// 197 Infernal Wywern
+{ 7,5,"wyvm","zwyvm.def",  0x00000013},// 197 Infernal Wywern
 /*//<<<<<<< .mine
 //=======
 {-1,1,"pike","cpkman.def",  0x00000000},// 198
