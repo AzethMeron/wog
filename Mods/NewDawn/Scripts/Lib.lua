@@ -135,7 +135,7 @@ end
 
 -- Wrapper for WoG path.find() function that allows to easily get random file matching given mask. 
 -- Both input and output values are relative to /Mods/ directory
-GetRandFile = function(filemask)
+GetRandFileMods = function(filemask)
 	-- Initialising temp values
 	local i = 1 -- tables in Lua should start with index 1
 	local filetab = {}
@@ -145,7 +145,7 @@ GetRandFile = function(filemask)
 		i = i+1
 	end
 	-- If found none, return nil
-	if filetab == nil then
+	if #filetab == 0 then
 		return nil
 	end
 	-- Getting Mods/ dir
@@ -158,7 +158,36 @@ GetRandFile = function(filemask)
 	end
 	-- Returning given string
 	local output = filetab[math.random(#filetab)]
-	output = string.gsub(output,dir,"")
+	output = string.gsub(output,dir.."\\","")
+	return (output)
+end
+
+-- Wrapper for WoG path.find() function that allows to easily get random file matching given mask. 
+-- Both input and output values are relative to /Data/ directory
+GetRandFileData = function(filemask)
+	-- Initialising temp values
+	local i = 1 -- tables in Lua should start with index 1
+	local filetab = {}
+	-- Getting all matching files into array
+	for file in path.find("Data/"..filemask,false) do
+		filetab[i] = file
+		i = i+1
+	end
+	-- If found none, return nil
+	if #filetab == 0 then
+		return nil
+	end
+	-- Getting Data/ dir
+	local dir = nil
+	for tmp in path.find("Data",true) do
+		dir = tmp
+	end
+	if dir == nil then
+		return nil
+	end
+	-- Returning given string
+	local output = filetab[math.random(#filetab)]
+	output = string.gsub(output,dir.."\\","")
 	return (output)
 end
 

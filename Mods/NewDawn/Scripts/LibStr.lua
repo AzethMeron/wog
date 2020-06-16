@@ -6,3 +6,10 @@ ShrineHint = {
 	[89] = "Learn level 2 spell",
 	[90] = "Learn level 3 spell"
 }
+
+QuickCombat = {
+	["Header"] = "{Quick Combat Battle Options}",
+	["Manually"] = "Play out the battle manually",
+	["Quick"] = "Use Quick Combat to resolve the battle",
+	["ConserveMana"] = "Use Quick Combat but don't cast hero spells (conserve spell points)"
+}

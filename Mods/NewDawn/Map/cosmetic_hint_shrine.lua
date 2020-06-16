@@ -4,6 +4,7 @@ local Lib = require "Lib"
 local LibStr = require "LibStr"
 
 --------------------------------- SHRINE HINT ---------------------------------
+-- this script uses vind=1, should be changed later
 
 -- Initialise "map" variable for Shrines
 PI.? = function()

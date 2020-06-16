@@ -4,6 +4,7 @@ local Lib = require "Lib"
 local LibStr = require "LibStr"
 
 --------------------------------- WITCH HUT WITCH ---------------------------------
+-- this script uses vind=1, should be changed later
 
 -- Initialise "map" variable for Witch's Hut
 PI.? = function()
