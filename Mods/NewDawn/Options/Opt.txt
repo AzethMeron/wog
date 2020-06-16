@@ -1,0 +1,130 @@
+Name$	Text$	ERM	Value	On	NoMP	Cosmetic	Hint$	LongHint$	(comment)-
+Enabled	New Dawn						TODO: Proper text, hint and description
+
+
+
+category:	Manage
+
+group:	Global setting
+o20	Enable mod	20	1				Enable New Dawn mod	TODO: Proper text, hint and description
+o20	Disable mod	20	0				Disable New Dawn mod	TODO: Proper text, hint and description
+o20	Tournament Mode	20	2				Override all chosen options with pre-defined ines	TODO: Proper text, hint and description
+
+group:	Manage modules
+o21	Enable cosmetic enhancements	21		true		true	TODO: Proper text, hint and description	TODO: Proper text, hint and description
+o22	Enable gameplay enhancements	22		true		true	TODO: Proper text, hint and description	TODO: Proper text, hint and description
+o23	Enable new content	23		true		true	TODO: Proper text, hint and description	TODO: Proper text, hint and description
+o24	Allow objects' replacement	24		true		true	TODO: Proper text, hint and description	TODO: Proper text, hint and description
+o25	Debug tools	25		true		true	TODO: Proper text, hint and description	TODO: Proper text, hint and description
+
+
+category:	Cosmetic enhancements
+
+group:	Uncompatible with HD Mod
+FizzleFade	Replace fade-to-black animation with blending when entering/leaving a town or combat			true		true	Purely cosmetic feature, fade-to-black replaced with blending effect. Doesn't work with HD Mod
+NewGrid	New battlefield grid look			true		true	Modified combat grid. Doesn't work with HD Mod
+SoftGridShadow	Light combat grid shadow			true		true	Modified combat grid shadow. Doesn't work with HD Mod
+
+group:	Trees and lakes
+Trees	Static SoD		false			true	No animation, just standard trees like in SoD
+Trees	WoG animated		"oldwog"			true	Trees animated like in WoG 3.58f + animated lakes
+Trees	A bit brighter green trees		"bright"			true	No animation, just brighter textures
+Trees	Animated brighter		"move"	true		true	Lakes and brighter trees with smooth animation
+
+group:	Quality of life
+BuyAllCr	Buy all creatures button			true		true	TODO: Proper text, hint, description
+QuickCombat	Quick combat settings			true		true	TODO: Proper text, hint, description
+SrHint	Shrines' hint			true		true	TODO: Proper text, hint, description
+DwHint	Dwellings' hint			true		true	TODO: Proper text, hint, description	
+WhHint	Witch hut hint			true		true	TODO: Proper text, hint, description
+
+group:	Audiovisual
+BattlePic	New battlefield pictures			true		true	TODO: Proper text, hint, description
+NewMp	New music			true		true	TODO: Proper text, hint, description
+NewSn	New sounds			true		true	TODO: Proper text, hint, description
+SoftShadow	Light shadows on adventure map			true		true	Less dark shadows on adventure map
+FasterAdvMap	Faster adventure map animation			true		true	1.2 times faster	All animations of objects on adventure map becomes 1.2 times faster, resulting in more smooth animations.
+MonStandAnim	Enable "standing" animation of monsters			true		true	Monster breath, move and animate all the time
+
+
+category:	Gameplay enhancements
+
+group:	Quality of life
+FasterAI	Faster AI (smaller thinking radius)						Sets AI thinking radius to 4096	Sets thinking radius to WoG 3.58 default (4096) instead of SoD default (32000). WoG 3.59 normally uses SoD default.
+ChooseRMGTemplate	Choose RMG template when starting a random map			true			At the beginning of game with random map, show dialog to choose RMG template. 
+o31	Witch and Scholar enhancements	31		true			TODO: Proper text, hint and description
+o32	Faster combat (changes Normal and Fast combat speeds)	32		true			Old "fast" becomes normal, "fast' is even faster
+o33	Team AI	33		true			TODO: Proper text, hint and description
+
+group:	Dwellings
+o7	Dwellings accumulate creatures	7		true			TODO: Proper text, hint and description
+o34	Accumulate creatures only if flagged	34		true			TODO: Proper text, hint and description
+o8	Dwellings accumulate guards	8		true			TODO: Proper text, hint and description
+
+
+category:	New content
+
+group:	New mechanics
+o41	Bad luck	41		true			TODO: Proper text, hint and description
+o4	Town demolition	4		true			Players can demolish towns by right-clicking on a town building while a hero is visiting the town
+o2	Leave troops by right-clicking on adventure map	2		true			A single stack of troops can be left on an empty square adjacent to the hero by right-clicking on the map
+o10	Troops left will rejoin their owner	10		true			If a hero "attacks" a stack of troops previously left on an empty square by the same player, the troops will rejoin the hero
+o42	Three skills on level up	42		true			TODO: Proper text, hint and description
+o43	Mithril usage	43		true			TODO: Proper text, hint and description
+
+group:	Commanders
+o3	Commanders are enabled	3		true			Commanders are enabled and each hero begins the game with one unless the "must be hired" option is also selected
+o6	Commanders must be hired	6			true		Commanders are enabled but heroes do not start with them. They may be hired for 1000 gold from any town a player owns.
+
+group:	Objects
+o44	Sanctuary of Commanders	44		true			TODO: Proper text, hint and description
+o45	Market of time	45		true			TODO: Proper text, hint and description
+o46	Reworked Creature Banks	46		true			TODO: Proper text, hint and description
+o47	New Creature Banks	47		true			TODO: Proper text, hint and description
+o48	Shrine of magic mind	48		true			TODO: Proper text, hint and description
+o49	School of Wizardry	49		true			TODO: Proper text, hint and description
+o50	Living skull	50		true			TODO: Proper text, hint and description
+
+group:	Stack experience
+o900	Enable stack experience	900		true			TODO: Proper text, hint and description
+o901	All stacks gain full experience 	901	0				TODO: Proper text, hint and description
+o901	(untested) Experience shared equally among stacks	901	3				TODO: Proper text, hint and description
+o901	(untested) Lower level stacks gain more exp	901	1				TODO: Proper text, hint and description
+o901	(untested) Higher level stacks gain more exp	901	2				TODO: Proper text, hint and description
+
+group:	Rebalanced secondary skills
+o51	Armory	51		true			TODO: Proper text, hint and description
+o52	Sorcery	52		true			TODO: Proper text, hint and description
+o53	Resistance	53		true			TODO: Proper text, hint and description
+o54	Mysticism	54		true			TODO: Proper text, hint and description
+o55	Estates	55		true			TODO: Proper text, hint and description
+o56	First Aid	56		true			TODO: Proper text, hint and description
+o57	Pathfinding	57		true			TODO: Proper text, hint and description
+o58	Learning	58		true			TODO: Proper text, hint and description
+o59	Artillery	59		true			TODO: Proper text, hint and description
+
+group:	Rebalanced creatures
+o60	Castle	60		true			TODO: Proper text, hint and description
+o61	Rampart	61		true			TODO: Proper text, hint and description
+o62	Tower	62		true			TODO: Proper text, hint and description
+o63	Inferno	63		true			TODO: Proper text, hint and description
+o64	Necropolis	64		true			TODO: Proper text, hint and description
+o65	Dungeon	65		true			TODO: Proper text, hint and description
+o66	Stronghold	66		true			TODO: Proper text, hint and description
+o67	Fortress	67		true			TODO: Proper text, hint and description
+o68	Conflux	68		true			TODO: Proper text, hint and description
+o69	Neutral	69		true			TODO: Proper text, hint and description
+
+
+category:	Map
+
+group:	Object replacement
+RepRes	Replace some resources with mithril			true		true	TODO: Proper text, hint, description
+RepCr	Replace some creatures with WoG creatures			true		true	TODO: Proper text, hint, description
+RepDw	Replace some dwellings with WoG dwellings			true		true	TODO: Proper text, hint, description
+RepBk	Replace some creature banks with WoG creature banks			true		true	TODO: Proper text, hint, description
+
+group:	Town Enhancements
+TownDw	Normalised dwellings			true		true	TODO: Proper text, hint, description
+TownNoForts	All towns start with no fort			true		true	TODO: Proper text, hint, description
+TownAiForts	All AI towns start with fort			true		true	TODO: Proper text, hint, description
