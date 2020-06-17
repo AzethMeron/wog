@@ -2,28 +2,85 @@
 
 local Lib = require "Lib"
 local LibStr = require "LibStr"
--- Need to move bgp to Data/p cause path too long for BA:B
+
+-- variables dealing with pathing
+local bgp_dir = ModName.."\\Res\\bgp\\"
+local data_relative_dir = "..\\Mods\\"
+local GetRandFile = Lib.GetRandFileMods
+-- Need to move bgp to Data/p cause path too long for BA:B ???
 
 -------------------------- NEW BATTLEFIELD PICTURES --------------------------
+
+-- sequence
+-- check if there is .pcx coresponding to object's type and subtype (t63s21p*.pcx)
+-- if not found above, check if there is .pcx coresponding to object's type, with universal type (t63s-1p*.pcx)
+-- if not found above, check if there is town, then get picture based on town subtype 
+-- if not found above, check if there overlay and get picture based on overlay subtype
+-- if not found above, check if there is border. If isn't, get picture based on terrain
+-- Set picture, unless nil
 
 -- Find & set .pcx for given object
 -- nil if not found
 -- string if found
-ObjectPCX = function(x,y,l)
-	local ob_type = OB(x,y,l):T(?v)
-	local ob_subtype = OB(x,y,l):U(?v)
-	local picture_path = Lib.GetRandFileMods(ModName.."/Res/bgp/t"..ob_type.."s"..ob_subtype.."p*.pcx")
+ModuleObjectPCX = function(x,y,l,ob_type,ob_subtype)
+	local picture_path = GetRandFile(bgp_dir.."t"..ob_type.."s"..ob_subtype.."p*.pcx")
 	if(picture_path == nil) then
-		picture_path = Lib.GetRandFileMods(ModName.."/Res/bgp/t"..ob_type.."s-1p*.pcx")
+		picture_path = GetRandFile(bgp_dir.."t"..ob_type.."s-1p*.pcx")
 	end
 	return picture_path;
 end
 
+-- return val
+-- nil means not found
+-- otheriwise, string relative to /Mods/
+ModuleCastlePCX = function(ob_subtype)
+	local masks_for_towns = {
+		[0] = "grass*.pcx", -- Castle
+		[1] = "grass*.pcx", -- Rampart
+		[2] = "snow*.pcx", -- Tower
+		[3] = "lava*.pcx", -- Inferno
+		[4] = "dirt*.pcx", -- Necropolis
+		[5] = "subt*.pcx", -- Dungeon
+		[6] = "rough*.pcx", -- Stronghold
+		[7] = "swamp*.pcx", -- Fortress
+		[8] = "grass*.pcx" -- Conflux
+	}
+	return GetRandFile(bgp_dir..masks_for_towns[ob_subtype])
+end
+
+ModuleOverlayPCX = function(overlay)
+	local masks_for_overlay = {
+		[21] = "cursed*.pcx",
+		[46] = "magic*.pcx",
+		[222] = "clover*.pcx",
+		[224] = "evil*.pcx",
+		[225] = "winds*.pcx",
+		[226] = "fiery*.pcx",
+		[227] = "holy*.pcx",
+		[228] = "lucid*.pcx",
+		[229] = "air*.pcx",
+		[231] = "rockl*.pcx"
+	}
+	return GetRandFile(bgp_dir..masks_for_overlay[overlay])
+end
+
+ModuleTerrainPCX = function(battle_square_terrain)
+	local masks_for_terrain = {
+		[0] = "dirt*.pcx",
+		[1] = "sand*.pcx",
+		[2] = "grass*.pcx",
+		[3] = "snow*.pcx",
+		[4] = "swamp*.pcx",
+		[5] = "rough*.pcx",
+		[6] = "subt*.pcx",
+		[7] = "lava*.pcx"
+	}
+	return GetRandFile(bgp_dir..masks_for_terrain[battle_square_terrain])
+end
+
 -- Check if border
 -- return true if there is border - shouldnt replace terrain picture
-CheckBorder = function(x,y,l)
-	if(TR(x,y,l):G(?v) ~= 0 ) then return false end
-	local main_square = TR(x,y,l):T(?v, nil,nil,nil,nil,nil,nil,nil)
+ModuleCheckBorder = function(x,y,l, main_square)
 	for ix = x-1,x+1,1 do
 		for iy = y-1,y+1,1 do
 			if ((ix==x) and (iy == y)) then
@@ -35,31 +92,25 @@ CheckBorder = function(x,y,l)
 	return false
 end
 
-BA(52).first? = function()
+BA(52).? = function()
+	-- Check for cosmetic enhancements
+	if(Lib.CheckIfEnabledCosmetic() == false) then return; end
+	-- Check if real battle
+	if ( ERM.flags[1000] == false ) then return false; end
+	-- Get coords of battle
 	local x, y, l = BA:P(?v,?v,?v)
-	local pic_obj = ObjectPCX(x,y,l)
-	if(pic_obj ~= nil) then
-		BA:B("../Mods/"..pic_obj)
+	local ob_type = OB(x,y,l):T(?v)
+	local ob_subtype = OB(x,y,l):U(?v)
+	local battle_square_terrain = TR(x,y,l):T(?v, nil,nil,nil,nil,nil,nil,nil)
+	local overlay = TR(x,y,l):G(?v)
+	-- Check for pcx coresponding to visited object (if any), exit if found
+	local pic_obj = ModuleObjectPCX(x,y,l,ob_type,ob_subtype)	
+	if(pic_obj ~= nil) then BA:B(data_relative_dir..pic_obj) return; end
+	-- 
+	local bgp = nil
+	if( ob_type == 98 ) then bgp = ModuleCastlePCX(ob_subtype) 
+	elseif( overlay ~= 0 ) then bgp = ModuleOverlayPCX(overlay)
+	elseif(ModuleCheckBorder(x,y,l,battle_square_terrain)) then bgp = ModuleTerrainPCX(battle_square_terrain)
 	end
+	if(bgp ~= nil) then --[[Message(data_relative_dir..bgp)]] BA:B(data_relative_dir..bgp) end
 end
-
---[[
-!!VRz1&y4=0/y5=0:S^dirt^; [Standard fields]
-!!VRz1&y4=1/y5=0:S^sand^;
-!!VRz1&y4=2/y5=0:S^grass^;
-!!VRz1&y4=3/y5=0:S^snow^;
-!!VRz1&y4=4/y5=0:S^swamp^;
-!!VRz1&y4=5/y5=0:S^rough^;
-!!VRz1&y4=6/y5=0:S^subt^;
-!!VRz1&y4=7/y5=0:S^lava^;
-
-!!VRz1&y5=046:S^magic^; [Special Fields]
-!!VRz1&y5=226:S^fiery^;
-!!VRz1&y5=231:S^rockl^;
-!!VRz1&y5=229:S^air^;
-!!VRz1&y5=228:S^lucid^;
-!!VRz1&y5=227:S^holy^;
-!!VRz1&y5=222:S^clover^;
-!!VRz1&y5=224:S^evil^;
-!!VRz1&y5=021:S^cursed^; [Now we have the name in z1]
---]]
