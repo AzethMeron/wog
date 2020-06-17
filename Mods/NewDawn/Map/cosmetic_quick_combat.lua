@@ -17,12 +17,17 @@ if new then
 	end
 end
 
+CheckQuickCombat = function()
+	return global[ModName].QuickCombat
+end
+
 -- Check if conditions fulfilled for Quick Combat
 QuickCombatCondition = function()
 	-- Check if real battle
 	if ( ERM.flags[1000] == false ) then return false; end
 	-- Check if Cosmetic AND Mod enabled
 	if (Lib.CheckIfEnabledCosmetic() ~= true) then return false; end
+	if (CheckQuickCombat() ~= true) then return false; end
 	-- Get heros' owners
 	local atk_owner, def_owner = BA:O(?v,?v)
 	-- Get attacker controller

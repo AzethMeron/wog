@@ -6,6 +6,10 @@ local LibStr = require "LibStr"
 --------------------------------- WITCH HUT WITCH ---------------------------------
 -- this script uses vind=1, should be changed later
 
+CheckHintWitch = function()
+	return global[ModName].WhHint
+end
+
 -- Initialise "map" variable for Witch's Hut
 PI.? = function()
 	local vind = 1 
@@ -14,9 +18,8 @@ end
 
 -- Set witch hut visited
 OB(113).? = function()
-	-- Check if Cosmetic AND Mod enabled
-	if (Lib.CheckIfEnabledCosmetic() ~= true) then return; end
-	
+	-- Check if Mod enabled, cosmetics doesnt need to be enabled for setting visited
+	if (Lib.CheckIfEnabledMod() ~= true) then return; end
 	local bit_colors = _G[ModName].map[ERM.v[998]][ERM.v[999]][ERM.v[1000]]["WH"]
 	local player = OW:C(?v)
 	_G[ModName].map[ERM.v[998]][ERM.v[999]][ERM.v[1000]]["WH"] = bit.Or(bit_colors,2^player)
@@ -26,6 +29,7 @@ end
 HD.? = function()
 	-- Check if Cosmetic AND Mod enabled
 	if (Lib.CheckIfEnabledCosmetic() ~= true) then return; end
+	if (CheckHintWitch() ~= true) then return; end
 	
 	-- Stop if customized hint
 	local customized = HD:C(?v)

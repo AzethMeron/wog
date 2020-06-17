@@ -1,0 +1,7 @@
+Unfortunatelly, this section appears to be somewhat buggy
+After !!MP receiver is used to change terrain audio, every step done by hero cause game music to stop playing for a second.
+
+This kinda ruins everything, thus this section is disabled by default and may never be used in the future,
+if we... well, I for current time, won't find any solution.
+
+Custom Terrain music could be AWESOME, but... meh :c

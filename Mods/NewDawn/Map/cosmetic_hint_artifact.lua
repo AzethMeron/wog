@@ -5,10 +5,18 @@ local LibStr = require "LibStr"
 
 --------------------------------- ART HINT ---------------------------------
 
+-- Check if hint artifact
+-- return true if enabled
+-- return false if disabled
+CheckHintArtifact = function()
+	return global[ModName].ArtHint
+end
+
 -- Advanced artifact's hint
 HD.? = function()
 	-- Check if Cosmetic AND Mod enabled
 	if (Lib.CheckIfEnabledCosmetic() ~= true) then return; end
+	if (CheckHintArtifact() ~= true) then return; end
 	
 	-- Stop if customized hint
 	local customized = HD:C(?v)

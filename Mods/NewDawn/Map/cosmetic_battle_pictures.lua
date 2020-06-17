@@ -19,6 +19,13 @@ local GetRandFile = Lib.GetRandFileMods
 -- if not found above, check if there is border. If isn't, get picture based on terrain
 -- Set picture, unless nil
 
+-- Check if cosmetic battle pictures enabled
+-- return true if enabled
+-- return false if disabled
+CheckCosmeticBattlePictures = function()
+	return global[ModName].BattlePic
+end
+
 -- Find & set .pcx for given object
 -- nil if not found
 -- string if found
@@ -94,7 +101,8 @@ end
 
 BA(52).? = function()
 	-- Check for cosmetic enhancements
-	if(Lib.CheckIfEnabledCosmetic() == false) then return; end
+	if(Lib.CheckIfEnabledCosmetic() ~= true) then return; end
+	if(CheckCosmeticBattlePictures() ~= true) then return; end
 	-- Check if real battle
 	if ( ERM.flags[1000] == false ) then return false; end
 	-- Get coords of battle

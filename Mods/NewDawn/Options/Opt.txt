@@ -37,6 +37,7 @@ QuickCombat	Quick combat settings			true		true	TODO: Proper text, hint, descript
 SrHint	Shrines' hint			true		true	TODO: Proper text, hint, description
 DwHint	Dwellings' hint			true		true	TODO: Proper text, hint, description	
 WhHint	Witch hut hint			true		true	TODO: Proper text, hint, description
+ArtHint	Artifact hint			true		true	TODO: Proper text, hint, description
 
 group:	Audiovisual
 BattlePic	New battlefield pictures			true		true	TODO: Proper text, hint, description

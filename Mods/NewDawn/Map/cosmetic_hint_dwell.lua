@@ -5,10 +5,18 @@ local LibStr = require "LibStr"
 
 --------------------------------- DWELL HINT ---------------------------------
 
+-- Check if dwelling hint
+-- return true if enabled
+-- return false if disabled
+CheckHintDwelling = function()
+	return global[ModName].DwHint
+end
+
 -- Advanced dwelling's hint
 HD.? = function()
 	-- Check if Cosmetic AND Mod enabled
 	if (Lib.CheckIfEnabledCosmetic() ~= true) then return; end
+	if (CheckHintDwelling() ~= true) then return; end
 	
 	-- Stop if customized hint
 	local customized = HD:C(?v)
