@@ -110,7 +110,7 @@ BA(52).? = function()
 	local bgp = nil
 	if( ob_type == 98 ) then bgp = ModuleCastlePCX(ob_subtype) 
 	elseif( overlay ~= 0 ) then bgp = ModuleOverlayPCX(overlay)
-	elseif(ModuleCheckBorder(x,y,l,battle_square_terrain)) then bgp = ModuleTerrainPCX(battle_square_terrain)
+	elseif(ModuleCheckBorder(x,y,l,battle_square_terrain) == false) then bgp = ModuleTerrainPCX(battle_square_terrain)
 	end
 	if(bgp ~= nil) then --[[Message(data_relative_dir..bgp)]] BA:B(data_relative_dir..bgp) end
 end
