@@ -7,6 +7,7 @@ local LibStr = require "LibStr"
 local mp3_dir = ModName.."\\Res\\mp3\\"
 local mp3_relative_dir = "..\\Mods\\"
 local GetRandFile = Lib.GetRandFileMods
+local enable_terrain_section = true
 
 ------------------- NEW MUSIC -------------------
 
@@ -24,10 +25,19 @@ CheckMusicCondition = function()
   return true;
 end
 
+CheckSuccess = function(percentage_chance)
+  local random_number = math.random(1,100)
+  return random_number <= percentage_chance
+end
+
+--------------------------------------
+
 SetMusic = function(index, mod_relative_path)
   if(mod_relative_path == nil) then Lib.PrintError("SetMusic","Settiing nil music at index: "..index.." Not actual error, more warning") return; end
   MP:S(index,mp3_relative_dir..mod_relative_path)
 end
+
+--------------------------------------
 
 ShuffleMusicAi = function()
   local music_dir = "aitheme\\"
@@ -42,6 +52,8 @@ ShuffleMusicAi = function()
   end
 end
 
+--------------------------------------
+
 ShuffleMusicCombat = function()
   local music_dir = "combat\\"
   local masks_combat = { 
@@ -55,6 +67,14 @@ ShuffleMusicCombat = function()
     SetMusic(index,music)
   end
 end
+
+BA(52).first? = function()
+  if (CheckMusicCondition() ~= true) then return; end
+  if (CheckSuccess(25) ~= true) then return; end
+  ShuffleMusicCombat()
+end
+
+--------------------------------------
 
 ShuffleMusicTown = function()
   local music_dir = "town\\"
@@ -75,8 +95,17 @@ ShuffleMusicTown = function()
   end
 end
 
+OB(98).first? = function()
+  if (CheckMusicCondition() ~= true) then return; end
+  if (CheckSuccess(25) ~= true) then return; end
+  ShuffleMusicTown()
+end
+
+--------------------------------------
+
 ShuffleMusicTerrain = function()
-  local music_dir = "town\\"
+  if(enable_terrain_section ~= true) then return; end
+  local music_dir = "terrain\\"
   local masks_terrain = { 
       [10] = "dirt*.mp3",
       [11] = "sand*.mpe",
@@ -94,6 +123,8 @@ ShuffleMusicTerrain = function()
   end
 end
 
+--------------------------------------
+
 ShuffleMusicBattleresults = function()
   local music_dir = "battleresults\\"
   local masks_battleresults = {
@@ -109,4 +140,25 @@ ShuffleMusicBattleresults = function()
     SetMusic(index,music)
   end
 end
+
+BA(52).first? = function()
+  if (CheckMusicCondition() ~= true) then return; end
+  if (CheckSuccess(25) ~= true) then return; end
+  ShuffleMusicBattleresults()
+end
+
+--------------------------------------
+
+InitMusic = function()
+  if (CheckMusicCondition() ~= true) then return; end
+  ShuffleMusicAi()
+  ShuffleMusicCombat()
+  ShuffleMusicTown()
+  ShuffleMusicTerrain()
+  ShuffleMusicBattleresults()
+end
+
+InitMusic()
+
+--------------------------------------
 
