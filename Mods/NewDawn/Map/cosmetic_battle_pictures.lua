@@ -22,7 +22,7 @@ local GetRandFile = Lib.GetRandFileMods
 -- Check if cosmetic battle pictures enabled
 -- return true if enabled
 -- return false if disabled
-CheckCosmeticBattlePictures = function()
+CheckBattlePictures = function()
 	return global[ModName].BattlePic
 end
 
@@ -102,7 +102,7 @@ end
 BA(52).? = function()
 	-- Check for cosmetic enhancements
 	if(Lib.CheckIfEnabledCosmetic() ~= true) then return; end
-	if(CheckCosmeticBattlePictures() ~= true) then return; end
+	if(CheckBattlePictures() ~= true) then return; end
 	-- Check if real battle
 	if ( ERM.flags[1000] == false ) then return false; end
 	-- Get coords of battle
