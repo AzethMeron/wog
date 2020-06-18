@@ -8,7 +8,7 @@ local mp3_dir = ModName.."\\Res\\mp3\\"
 local mp3_relative_dir = "..\\Mods\\"
 local GetRandFile = Lib.GetRandFileMods
 -- buggy section (terrain) disabler
-local enable_terrain_section = true
+local enable_terrain_section = false
 
 ------------------- NEW MUSIC -------------------
 
