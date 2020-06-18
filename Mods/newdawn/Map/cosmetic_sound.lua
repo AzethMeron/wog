@@ -95,5 +95,32 @@ end
 
 --------------------------------------
 
+SetSound = function(snd_path)
+	if(snd_path == nil) then return; end
+	print(sn_relative_dir..snd_path) -- TEMPORARY
+	SN:S(sn_relative_dir..snd_path)
+end
 
+-- For those that require only Type
+OB.? = function()
+	if(CheckSoundCondition() ~= true) then return; end
+	local ob_type = OB(998):T(?v)
+	local masks = {
+		-- Chest.wav
+		[82] = "chest*",
+		[101] = "chest*",
+		-- Mystery.wav
+		[6] = "myst*",
+		[97] = "myst*",
+		[7] = "myst*",
+		[2] = "myst*"
+	}
+	if (masks[ob_type] == nil) then return; end
+	SetSound(GetRandFile(masks[ob_type]))
+end
 
+-- For those that require Subtype
+OB.? = function()
+	if(CheckSoundCondition() ~= true) then return; end
+	local ob_type = OB(998):T(?v)
+end
