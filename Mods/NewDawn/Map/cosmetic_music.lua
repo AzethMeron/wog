@@ -8,6 +8,22 @@ local mp3_dir = ModName.."\\Res\\mp3\\"
 local mp3_relative_dir = "..\\Mods\\"
 local GetRandFile = Lib.GetRandFileMods
 
+------------------- NEW MUSIC -------------------
+
+-- true if enabled
+-- false if disabled
+CheckMusic = function()
+  return global[ModName].NewMp
+end
+
+-- true if enabled
+-- false if disabled
+CheckMusicCondition = function()
+  if(Lib.CheckIfEnabledCosmetic() ~= true) then return false end
+  if(CheckMusic() ~= true) then return false end
+  return true;
+end
+
 SetMusic = function(index, mod_relative_path)
   if(mod_relative_path == nil) then Lib.PrintError("SetMusic","Settiing nil music at index: "..index.." Not actual error, more warning") return; end
   MP:S(index,mp3_relative_dir..mod_relative_path)
