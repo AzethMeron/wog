@@ -33,7 +33,7 @@ HD.? = function()
 	if (rightclick == 0) then 
 		-- mouseover
 		local art_name = UN:N0(?z,art_type)
-		local final_hint = "{"..art_name.."}"
+		local final_hint = "{"..UX:S(721,?z).."}".." ("..art_name..")"
 		HD:M(final_hint)
 	else
 		-- rightclick
