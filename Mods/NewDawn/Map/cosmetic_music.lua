@@ -7,9 +7,22 @@ local LibStr = require "LibStr"
 local mp3_dir = ModName.."\\Res\\mp3\\"
 local mp3_relative_dir = "..\\Mods\\"
 local GetRandFile = Lib.GetRandFileMods
+-- buggy section (terrain) disabler
 local enable_terrain_section = true
 
 ------------------- NEW MUSIC -------------------
+
+-- timer
+local last_day_executed = ERM.c
+TM(1,-1,1,255).first? = function()
+  if(ERM.c <= last_day_executed) then return; end
+  CallerTerrain()
+  CallerAi()
+  if(ERM.c % 3 ==2) then CallerTerrain() end
+  last_day_executed = ERM.c
+end
+
+--------------------------------------
 
 -- true if enabled
 -- false if disabled
@@ -52,26 +65,10 @@ ShuffleMusicAi = function()
   end
 end
 
---------------------------------------
-
-ShuffleMusicCombat = function()
-  local music_dir = "combat\\"
-  local masks_combat = { 
-      [41] = "combat*.mp3",
-      [42] = "combat*.mp3",
-      [43] = "combat*.mp3",
-      [44] = "combat*.mp3"
-    }
-  for index, mask in pairs(masks_combat) do
-    local music = GetRandFile(mp3_dir..music_dir..mask)
-    SetMusic(index,music)
-  end
-end
-
-BA(52).first? = function()
+CallerAi = function()
   if (CheckMusicCondition() ~= true) then return; end
   if (CheckSuccess(25) ~= true) then return; end
-  ShuffleMusicCombat()
+  ShuffleMusicAi()
 end
 
 --------------------------------------
@@ -95,10 +92,14 @@ ShuffleMusicTown = function()
   end
 end
 
-OB(98).first? = function()
+CallerTown = function()
   if (CheckMusicCondition() ~= true) then return; end
   if (CheckSuccess(25) ~= true) then return; end
   ShuffleMusicTown()
+end
+
+OB(98).first? = function()
+  CallerTown()
 end
 
 --------------------------------------
@@ -123,6 +124,38 @@ ShuffleMusicTerrain = function()
   end
 end
 
+CallerTerrain = function()
+  if (CheckMusicCondition() ~= true) then return; end
+  if (CheckSuccess(25) ~= true) then return; end
+  ShuffleMusicTerrain()
+end
+
+--------------------------------------
+
+ShuffleMusicCombat = function()
+  local music_dir = "combat\\"
+  local masks_combat = { 
+      [41] = "combat*.mp3",
+      [42] = "combat*.mp3",
+      [43] = "combat*.mp3",
+      [44] = "combat*.mp3"
+    }
+  for index, mask in pairs(masks_combat) do
+    local music = GetRandFile(mp3_dir..music_dir..mask)
+    SetMusic(index,music)
+  end
+end
+
+CallerCombat = function()
+  if (CheckMusicCondition() ~= true) then return; end
+  if (CheckSuccess(25) ~= true) then return; end
+  ShuffleMusicCombat()
+end
+
+BA(52).first? = function()
+  CallerCombat()
+end
+
 --------------------------------------
 
 ShuffleMusicBattleresults = function()
@@ -141,10 +174,14 @@ ShuffleMusicBattleresults = function()
   end
 end
 
-BA(52).first? = function()
+CallerBattleresults = function()
   if (CheckMusicCondition() ~= true) then return; end
   if (CheckSuccess(25) ~= true) then return; end
   ShuffleMusicBattleresults()
+end
+
+BA(52).first? = function()
+  CallerBattleresults()
 end
 
 --------------------------------------
