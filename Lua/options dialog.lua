@@ -49,6 +49,7 @@ local d_CheckBox = dialogs.CheckBox
 local d_Frame = dialogs.Frame
 local d_MainMenuButton = dialogs.MainMenuButton
 
+local TEXT = internal.TEXT
 local dofile = dofile
 
 ----------- No globals from this point ------------
@@ -140,8 +141,8 @@ local function BuildDlg()
 				
 				d_AlignV{ExpandHeight = 1, SpaceX = 1, Width = 210, SpaceY = 4, AlignX = 0.5,
 					d_Text{Name = "ModsCaption", Font = CaptionFont, Color = 19, ExpandWidth = 1,
-						Text = "Mods", Hint = "Mods List", LongHint = "MODS LIST\n\nInfo",
-					},  -- !!! localize
+						Text = TEXT.ModsText, Hint = TEXT.ModsHint, LongHint = TEXT.ModsLongHint,
+					},  
 					d_AlignH{ExpandWidth = 1,
 						d_CheckGroup{Name = "ModsGroup", 
 							BorderHeight = 8,
@@ -150,7 +151,7 @@ local function BuildDlg()
 							--CloseDialog = true,
 							ExpandWidth = 1, MarginTop = -1, MarginBottom = -1,
 							-- MinWidth = 0, ItemsAutoHeight = true,
-							--ScrollBar = "Scroll",
+							ScrollBar = "ScrollMods",
 							Radio = true,
 							FillColor = FillColor,
 							BorderLColor = BorderLColor,
@@ -171,8 +172,8 @@ local function BuildDlg()
 					},
 					17,
 					d_Text{Name = "CatsCaption", Font = CaptionFont, Color = 19, ExpandWidth = 1, Visible = false,
-						Text = "Category", Hint = "Categories list", LongHint = "CATEGORIES LIST\n\nInfo",
-					},  -- !!! localize
+						Text = TEXT.CategoryText, Hint = TEXT.CategoryHint, LongHint = TEXT.CategoryLongHint,
+					},  
 					d_AlignH{ExpandWidth = 1, ExpandHeight = 1,
 						d_CheckGroup{Name = "CatsGroup",
 							BorderHeight = 8,
@@ -540,7 +541,7 @@ end
 function DlgF.OnShow(dlg)
 	if internal.context ~= "map" then
 		dlg:Redraw()
-		Message("{Some Info.}\nE.g. Ctrl + Right Click opens permanent info window.\nAlt + Right Click and Shift + Right Click do the same.", 4)
+		Message(TEXT.OptionsOnShow, 4)
 	end
 end
 
