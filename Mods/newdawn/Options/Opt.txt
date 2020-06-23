@@ -110,15 +110,36 @@ Monster breath, move and animate all the time.
 category:	Gameplay enhancements
 
 group:	Quality of life
-FasterAI	Faster AI (smaller thinking radius)						Sets AI thinking radius to 4096	Sets thinking radius to WoG 3.58 default (4096) instead of SoD default (32000). WoG 3.59 normally uses SoD default.
 ChooseRMGTemplate	Choose RMG template when starting a random map			true			At the beginning of game with random map, show dialog to choose RMG template. 
 o31	Witch and Scholar enhancements	31		true			TODO: Proper text, hint and description
-o33	Team AI	33		true			TODO: Proper text, hint and description
+
+group:	AI-oriented scripts
+FasterAI	Faster AI (smaller thinking radius)			true			Sets AI thinking radius to 8192	{Faster AI}
+by Jakub Grzana
+
+Greatly decrease AI thinking radius, reducing time required for computer players to move. Unfortunatelly, might cause AI to be much dumber.
+o32	Omniscient AI	32		true			Whole map will be revealed to computer players at game start	{Omniscient AI}
+Option 32, by Jakub Grzana
+
+Whole map will be revealed to computer players at game start. Cover of darkness will still be effective. Doesn't reveal map if computer player has any human allies.
+o33	Team AI	33		true			Computer players send all resources to next allied AI at the end of turn	{Team AI}
+Option 33, by Jakub Grzana
+
+At the end of turn, computer player sends all resources to next (allied) computer player.
 
 group:	Dwellings
-o7	Dwellings accumulate creatures	7		true			TODO: Proper text, hint and description
-o34	Accumulate creatures only if flagged	34		true			TODO: Proper text, hint and description
-o8	Dwellings accumulate guards	8		true			TODO: Proper text, hint and description
+o7	Dwellings accumulate creatures	7		true			All dwellings on adventure map accumulate creatures from week to week.	{Dwelling accumulate creatures}
+Hardcoded
+
+All dwellings on adventure map accumulate creatures from week to week.
+o34	Accumulate creatures only if flagged	34		true			Only flagged dwellings accumulate creatures.	{Flagged dwelling accumulate}
+Option 34, by Jakub Grzana
+
+Only flagged dwellings accumulate creatures. Requires enabled "Dwelling accumulate creatures" to work.
+o8	Dwellings accumulate guards	8		true			All dwellings on adventure map accumulate guard.	{Dwellings accumulate guard}
+Hardcoded
+
+All dwellings on adventure map accumulate guard.
 
 
 category:	New content
@@ -133,7 +154,7 @@ o43	Mithril usage	43		true			TODO: Proper text, hint and description
 
 group:	Commanders
 o3	Commanders are enabled	3		true			Commanders are enabled and each hero begins the game with one unless the "must be hired" option is also selected
-o6	Commanders must be hired	6			true		Commanders are enabled but heroes do not start with them. They may be hired for 1000 gold from any town a player owns.
+o6	Commanders must be hired	6		true			Commanders are enabled but heroes do not start with them. They may be hired for 1000 gold from any town a player owns.
 
 group:	Objects
 o44	Sanctuary of Commanders	44		true			TODO: Proper text, hint and description
@@ -146,10 +167,10 @@ o50	Living skull	50		true			TODO: Proper text, hint and description
 
 group:	Stack experience
 o900	Enable stack experience	900		true			TODO: Proper text, hint and description
-o901	All stacks gain full experience 	901	0				TODO: Proper text, hint and description
-o901	(untested) Experience shared equally among stacks	901	3				TODO: Proper text, hint and description
-o901	(untested) Lower level stacks gain more exp	901	1				TODO: Proper text, hint and description
-o901	(untested) Higher level stacks gain more exp	901	2				TODO: Proper text, hint and description
+o901	All stacks gain full experience 	901	0	true			TODO: Proper text, hint and description
+o901	(untested) Experience shared equally among stacks	901	3	true			TODO: Proper text, hint and description
+o901	(untested) Lower level stacks gain more exp	901	1	true			TODO: Proper text, hint and description
+o901	(untested) Higher level stacks gain more exp	901	2	true			TODO: Proper text, hint and description
 
 group:	Rebalanced secondary skills
 o51	Armory	51		true			TODO: Proper text, hint and description
@@ -178,12 +199,12 @@ o69	Neutral	69		true			TODO: Proper text, hint and description
 category:	Map
 
 group:	Object replacement
-RepRes	Replace some resources with mithril			true		true	TODO: Proper text, hint, description
-RepCr	Replace some creatures with WoG creatures			true		true	TODO: Proper text, hint, description
-RepDw	Replace some dwellings with WoG dwellings			true		true	TODO: Proper text, hint, description
-RepBk	Replace some creature banks with WoG creature banks			true		true	TODO: Proper text, hint, description
+RepRes	Replace some resources with mithril			true			TODO: Proper text, hint, description
+RepCr	Replace some creatures with WoG creatures			true			TODO: Proper text, hint, description
+RepDw	Replace some dwellings with WoG dwellings			true			TODO: Proper text, hint, description
+RepBk	Replace some creature banks with WoG creature banks			true			TODO: Proper text, hint, description
 
 group:	Town Enhancements
-TownDw	Normalised dwellings			true		true	TODO: Proper text, hint, description
-TownNoForts	All towns start with no fort			true		true	TODO: Proper text, hint, description
-TownAiForts	All AI towns start with fort			true		true	TODO: Proper text, hint, description
+TownDw	Normalised dwellings			true			TODO: Proper text, hint, description
+TownNoForts	All towns start with no fort			true			TODO: Proper text, hint, description
+TownAiForts	All AI towns start with fort			true			TODO: Proper text, hint, description
