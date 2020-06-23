@@ -13,3 +13,5 @@ QuickCombat = {
 	["Quick"] = "Use Quick Combat to resolve the battle",
 	["ConserveMana"] = "Use Quick Combat but don't cast hero spells (conserve spell points)"
 }
+
+TemplateCaption = "Choose random map template"

@@ -38,6 +38,7 @@ SrHint	Shrines' hint			true		true	TODO: Proper text, hint, description
 DwHint	Dwellings' hint			true		true	TODO: Proper text, hint, description	
 WhHint	Witch hut hint			true		true	TODO: Proper text, hint, description
 ArtHint	Artifact hint			true		true	TODO: Proper text, hint, description
+FasterCombat	Faster combat (changes Normal and Fast combat speeds)			true			Old "fast" becomes normal, "fast' is even faster
 
 group:	Audiovisual
 BattlePic	New battlefield pictures			true		true	TODO: Proper text, hint, description
@@ -54,7 +55,6 @@ group:	Quality of life
 FasterAI	Faster AI (smaller thinking radius)						Sets AI thinking radius to 4096	Sets thinking radius to WoG 3.58 default (4096) instead of SoD default (32000). WoG 3.59 normally uses SoD default.
 ChooseRMGTemplate	Choose RMG template when starting a random map			true			At the beginning of game with random map, show dialog to choose RMG template. 
 o31	Witch and Scholar enhancements	31		true			TODO: Proper text, hint and description
-o32	Faster combat (changes Normal and Fast combat speeds)	32		true			Old "fast" becomes normal, "fast' is even faster
 o33	Team AI	33		true			TODO: Proper text, hint and description
 
 group:	Dwellings
