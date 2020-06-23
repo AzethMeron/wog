@@ -47,6 +47,7 @@ end
 -- Insert data - replace
 -- ["Sound to be replaced"] = "filemask"
 PI.? = function()
+	if(CheckSoundCondition() ~= true) then return; end
 	if(gNewSn.Replace == nil) then gNewSn.Replace = {} end
 	
 	local path = sn_dir
@@ -84,6 +85,7 @@ end
 -- Insert data - shutup
 -- ["Sound to be shut up"] = true
 PI.? = function()
+	if(CheckSoundCondition() ~= true) then return; end
 	if(gNewSn.ShutUp == nil) then gNewSn.ShutUp = {} end
 	
 	gNewSn.ShutUp["Chest.wav"] = true
@@ -120,6 +122,7 @@ end
 -- [Type][Subtype] = "filemask"
 -- if subtype isn't mandatory, use -1
 PI.? = function()
+	if(CheckSoundCondition() ~= true) then return; end
 	if(gNewSn.Object == nil) then gNewSn.Object = {} end
 	
 	local path = sn_dir
@@ -163,6 +166,7 @@ end
 
 -- Replace
 SN.? = function()
+	if(CheckSoundCondition() ~= true) then return; end
 	local sound_name = SN:S(?z)
 	local filemask = gNewSn.Replace[sound_name]
 	if(filemask == nil) then return; end
@@ -171,6 +175,7 @@ end
 
 -- ShutUp
 SN.? = function()
+	if(CheckSoundCondition() ~= true) then return; end
 	local sound_name = SN:S(?z)
 	if(gNewSn.ShutUp[sound_name] ~= true) then return; end
 	SetSound(sn_shut_down)
@@ -178,6 +183,7 @@ end
 
 -- Object
 OB.? = function()
+	if(CheckSoundCondition() ~= true) then return; end
 	local ob_type = OB(998):T(?v)
 	local ob_subtype = OB(998):U(?v)
 	if(gNewSn.Object[ob_type] ~= nil) then
