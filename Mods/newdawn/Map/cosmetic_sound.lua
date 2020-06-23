@@ -17,8 +17,7 @@ local GetRandFile = Lib.GetRandFileData
 local sn_shut_down = "ZQUIET.WAV"
 
 -- globals
-local gNewSn = nil
-if(global.GlobNd ~= nil) then  gNewSn = global.GlobND.NewSn end
+local gNewSn = global[ModName].NewSn
 -- Parts: Enabled, Replace, Object, ShutUp
 -- all path are relative to Mods folder !!!
 

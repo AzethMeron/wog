@@ -11,7 +11,7 @@ function global.events.EnterContext()
 	global[ModName].QuickCombat = Options.QuickCombat
 	global[ModName].BattlePic = Options.BattlePic
 	global[ModName].NewMp = Options.NewMp
-	global.GlobND = { NewSn = { Enabled = Options.NewSn, Replace = {}, Object = {} , ShutUp = {} } }
+	global[ModName].NewSn = { Enabled = Options.NewSn, Replace = {}, Object = {} , ShutUp = {} }
 	
 	global[ModName].FasterCombat = Options.FasterCombat
 	global[ModName].FasterAdvMap = Options.FasterAdvMap
