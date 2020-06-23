@@ -11,5 +11,5 @@ function global.events.EnterMap()
 	global[ModName].QuickCombat = Options.QuickCombat
 	global[ModName].BattlePic = Options.BattlePic
 	global[ModName].NewMp = Options.NewMp
-	global[ModName].NewSn = Options.NewSn
+	global.GlobND = { NewSn = { Enabled = Options.NewSn, Replace = {}, Object = {} , ShutUp = {} } }
 end

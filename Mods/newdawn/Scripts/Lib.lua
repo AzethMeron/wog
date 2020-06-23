@@ -160,6 +160,7 @@ GetRandFileMods = function(filemask)
 	-- Returning given string
 	local output = filetab[math.random(#filetab)]
 	output = string.gsub(output,dir.."\\","")
+	output = string.gsub(output,"\\","/")
 	return (output)
 end
 
@@ -189,6 +190,7 @@ GetRandFileData = function(filemask)
 	-- Returning given string
 	local output = filetab[math.random(#filetab)]
 	output = string.gsub(output,dir.."\\","")
+	output = string.gsub(output,"\\","/")
 	return (output)
 end
 

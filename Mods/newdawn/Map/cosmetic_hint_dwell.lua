@@ -3,13 +3,16 @@
 local Lib = require "Lib"
 local LibStr = require "LibStr"
 
+-- globals
+local gModName = global[ModName]
+
 --------------------------------- DWELL HINT ---------------------------------
 
 -- Check if dwelling hint
 -- return true if enabled
 -- return false if disabled
 CheckHintDwelling = function()
-	return global[ModName].DwHint
+	return gModName.DwHint
 end
 
 -- Advanced dwelling's hint

@@ -3,6 +3,10 @@
 local Lib = require "Lib"
 local LibStr = require "LibStr"
 
+-- globals
+local gModName = global[ModName]
+local GMap =  _G[ModName].map
+
 --------------------------------- SHRINE HINT ---------------------------------
 -- this script uses vind=1, should be changed later
 
@@ -10,23 +14,23 @@ local LibStr = require "LibStr"
 -- return true if enabled
 -- return false if disabled
 CheckShrineHint = function()
-	return global[ModName].SrHint
+	return gModName.SrHint
 end
 
 -- Initialise "map" variable for Shrines
 PI.? = function()
 	local vind = 1 
-	Lib.ObjectIterate(88,-1,vind,function(x,y,z,arg) _G[ModName].map[x][y][z]["SR"] = 0; end,nil)
-	Lib.ObjectIterate(89,-1,vind,function(x,y,z,arg) _G[ModName].map[x][y][z]["SR"] = 0; end,nil)
-	Lib.ObjectIterate(90,-1,vind,function(x,y,z,arg) _G[ModName].map[x][y][z]["SR"] = 0; end,nil)
+	Lib.ObjectIterate(88,-1,vind,function(x,y,z,arg) GMap[x][y][z].SR = 0; end,nil)
+	Lib.ObjectIterate(89,-1,vind,function(x,y,z,arg) GMap[x][y][z].SR = 0; end,nil)
+	Lib.ObjectIterate(90,-1,vind,function(x,y,z,arg) GMap[x][y][z].SR = 0; end,nil)
 end
 
 local SetShrineVisited = function(x,y,l)
 	-- Check if Mod enabled, cosmetics doesnt need to be enabled for setting visited
 	if (Lib.CheckIfEnabledMod() ~= true) then return; end
-	local bit_colors = _G[ModName].map[x][y][l]["SR"]
+	local bit_colors = GMap[x][y][l].SR
 	local player = OW:C(?v)
-	_G[ModName].map[x][y][l]["SR"] = bit.Or(bit_colors,2^player)
+	GMap[x][y][l].SR = bit.Or(bit_colors,2^player)
 end
 
 -- Set shrine of magic incantation visited
@@ -63,7 +67,7 @@ HD.? = function()
 	local spell = SR(998):S(?v)
 	local expanded_hint = LibStr.ShrineHint[ob_type]
 	-- Check if visited
-	local bit_colors = _G[ModName].map[ERM.v[998]][ERM.v[999]][ERM.v[1000]]["SR"]
+	local bit_colors = GMap[ERM.v[998]][ERM.v[999]][ERM.v[1000]].SR
 	local local_player = Lib.GetLocalPlayer()
 	local rightclick = HD:T(?v)
 	if (Lib.AlignmentCheckTeam(local_player,bit_colors) == false) then 

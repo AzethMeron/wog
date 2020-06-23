@@ -3,6 +3,9 @@
 local Lib = require "Lib"
 local LibStr = require "LibStr"
 
+-- globals
+local gModName = global[ModName]
+
 -------------------------- QUICK COMBAT SETTINGS --------------------------
 -- this script uses vind, should be changed later
 -- might not restore mana properly after being attacked by AI as remote player
@@ -18,7 +21,7 @@ if new then
 end
 
 CheckQuickCombat = function()
-	return global[ModName].QuickCombat
+	return gModName.QuickCombat
 end
 
 -- Check if conditions fulfilled for Quick Combat

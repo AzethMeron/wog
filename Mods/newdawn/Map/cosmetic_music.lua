@@ -4,11 +4,14 @@ local Lib = require "Lib"
 local LibStr = require "LibStr"
 
 -- variables dealing with pathing
-local mp3_dir = ModName.."\\Res\\mp3\\"
-local mp3_relative_dir = "..\\Mods\\"
+local mp3_dir = ModName.."/Res/mp3/"
+local mp3_relative_dir = "../Mods/"
 local GetRandFile = Lib.GetRandFileMods
 -- buggy section (terrain) disabler
 local enable_terrain_section = false
+
+-- globals
+local gModName = global[ModName]
 
 ------------------- NEW MUSIC -------------------
 
@@ -27,7 +30,7 @@ end
 -- true if enabled
 -- false if disabled
 CheckMusic = function()
-  return global[ModName].NewMp
+  return gModName.NewMp
 end
 
 -- true if enabled

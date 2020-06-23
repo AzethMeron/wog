@@ -3,13 +3,16 @@
 local Lib = require "Lib"
 local LibStr = require "LibStr"
 
+-- globals
+local gModName = global[ModName]
+
 --------------------------------- ART HINT ---------------------------------
 
 -- Check if hint artifact
 -- return true if enabled
 -- return false if disabled
 CheckHintArtifact = function()
-	return global[ModName].ArtHint
+	return gModName.ArtHint
 end
 
 -- Advanced artifact's hint

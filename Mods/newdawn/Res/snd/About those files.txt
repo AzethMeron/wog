@@ -1,8 +1,6 @@
-This folder contain .wav files, to be used with SN receiver.
+This folder contain sound files, to be used with SN receiver.
 All new files starts with letter 'z', to not mess with internal files. Please stick to that rule.
-Sounds that DOESNT start with 'z' are for New Sound Engine.
 
-Due to only 12 characters filepath limit, names are roughly shortened, so there is translation to Format SN:
 	newd0...newd99 ~ newday     +
 	newm0...newm99 ~ newmonth   +
 	neww0...neww99 ~ newweek    +
@@ -31,6 +29,10 @@ Due to only 12 characters filepath limit, names are roughly shortened, so there 
 	mrle0...mrle99 ~ Morale     +
 	luck0...luck99 ~ Luck       +
 	dngr0...dngr99 ~ Danger     +
+	
+	btwm - build in town
+	btle - battle
+	kfde - killfade
+	dsnd - digsound
 
-There is also file ZQUEIT.WAV, for now placed in folder Data\
-But please, for sake of future compability use %Z100004 instead of ZQUIET.WAV
+

@@ -4,10 +4,13 @@ local Lib = require "Lib"
 local LibStr = require "LibStr"
 
 -- variables dealing with pathing
-local bgp_dir = ModName.."\\Res\\bgp\\"
-local data_relative_dir = "..\\Mods\\"
+local bgp_dir = ModName.."/Res/bgp/"
+local data_relative_dir = "../Mods/"
 local GetRandFile = Lib.GetRandFileMods
 -- Need to move bgp to Data/p cause path too long for BA:B ???
+
+-- globals
+local gModName = global[ModName]
 
 -------------------------- NEW BATTLEFIELD PICTURES --------------------------
 
@@ -23,7 +26,7 @@ local GetRandFile = Lib.GetRandFileMods
 -- return true if enabled
 -- return false if disabled
 CheckBattlePictures = function()
-	return global[ModName].BattlePic
+	return gModName.BattlePic
 end
 
 -- Find & set .pcx for given object
