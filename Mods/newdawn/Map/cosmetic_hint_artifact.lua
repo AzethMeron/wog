@@ -12,6 +12,7 @@ local gModName = global[ModName]
 -- return true if enabled
 -- return false if disabled
 CheckHintArtifact = function()
+	if(gModName == nil) then return nil end
 	return gModName.ArtHint
 end
 

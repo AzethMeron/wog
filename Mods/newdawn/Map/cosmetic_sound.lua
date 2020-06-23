@@ -4,13 +4,21 @@ local Lib = require "Lib"
 local LibStr = require "LibStr"
 
 -- variables dealing with pathing
+--[[ -- Mods doesnt work cause path is too long (above 12 chars)
 local sn_dir = ModName.."/Res/snd/"
 local sn_relative_dir = "../Mods/"
 local GetRandFile = Lib.GetRandFileMods
 local sn_shut_down = sn_dir.."ZQUIET.WAV"
+]]
+
+local sn_dir = "s/"
+local sn_relative_dir = ""
+local GetRandFile = Lib.GetRandFileData
+local sn_shut_down = "ZQUIET.WAV"
 
 -- globals
-local gNewSn = global.GlobND.NewSn
+local gNewSn = nil
+if(global.GlobNd ~= nil) then  gNewSn = global.GlobND.NewSn end
 -- Parts: Enabled, Replace, Object, ShutUp
 -- all path are relative to Mods folder !!!
 
@@ -19,7 +27,8 @@ local gNewSn = global.GlobND.NewSn
 -- true if enabled
 -- false if disabled
 CheckSound = function()
-  return gNewSn.Enabled
+	if(gNewSn == nil) then return nil end
+	return gNewSn.Enabled
 end
 
 -- true if enabled
@@ -32,13 +41,13 @@ end
 
 SetSound = function(snd_path)
 	if(snd_path == nil) then return; end
-	print(sn_relative_dir..snd_path) -- TEMPORARY
+	-- print(sn_relative_dir..snd_path) -- TEMPORARY
 	SN:S(sn_relative_dir..snd_path)
 end
 
 PlaySound = function(snd_path)
 	if(snd_path == nil) then return; end
-	print(sn_relative_dir..snd_path) -- TEMPORARY
+	-- print(sn_relative_dir..snd_path) -- TEMPORARY
 	SN:P(sn_relative_dir..snd_path)
 end
 

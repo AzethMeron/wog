@@ -11,6 +11,7 @@ local gModName = global[ModName]
 -- this script uses vind=1, should be changed later
 
 CheckHintWitch = function()
+	if(gModName == nil) then return nil end
 	return gModName.WhHint
 end
 

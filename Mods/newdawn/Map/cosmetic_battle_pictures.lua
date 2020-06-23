@@ -26,6 +26,7 @@ local gModName = global[ModName]
 -- return true if enabled
 -- return false if disabled
 CheckBattlePictures = function()
+	if(gModName == nil) then return nil end
 	return gModName.BattlePic
 end
 

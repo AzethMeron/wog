@@ -30,6 +30,7 @@ end
 -- true if enabled
 -- false if disabled
 CheckMusic = function()
+	if(gModName == nil) then return nil end
   return gModName.NewMp
 end
 

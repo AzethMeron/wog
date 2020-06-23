@@ -21,6 +21,7 @@ if new then
 end
 
 CheckQuickCombat = function()
+	if(gModName == nil) then return nil end
 	return gModName.QuickCombat
 end
 

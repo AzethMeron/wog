@@ -14,6 +14,7 @@ local GMap =  _G[ModName].map
 -- return true if enabled
 -- return false if disabled
 CheckShrineHint = function()
+	if(gModName == nil) then return nil end
 	return gModName.SrHint
 end
 
