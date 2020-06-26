@@ -29,7 +29,7 @@ NewGrid	New battlefield grid look			true		true	Modified combat grid.	{New battle
 by GrayFace
 
 Modified combat grid.
-SoftGridShadow	Light combat grid shadow			true		true	Lighter combat grid shadow. 	{COmbat grid shadow}
+SoftGridShadow	Light combat grid shadow			true		true	Lighter combat grid shadow. 	{Combat grid shadow}
 by GrayFace
 
 Modified combat grid shadow. 
@@ -110,7 +110,10 @@ Monster breath, move and animate all the time.
 category:	Gameplay enhancements
 
 group:	Quality of life
-ChooseRMGTemplate	Choose RMG template when starting a random map			true			At the beginning of game with random map, show dialog to choose RMG template. 
+ChooseRMGTemplate	Choose RMG template when starting a random map			true			At the beginning of game with random map, show dialog to choose RMG template. 	{Choose RMG Template}
+by GrayFace
+
+At the beginning of game on randomly generated map show dialog to choose Random-Map-Generator template.
 o31	Witch and Scholar enhancements	31		true			TODO: Proper text, hint and description
 
 group:	AI-oriented scripts
@@ -126,6 +129,10 @@ o33	Team AI	33		true			Computer players send all resources to next allied AI at 
 Option 33, by Jakub Grzana
 
 At the end of turn, computer player sends all resources to next (allied) computer player.
+o35	Easier neutral battles for AI	35		true			Increase statistics of computer player when fighting neutral units	{Easier battles for AI}
+Option 35, by Jakub Grzana
+
+Increase primary skills of all computer heroes while fighting with neutral stacks, resulting in less casualties.
 
 group:	Dwellings
 o7	Dwellings accumulate creatures	7		true			All dwellings on adventure map accumulate creatures from week to week.	{Dwelling accumulate creatures}
