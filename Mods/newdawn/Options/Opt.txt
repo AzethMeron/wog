@@ -133,6 +133,10 @@ o35	Easier neutral battles for AI	35		true			Increase statistics of computer pla
 Option 35, by Jakub Grzana
 
 Increase primary skills of all computer heroes while fighting with neutral stacks, resulting in less casualties.
+o36	Computer heroes always buy spellbook	36		true			If there is magic guild in town, heroes controlled by AI will always buy spellbook	{AI Spellbook}
+Option 36, by Jakub Grzana
+
+o37	AI leveleing up	37		true			TODO 	TODO
 
 group:	Dwellings
 o7	Dwellings accumulate creatures	7		true			All dwellings on adventure map accumulate creatures from week to week.	{Dwelling accumulate creatures}
