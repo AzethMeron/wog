@@ -19,6 +19,9 @@ MainSpellbook = function()
 	-- Owner
 	local owner_castle, owner_hero = CA(-1):O(?v), HE(-1):O(?v)
 	if(owner_castle ~= owner_hero) then return; end
+	-- Exit if human player
+	local current_player = OW:C(?v)
+	if(OW:I(current_player,?v) == 0) then return; end
 	-- Check if magic guild is built. Restore flag1
 	local flag_backup = ERM.flags[1]
 	CA(-1):B(3,0,1)

@@ -146,12 +146,8 @@ PI.? = function()
 	gNewSn.Object[2] = { [-1] = path.."myst*" }
 	gNewSn.Object[53] = { [7] = path.."myst*" }
 	gNewSn.Object[57] = { [-1] = path.."myst*" }
-	gNewSn.Object[22] = { [0] = path.."myst*" }
-	gNewSn.Object[63] = { [0] = path.."myst*" }
-	gNewSn.Object[63] = { [10] = path.."myst*" }
-	gNewSn.Object[63] = { [11] = path.."myst*" }
-	gNewSn.Object[63] = { [12] = path.."myst*" }
-	gNewSn.Object[63] = { [13] = path.."myst*" }
+	gNewSn.Object[22] = { [-1] = path.."myst*" }
+	gNewSn.Object[63] = { [-1] = path.."myst*" }
 	
 	-- Military.wav
 	gNewSn.Object[17] = { [-1] = path.."milit*" }
@@ -167,7 +163,106 @@ PI.? = function()
 	gNewSn.Object[62] = { [-1] = path.."roqe*" }
 	
 	-- Gazebo.wav
+	gNewSn.Object[61] = { [-1] = path.."gzbo*" }
+	gNewSn.Object[100] = { [-1] = path.."gzbo*" }
+	gNewSn.Object[104] = { [-1] = path.."gzbo*" }
+	gNewSn.Object[113] = { [-1] = path.."gzbo*" }
+	gNewSn.Object[41] = { [-1] = path.."gzbo*" }
+	gNewSn.Object[81] = { [-1] = path.."gzbo*" }
+	gNewSn.Object[102] = { [-1] = path.."gzbo*" }
 	
+	-- GetProtection.wav
+	gNewSn.Object[80] = { [-1] = path.."gprot*" }
+	gNewSn.Object[32] = { [-1] = path.."gprot*" }
+	
+	-- Expernce.wav
+	gNewSn.Object[38] = { [-1] = path.."exp*" }
+	gNewSn.Object[55] = { [-1] = path.."exp*" }
+	gNewSn.Object[12] = { [-1] = path.."exp*" }
+	
+	-- Genie.wav
+	gNewSn.Object[112] = { [-1] = path.."genie*" }
+	gNewSn.Object[109] = { [-1] = path.."genie*" }
+	gNewSn.Object[29] = { [-1] = path.."genie*" }
+	gNewSn.Object[105] = { [-1] = path.."genie*" }
+	gNewSn.Object[39] = { [-1] = path.."genie*" }
+	
+	-- Nomad.wav
+	gNewSn.Object[23] = { [-1] = path.."nomd*" }
+	gNewSn.Object[51] = { [-1] = path.."nomd*" }
+	gNewSn.Object[4] = { [-1] = path.."nomd*" }
+	
+	-- Store.wav
+	gNewSn.Object[106] = { [-1] = path.."stor*" }
+	gNewSn.Object[221] = { [-1] = path.."stor*" }
+	gNewSn.Object[94] = { [-1] = path.."stor*" }
+	gNewSn.Object[87] = { [-1] = path.."stor*" }
+	gNewSn.Object[59] = { [-1] = path.."stor*" }
+	gNewSn.Object[91] = { [-1] = path.."stor*" }
+	gNewSn.Object[95] = { [-1] = path.."stor*" }
+	
+	-- Faerie.wav
+	gNewSn.Object[47] = { [-1] = path.."faer*" }
+	gNewSn.Object[49] = { [-1] = path.."faer*" }
+	gNewSn.Object[48] = { [-1] = path.."faer*" }
+	
+	-- Temple.wav
+	gNewSn.Object[88] = { [-1] = path.."templ*" }
+	gNewSn.Object[89] = { [-1] = path.."templ*" }
+	gNewSn.Object[90] = { [-1] = path.."templ*" }
+	gNewSn.Object[96] = { [-1] = path.."templ*" }
+	
+	-- Cavehead.wav
+	gNewSn.Object[103] = { [-1] = path.."cvhd*" }
+	gNewSn.Object[9] = { [-1] = path.."cvhd*" }
+	gNewSn.Object[212] = { [-1] = path.."cvhd*" }
+	gNewSn.Object[10] = { [-1] = path.."cvhd*" }
+	gNewSn.Object[215] = { [-1] = path.."cvhd*" }
+	
+	-- Lighthouse.wav
+	gNewSn.Object[42] = { [-1] = path.."lhous*" }
+	gNewSn.Object[27] = { [-1] = path.."lhous*" }
+	gNewSn.Object[58] = { [-1] = path.."lhous*" }
+	gNewSn.Object[60] = { [-1] = path.."lhous*" }
+	gNewSn.Object[13] = { [-1] = path.."lhous*" }
+	gNewSn.Object[15] = { [-1] = path.."lhous*" }
+	
+	-- Dragon.wav
+	gNewSn.Object[25] = { [-1] = path.."draqn*" }
+	gNewSn.Object[17] = { [24] = path.."draqn*" }
+	gNewSn.Object[17] = { [81] = path.."draqn*" }
+	gNewSn.Object[17] = { [41] = path.."draqn*" }
+	gNewSn.Object[17] = { [85] = path.."draqn*" }
+	
+	-- Quest.wav
+	gNewSn.Object[83] = { [-1] = path.."ques*" }
+	
+	-- Graveyard
+	gNewSn.Object[108] = { [-1] = path.."gyard*" }
+	gNewSn.Object[84] = { [-1] = path.."gyard*" }
+	
+	-- Morale.wav
+	gNewSn.Object[64] = { [-1] = path.."mrle*" }
+	gNewSn.Object[31] = { [-1] = path.."mrle*" }
+	gNewSn.Object[110] = { [-1] = path.."mrle*" }
+	gNewSn.Object[11] = { [-1] = path.."mrle*" }
+	
+	-- Luck.wav
+	gNewSn.Object[52] = { [-1] = path.."luck*" }
+	gNewSn.Object[14] = { [-1] = path.."luck*" }
+	gNewSn.Object[30] = { [-1] = path.."luck*" }
+	gNewSn.Object[28] = { [-1] = path.."luck*" }
+	
+	-- Danger.wav
+	gNewSn.Object[111] = { [-1] = path.."dngr*" }
+	gNewSn.Object[92] = { [-1] = path.."dngr*" }
+	
+	-- flagmine.wav
+	gNewSn.Object[53] = { [-1] = path.."fmine*" }
+	gNewSn.Object[220] = { [-1] = path.."fmine*" }
+	
+	-- Obelisk.wav
+	gNewSn.Object[57] = { [-1] = path.."obls*" }
 end
 
 --------------------------------------
