@@ -83,7 +83,8 @@ group:	Audiovisual
 BattlePic	New battlefield pictures			true		true	Replace pictures in combat	{New Battlefield Pictures}
 by Jakub Grzana
 
-Randomly change battleground picture based on terrain. Doesn't work yet for unknown reason.
+Randomly change battleground picture based on terrain. 
+Doesn't work yet cuz of Lua/ERM bug.
 NewMp	New music			true		true	Replace music with new	{New music}
 by Jakub Grzana
 
@@ -91,7 +92,8 @@ Randomize music in towns, battles and more
 NewSn	New sounds			true		true	Replace sounds with new (though there is none yet)	{New sounds}
 by Jakub Grzana
 
-Randomize sounds in the game... no new sounds yet :(
+Randomize sounds in the game.
+No new sounds yet.
 SoftShadow	Light shadows on adventure map			true		true	Less dark shadows on adventure map	{Soft shadows}
 by GrayFace
 
@@ -136,7 +138,13 @@ Increase primary skills of all computer heroes while fighting with neutral stack
 o36	Computer heroes always buy spellbook	36		true			If there is magic guild in town, heroes controlled by AI will always buy spellbook	{AI Spellbook}
 Option 36, by Jakub Grzana
 
-o37	AI leveleing up	37		true			TODO 	TODO
+If there is magic guild in town, heroes controlled by AI will always buy spellbook
+LUA ERROR: can't use post-trigger (!$) so im using pre-trigger. Should be fixed cuz now AI buys spellbook much less frequently
+o37	Improved AI leveling	37		true			Improved AI algorithm to choose secondary skills	{Improved AI leveling}
+Option 37, by Jakub Grzana
+
+Computer player's choose secondary skills more wisely, based on their allignment, hero type, available spells and more.
+Not finished yet.
 
 group:	Dwellings
 o7	Dwellings accumulate creatures	7		true			All dwellings on adventure map accumulate creatures from week to week.	{Dwelling accumulate creatures}

@@ -209,3 +209,49 @@ ObjectIterate = function(Type, Subtype, vind, func, args)
 		func(ERM.v[vind], ERM.v[vind+1], ERM.v[vind+2], args)
 	end
 end
+
+-- return x,y,z
+-- easier to use x than ERM.v[998]
+GetCoords = function(vind)
+	return ERM.v[vind], ERM.v[vind+1], ERM.v[vind+2]
+end
+
+--[[
+GetHeroData(hero_number)
+- hero_num - Format H
+- atk, def, mig, kno
+- skills - table { [id] = level }- 
+- town - format
+- type - string, "might", "magic"
+- level - number
+]]
+
+GetHeroData = function(hero_number)
+	-- Gather data in t_ variables
+	local t_hero_num = HE(hero_number):N(?v)
+	local t_atk, t_def, t_mig, t_kno = HE(hero_number):F(?v,?v,?v,?v)
+	local t_skills = {}
+	for i = 0,27,1 do 
+		local t_skill = HE(hero_number):S(i,?v)
+		if(t_skill ~= 0) then 
+			t_skills[i] = t_skill
+		end
+	end
+	local t_town = math.floor(HE(hero_number):B2(?v) / 2)
+	local t_type = nil
+	if( ( HE(hero_number):B2(?v) % 2 ) == 0 ) then t_type = "might"
+	else t_type = "magic" end
+	local trash, t_level = HE(hero_number):E(?v,?v,1)
+	-- return gathered data
+	return {
+		hero_num = t_hero_num,
+		atk = t_atk,
+		def = t_def,
+		mig = t_mig,
+		kno = t_kno,
+		skills = t_skills,
+		town = t_town,
+		type = t_type,
+		level = t_level
+	}
+end

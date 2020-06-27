@@ -8,6 +8,8 @@ Inside FU trigger you have arguments
 x1 - hero owner
 x2 - hero number
 
+~ actually changes to QW receiver are reversed for now, cuz wasn't finished and i will not finish it for some time
+
 Wog Legacy naming convention:
 - All new files are in WogLegacy dir
 - All new files starts with WL
@@ -27,6 +29,8 @@ It is very easy way to make variables that are automatically stored in savefile 
 Im not experienced enough yet to make my own variables. Note that every change to any of consts will make saves uncompatible, and you still can change those values
 for example via WoG options dialog.
 
+[+] In Lua/ERM you can use ".pre" ".firstpre" ".post" instead of ".?" ".first?" ".$".
+[+] In Lua/ERM trigger type (pre, firstpost) letter case no longer matters. You can use "FirstPost", or "FiRsTpOsT".
 [+] New v-vars: v10001-v10100
 [+] New functions (FU30001-FU40000) BUT those are for tests only. Number will be decreased when API will be proven to work fine.
 [+] HE, HL, HM triggers now supports number of heroes above 199.
@@ -35,3 +39,7 @@ for example via WoG options dialog.
 
 Self-caused bugs
 [-] options.lua was scrapping Wog Options. Fixed, but you need to manually change constant value in both C++ header and Lua file.
+
+Found bugs:
+[-] When using Lua/ERM, post triggers ($) cause error with _NOGLOBALS macro. I believe game mistake them as macros. Not fixed, but i have added .pre and .post syntax - those works. For example, now you can use OB(11).pre = function() 
+[ ] When using Lua/ERM, BA:B(string) looks to be broken. Not fixed

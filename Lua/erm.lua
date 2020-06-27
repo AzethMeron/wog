@@ -9,6 +9,7 @@ local format = string.format
 local string_byte = string.byte
 local string_sub = string.sub
 local string_match = string.match
+local string_lower = string.lower
 
 local next = next
 local pairs = pairs
@@ -95,19 +96,34 @@ local function rec_index(t, a)
 end
 
 local function rec_newindex(t, a, v)
+	-- postFlag: 0 means pre-trigger (!?), and 1 means post-trigger (!$)
+	-- ind: 0 means "first", -1 means normal addition
 	local postFlag, ind
 	-- test triggers: postFlag, ind = false, a
-	if a == "?" then
-		postFlag, ind = false, -1
-	elseif a == "first?" or a == "First?" then
-		postFlag, ind = false, 0
-	elseif a == "$" then
-		postFlag, ind = true, -1
-	elseif a == "first$" or a == "First$" then
-		postFlag, ind = true, 0
+	-- functions to prevent repeating over and over again same code
+	local wl_pre = function() return false, -1 end
+	local wl_pre_first = function() return false, 0 end
+	local wl_post = function() return true, -1 end
+	local wl_post_first = function() return true, 0 end
+	-- switch emulator, for easy finding and adding new syntax. All commands should be lowercase
+	local wl_switch = {
+		["?"] = wl_pre,
+		["first?"] = wl_pre_first,
+		["$"] = wl_post,
+		["first$"] = wl_post_first,
+		["pre"] = wl_pre,
+		["firstpre"] = wl_pre_first,
+		["post"] = wl_post,
+		["firstpost"] = wl_post_first,
+	}
+	-- getting function from switch, executing if exist, or displaying error if not found
+	local wl_func = wl_switch[string_lower(a)]
+	if(wl_func ~= nil) then
+		postFlag, ind = wl_func()
 	else
 		error(format('"%s.%s"-unknown trigger type.', t.name, a), 2)
 	end
+	
 	if type(v) ~= "function" then
 		error("Trigger must be a function.", 2)
 	end

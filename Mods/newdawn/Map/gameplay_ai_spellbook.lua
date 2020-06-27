@@ -14,10 +14,12 @@ CheckAiSpellbookCondition = function()
 	return true
 end
 
+-- Can't be used in pre trigger
 MainSpellbook = function()
 	if(CheckAiSpellbookCondition() ~= true) then return; end
 	-- Owner
-	local owner_castle, owner_hero = CA(-1):O(?v), HE(-1):O(?v)
+	local owner_castle = CA(-1):O(?v)
+	local owner_hero = HE(-1):O(?v)
 	if(owner_castle ~= owner_hero) then return; end
 	-- Exit if human player
 	local current_player = OW:C(?v)
@@ -36,9 +38,10 @@ MainSpellbook = function()
 	-- Buy spellbook
 	OW:R(-1,6,{-500})
 	HE(-1):A(4,1000)
-	HE(-1):M(15,1)
+	HE(-1):M(15,1) -- give magic arrow
 end
 
-OB(98).? = function()
+-- Doesn't work due to Lua/ERM error
+OB(98).Post = function()
 	MainSpellbook()
 end

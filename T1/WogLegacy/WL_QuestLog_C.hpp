@@ -95,7 +95,7 @@ int ERM_Qwest(char Cmd,int Num,_ToDo_* /*sp*/,Mes *Mp)
 			if(qlp->z==0) DelQuest(qlp);
 			break;
 		}
-		case 'M':
+		/*case 'M':
 		{
 			CHECK_ParamsMin(1);
 			int cpy_mode = WL_Questlog_mode;
@@ -109,7 +109,7 @@ int ERM_Qwest(char Cmd,int Num,_ToDo_* /*sp*/,Mes *Mp)
 				if(WL_Questlog_func < 1 || WL_Questlog_func > WL_FUNC_COUNT) { WL_EWrongParam2("function",WL_Questlog_func); WL_Questlog_func = cpy_func; RETURN(0) }
 			}
 			break;
-		}
+		}*/
 		default: WL_EWrongCommand(); RETURN(0)
 	}
 	RETURN(1)
