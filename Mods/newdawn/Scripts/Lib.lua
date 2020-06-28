@@ -213,7 +213,13 @@ end
 -- return x,y,z
 -- easier to use x than ERM.v[998]
 GetCoords = function(vind)
-	return ERM.v[vind], ERM.v[vind+1], ERM.v[vind+2]
+	return ERM.v[vind], ERM.v[vind+1], ERM.v[vind+2] 
+end
+
+-- input: Format SS
+-- output: Format SQ
+GetSQfromSS = function(skill_ss)
+	return (3*(skill_ss+1))
 end
 
 --[[

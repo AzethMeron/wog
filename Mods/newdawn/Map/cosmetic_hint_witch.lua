@@ -58,7 +58,7 @@ HD.? = function()
 	else
 		-- rightclick
 		HD:M(witch_hut_name.."\n"..UN:N(4,?z,skill))
-		local skill_sq = 3*(skill+1)
+		local skill_sq = Lib.GetSQfromSS(skill)
 		Lib.AddHintImage(0,20,skill_sq)
 	end
 end

@@ -15,3 +15,12 @@ QuickCombat = {
 }
 
 TemplateCaption = "Choose random map template"
+
+WitchHut = {
+	["AskForPermission"] = "Temporary string",
+	["AlreadyKnown"] = "Temporary string"
+}
+
+Scholar = {
+	["AskForPermission"] = "Temporary string"
+}

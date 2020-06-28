@@ -84,7 +84,7 @@ BattlePic	New battlefield pictures			true		true	Replace pictures in combat	{New 
 by Jakub Grzana
 
 Randomly change battleground picture based on terrain. 
-Doesn't work yet cuz of Lua/ERM bug.
+Doesn't work yet cuz of engine bug.
 NewMp	New music			true		true	Replace music with new	{New music}
 by Jakub Grzana
 
@@ -116,7 +116,10 @@ ChooseRMGTemplate	Choose RMG template when starting a random map			true			At the
 by GrayFace
 
 At the beginning of game on randomly generated map show dialog to choose Random-Map-Generator template.
-o31	Witch and Scholar enhancements	31		true			TODO: Proper text, hint and description
+o31	Witch and Scholar enhancements	31		true			Allow players to chose if they want secondary skill offered by Witch Hut and Scholar	{Witch Hut and Scholar enhancement}
+Option 31, by Jakub Grzana
+
+Allow players to chose if they want secondary skill offered by Witch Hut and Scholar.
 
 group:	AI-oriented scripts
 FasterAI	Faster AI (smaller thinking radius)			true			Sets AI thinking radius to 8192	{Faster AI}
@@ -135,12 +138,7 @@ o35	Easier neutral battles for AI	35		true			Increase statistics of computer pla
 Option 35, by Jakub Grzana
 
 Increase primary skills of all computer heroes while fighting with neutral stacks, resulting in less casualties.
-o36	Computer heroes always buy spellbook	36		true			If there is magic guild in town, heroes controlled by AI will always buy spellbook	{AI Spellbook}
-Option 36, by Jakub Grzana
-
-If there is magic guild in town, heroes controlled by AI will always buy spellbook
-LUA ERROR: can't use post-trigger (!$) so im using pre-trigger. Should be fixed cuz now AI buys spellbook much less frequently
-o37	Improved AI leveling	37		true			Improved AI algorithm to choose secondary skills	{Improved AI leveling}
+o36	Improved AI leveling	36		true			Improved AI algorithm to choose secondary skills	{Improved AI leveling}
 Option 37, by Jakub Grzana
 
 Computer player's choose secondary skills more wisely, based on their allignment, hero type, available spells and more.
