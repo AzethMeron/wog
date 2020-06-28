@@ -24,3 +24,7 @@ WitchHut = {
 Scholar = {
 	["AskForPermission"] = "Temporary string"
 }
+
+BuyAllCreatures = {
+	
+}
