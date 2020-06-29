@@ -1,7 +1,6 @@
 #ifndef WLA_COMMON_HPP
 #define WLA_COMMON_HPP
 
-
 /* by Jakub Grzana
 	This file is not supposed to be included anywhere except common.h 
 	Simple addition, to separate old and new code. Don't try to compile this file seperately
@@ -22,6 +21,7 @@
 #define WL_EWrongSyntax() { WL_MError2("wrong syntax.") }
 #define WL_EWrongParam(val) { WL_MError3("invalid parameter value: %d",val) }
 #define WL_EWrongParam2(name,val) { MError2(Format("invalid parameter '%s' value: %d",name,val)); }
+
 // Don't use this one: use CHECK_ instead
 #define WL_EWrongParamsNum(num,str,n) { MError2(Format("wrong number of parameters: %d\nExpected %s %d",num,str,n)); }
 

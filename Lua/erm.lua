@@ -105,7 +105,7 @@ local function rec_newindex(t, a, v)
 	local wl_pre_first = function() return false, 0 end
 	local wl_post = function() return true, -1 end
 	local wl_post_first = function() return true, 0 end
-	-- switch emulator, for easy finding and adding new syntax. All commands should be lowercase
+	-- switch emulator, for easy finding and adding new syntax. All commands MUST be lowercase
 	local wl_switch = {
 		["?"] = wl_pre,
 		["first?"] = wl_pre_first,

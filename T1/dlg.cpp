@@ -879,7 +879,7 @@ int ERM_Dlg(char Cmd,int Num,_ToDo_*sp,Mes *Mp)
 			//NdlgTXTfilename
 			if(dlg==NULL){ // not found - try to load
 				dlg=new HDlg(0);
-				if(dlg==NULL){ MError("\"DL:N\"- no memory."); RETURN(0) }
+				if(dlg==NULL){ WL_MError2("- no memory."); RETURN(0) }
 				char *FileName; //="ZSTDDLGS.TXT";
 				if(Mp->VarI[0].Num!=0){ // переменная
 					Apply(&vv,4,Mp,0);

@@ -6653,15 +6653,31 @@ int ERM_Battle(char Cmd,int Num,_ToDo_*,Mes *Mp)
 			Apply(&val,4,Mp,0);
 			break;
 		case 'B': // B# - установить бэкграунд
-			CHECK_ParamsMin(1);
-			v=Mp->n[0];
-			if(v==0){ // копируем строку
-				StrCopy(BFBackGrUDef,255,ERM2String(&Mp->m.s[Mp->i],0,&vv));
-				Mp->i+=vv;
-			}else{
-				if((v<-1)||(v>25)){ WL_MError3("wrong BA background index.\nIncorrect value: %d",v); RETURN(0) }
+			if(Num == 1)
+			{
+				// Old, original syntax
+				v=Mp->n[0];
+				if(v==0){ // копируем строку
+					StrCopy(BFBackGrUDef,255,ERM2String(&Mp->m.s[Mp->i],0,&vv));
+					Mp->i+=vv;
+				}else{
+					if((v<-1)||(v>25)){ WL_MError3("wrong BA background index.\nIncorrect value: %d",v); RETURN(0) }
+				}
+				BF_BatFieldNum=v;
 			}
-			BF_BatFieldNum=v;
+			else if(Num == 2)
+			{
+				// New syntax, made to use ERM z-var. Doesn't work yet
+				v=0;
+				if( (Mp->n[1]<1) || (Mp->n[1]>1000) ) { WL_MError3("wrong z-var index\nIncorrect value: %d",Mp->n[1]); RETURN(0) }
+				Message(ERMString[Mp->n[1]]);
+				StrCopy(BFBackGrUDef,255,ERMString[Mp->n[1]]);
+				BF_BatFieldNum=v;
+			}
+			else
+			{
+				WL_EWrongSyntax()
+			}
 			break;
 		case 'Q': // Q$ - 3.58 quick battle (1=yes/0=no)
 			CHECK_ParamsMin(1);

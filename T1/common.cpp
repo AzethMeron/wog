@@ -5639,7 +5639,7 @@ void PEr::Show(char *Reason,void *Address,int Flag,Dword AddPar,char *Adendum)
 
 	strcat_s(GlbBuf[0], 30000, Format("\nLast loaded DEF:\n\n%s", LastLoadedDefName));
 
-	char *msg = Format("%s\n\n%s", (Dword)GlbBuf[0], "PLEASE SEND {WOGCRASHDUMP.DMP}, {WOGCRASHLOG.TXT} AND {WOGERMLOG.TXT} FILES TO {sergroj@mail.ru}");
+	char *msg = Format("%s\n\n%s", (Dword)GlbBuf[0], "PLEASE SEND {WOGCRASHDUMP.DMP}, {WOGCRASHLOG.TXT} (WOGERMLOG.TXT} AND {LuaLog.txt} FILES TO {meronentertainment@gmail.com}");
 	Zsprintf2(&Frmt,"WoG Version: %s\n\n%s",(Dword)WOG_STRING_VERSION,(Dword)msg);
 	StrCopy(GlbBuf[0],30000,Frmt.Str);
 	Zsprintf2(&Frmt,"Map Saved with: %s\n\n%s",(Dword)MapSavedWoG,(Dword)GlbBuf[0]);

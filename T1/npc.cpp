@@ -1794,7 +1794,7 @@ static int RemoveCreatureDistant(int Ind,int *Type,int *Num)
 	int ret=0;
 	if(LFiredSet[Ind]==-1) RETURN(0)
 	for(int i=0;i<7;i++){
-		if(LFiredMon[Ind].Ct[i]!=Type[i]){ MError("MP: Mon type is not equal (AstrSprt)"); RETURN(0) }
+		if(LFiredMon[Ind].Ct[i]!=Type[i]){ WL_MError2("MP: Mon type is not equal (AstrSprt)"); RETURN(0) }
 		Num[i]=LFiredMon[Ind].Cn[i];
 		ret=1;
 	}
@@ -2868,11 +2868,11 @@ int ERM_NPC(char Cmd,int Num,_ToDo_*sp,Mes *Mp)
 	Dword andmask,ormask;
 	NPC *npc;
 	ind=GetVarVal(&sp->Par[0]);
-	if((ind<-4)||(ind>=HERNUM)){ MError("\"!!CO\"-Commander index is out of range."); RETURN(0) }
+	if((ind<-4)||(ind>=HERNUM)){ WL_MError3("-Commander index is out of range.\nIncorrect value: %d",ind); RETURN(0) }
 	if(ind==-1){ // current
-		if(ERM_HeroStr==0){ MError("\"!!CO\"-Cannot get the current Commander (no current hero)"); RETURN(0) }
+		if(ERM_HeroStr==0){ WL_MError2("-Cannot get the current Commander (no current hero)"); RETURN(0) }
 		ind=ERM_HeroStr->Number;
-		if((ind<0)||(ind>=HERNUM)){ MError("\"!!CO\"-Commander index is out of range."); RETURN(0) }
+		if((ind<0)||(ind>=HERNUM)){ WL_MError3("-Commander index is out of range.\nIncorrect value: %d",ind); RETURN(0) }
 	}
 	if(ind>=0) npc=&NPCs[ind]; else npc=&NPCs[0]; // на вс€кий случай
 	if(ind==-3) npc=&NPCsa[0]; // additional npcs attacker
@@ -2880,7 +2880,7 @@ int ERM_NPC(char Cmd,int Num,_ToDo_*sp,Mes *Mp)
 	switch(Cmd){
 		case 'E': // E - разрешить/запретить
 			if(ind==-2){ // дл€ всех
-				if(Apply(&v,4,Mp,0)){ MError("\"!!CO:E\"-cannot be got or checked for all Commanders."); RETURN(0) }
+				if(Apply(&v,4,Mp,0)){ WL_MError2("-cannot be got or checked for all Commanders."); RETURN(0) }
 				for(i=0;i<HERNUM;i++) NPCs[i].Used=v;
 				break;
 			}
@@ -2890,7 +2890,7 @@ int ERM_NPC(char Cmd,int Num,_ToDo_*sp,Mes *Mp)
 			break;
 		case 'D': // D - живой/мертвый
 			if(ind==-2){ // дл€ всех
-				if(Apply(&v,4,Mp,0)){ MError("\"!!CO:D\"-cannot be got or checked for all Commanders."); RETURN(0) }
+				if(Apply(&v,4,Mp,0)){ WL_MError2("-cannot be got or checked for all Commanders."); RETURN(0) }
 				for(i=0;i<HERNUM;i++) NPCs[i].Dead=v;
 				break;
 			}
@@ -2901,13 +2901,13 @@ int ERM_NPC(char Cmd,int Num,_ToDo_*sp,Mes *Mp)
 //      v=npc->Fl.NoHeroOwner; if(Apply(&v,4,Mp,0)) break; npc->Fl.NoHeroOwner=v;
 //      break;
 		case 'T': // T - тип  омандера
-			if(ind==-2){ MError("\"!!CO:T\"-cannot be applied to all Commanders."); RETURN(0) }
+			if(ind==-2){ WL_MError2("-cannot be applied to all Commanders."); RETURN(0) }
 			v=npc->Type; if(Apply(&v,4,Mp,0)) break; 
 			if(v<0) v=0; if(v>8) v=8;
 			npc->Type=v;
 			break;
 		case 'H': // H - тип ’оз€ина  омандера
-			if(ind==-2){ MError("\"!!CO:H\"-cannot be applied to all Commanders."); RETURN(0) }
+			if(ind==-2){ WL_MError2("-cannot be applied to all Commanders."); RETURN(0) }
 			v=npc->HType; if(Apply(&v,4,Mp,0)) break; 
 			if(v<0) v=0; if(v>17) v=17;
 			npc->HType=v;
@@ -2916,7 +2916,7 @@ int ERM_NPC(char Cmd,int Num,_ToDo_*sp,Mes *Mp)
 //  int  Primary[7]/*At,Df,Hp,Dm,Mp,Sp,Mr*/;
 			if(Num==1){
 				if(ind==-2){
-					if(Apply(&v,4,Mp,0)){ MError("\"!!CO:P\"-cannot be got or checked for all Commanders."); RETURN(0) }
+					if(Apply(&v,4,Mp,0)){ WL_MError2("-cannot be got or checked for all Commanders."); RETURN(0) }
 					for(i=0;i<HERNUM;i++) NPCs[i].Fl.CustomPrimary=v;
 					break;
 				}
@@ -2926,10 +2926,10 @@ int ERM_NPC(char Cmd,int Num,_ToDo_*sp,Mes *Mp)
 				break;
 			}
 			CHECK_ParamsMin(2);
-			if(Apply(&v,4,Mp,0)){ MError("\"!!CO:P\"-cannot get or check the type of skill."); RETURN(0) }
-			if((v<0)||(v>6)){ MError("\"!!CO:P\"-index of skill out of range (0...6)."); RETURN(0) }
+			if(Apply(&v,4,Mp,0)){ WL_MError2("-cannot get or check the type of skill."); RETURN(0) }
+			if((v<0)||(v>6)){ WL_MError3("-index of skill out of range (0...6).\nIncorrect value: %d",v); RETURN(0) }
 			if(ind==-2){ // дл€ всех
-				if(Apply(&v2,4,Mp,1)){ MError("\"!!CO:P\"-cannot be got or checked for all Commanders."); RETURN(0) }
+				if(Apply(&v2,4,Mp,1)){ WL_MError2("-cannot be got or checked for all Commanders."); RETURN(0) }
 				for(i=0;i<HERNUM;i++) NPCs[i].Primary[v]=v2;
 				break;
 			}
@@ -2938,24 +2938,24 @@ int ERM_NPC(char Cmd,int Num,_ToDo_*sp,Mes *Mp)
 		case 'S': // S - скилы
 //  int  Skills[7];
 			CHECK_ParamsMin(2);
-			if(Apply(&v,4,Mp,0)){ MError("\"!!CO:S\"-cannot get or check the type of skill level."); RETURN(0) }
-			if((v<0)||(v>6)){ MError("\"!!CO:S\"-index of skill level out of range (0...6)."); RETURN(0) }
+			if(Apply(&v,4,Mp,0)){ WL_MError2("-cannot get or check the type of skill level."); RETURN(0) }
+			if((v<0)||(v>6)){ WL_MError3("-index of skill level out of range (0...6).\nIncorrect value: %d",v); RETURN(0) }
 			if(ind==-2){ // дл€ всех
-				if(Apply(&v2,4,Mp,1)){ MError("\"!!CO:S\"-cannot be got or checked for all Commanders."); RETURN(0) }
+				if(Apply(&v2,4,Mp,1)){ WL_MError2("-cannot be got or checked for all Commanders."); RETURN(0) }
 				for(i=0;i<HERNUM;i++) NPCs[i].Skills[v]=v2;
 				break;
 			}
 			v2=npc->Skills[v]; if(Apply(&v2,4,Mp,1)) break; npc->Skills[v]=v2;
 			break;
 		case 'A': // A - артифакты   //  short Arts[10][8];
-			if(ind==-2){ MError("\"!!CO:A\"-cannot be applied to all Commanders."); RETURN(0) }
-			if(Apply(&v,4,Mp,0)){ MError("\"!!CO:A\"-cannot get or check the command type."); RETURN(0) }
+			if(ind==-2){ WL_MError2("-cannot be applied to all Commanders."); RETURN(0) }
+			if(Apply(&v,4,Mp,0)){ WL_MError2("-cannot get or check the command type."); RETURN(0) }
 			ERMVar2[0]=0;
 			switch(v){
 				case 1: // add art type A1/#arttype/#battlewon -> v[0]
-					if(Num<3){ MError("\"!!CO:A1\"-wrong syntax"); RETURN(0) }
-					if(Apply(&v2,4,Mp,1)){ MError("\"!!CO:A1\"-cannot get or check art type."); RETURN(0) }
-					if(Apply(&v3,4,Mp,2)){ MError("\"!!CO:A1\"-cannot get or check number of battles."); RETURN(0) }
+					if(Num<3){ WL_MError2("-wrong syntax"); RETURN(0) }
+					if(Apply(&v2,4,Mp,1)){ WL_MError2("-cannot get or check art type."); RETURN(0) }
+					if(Apply(&v3,4,Mp,2)){ WL_MError2("-cannot get or check number of battles."); RETURN(0) }
 					int Slot;
 					if(npc->ArtIsPossible(v2)==0){ ERMVar2[0]=1; break; }
 					if(npc->ArtMayHave(v2)==0){ ERMVar2[0]=2; break; }
@@ -2966,22 +2966,22 @@ int ERM_NPC(char Cmd,int Num,_ToDo_*sp,Mes *Mp)
 					npc->Arts[Slot][ARTBATTLES]=v3;
 					break;
 				case 2: // take art type A2/#arttype -> v[0]
-					if(Num<2){ MError("\"!!CO:A2\"-wrong syntax"); RETURN(0) }
-					if(Apply(&v2,4,Mp,1)){ MError("\"!!CO:A2\"-cannot get or check art type."); RETURN(0) }
+					if(Num<2){ WL_MError2("-wrong syntax"); RETURN(0) }
+					if(Apply(&v2,4,Mp,1)){ WL_MError2("-cannot get or check art type."); RETURN(0) }
 					if((v3=npc->ArtInSlot(v2))==-1){ ERMVar2[0]=1; break; }
 					for(i=0;i<8;i++) npc->Arts[v3][i]=0;
 					break;
 				case 3: // art at pos A3/#pos/$arttype/$battlewon
-					if(Num<4){ MError("\"!!CO:A3\"-wrong syntax"); RETURN(0) }
-					if(Apply(&v,4,Mp,1)){ MError("\"!!CO:A3\"-cannot get or check art slot."); RETURN(0) }
-					if((v<0) || (v>5)){ MError("\"!!CO:A3\"-incorrect art slot (0...5)."); RETURN(0) }
+					if(Num<4){ WL_MError2("-wrong syntax"); RETURN(0) }
+					if(Apply(&v,4,Mp,1)){ WL_MError2("-cannot get or check art slot."); RETURN(0) }
+					if((v<0) || (v>5)){ WL_MError3("-incorrect art slot (0...5).\nIncorrect value: %d",v); RETURN(0) }
 					v2=npc->Arts[v][ARTNUMINDEX];
 					v3=npc->Arts[v][ARTBATTLES];
 					if(Apply(&v2,4,Mp,2)==0) npc->Arts[v][ARTNUMINDEX]=v2;
 					if(Apply(&v3,4,Mp,3)==0) npc->Arts[v][ARTBATTLES]=v3;
 					break;
 				case 4: // set/get all A4/$a1/$b1/$a2/$b2/$a3/$b3/$a4/$b4/$a5/$b5/$a6/$b6
-					if(Num<13){ MError("\"!!CO:A4\"-wrong syntax"); RETURN(0) }
+					if(Num<13){ WL_MError2("-wrong syntax"); RETURN(0) }
 					for(i=0;i<6;i++){
 						v2=npc->Arts[i][ARTNUMINDEX];
 						v3=npc->Arts[i][ARTBATTLES];
@@ -2992,15 +2992,15 @@ int ERM_NPC(char Cmd,int Num,_ToDo_*sp,Mes *Mp)
 			}
 		case 'N': // N - им€
 //  char Name[32];
-			if(ind==-2){ MError("\"!!CO:S\"-cannot be got or checked for all Commanders."); RETURN(0) }
+			if(ind==-2){ WL_MError2("-cannot be got or checked for all Commanders."); RETURN(0) }
 			if(Mp->VarI[0].Check==1){ // ?
 				sind=GetVarVal(&Mp->VarI[0]);
-				if(BAD_INDEX_LZ(sind)||(sind>1000)){ MError("\"CO:N\"-wrong z var index (-20...-1,1...1000)."); RETURN(0) }
+				if(BAD_INDEX_LZ(sind)||(sind>1000)){ WL_MError3("-wrong z var index (-20...-1,1...1000).\nIncorrect value: %d",sind); RETURN(0) }
 				if(sind>0){ StrCopy(ERMString[sind-1],31,npc->Name); ERMString[sind-1][31]=0; }
 				else      { StrCopy(ERMLString[-sind-1],31,npc->Name); ERMLString[-sind-1][31]=0; }
 			}else{
 				sind=Mp->n[0];
-				if(BAD_INDEX_LZ(sind)||(sind>1000)){ MError("\"CO:N\"-wrong z var index (-20...-1,1...1000)."); RETURN(0) }
+				if(BAD_INDEX_LZ(sind)||(sind>1000)){ WL_MError3("-wrong z var index (-20...-1,1...1000).\nIncorrect value: %d",sind); RETURN(0) }
 				if(sind>0) StrCopy(npc->Name,31,ERMString[sind-1]);
 				else       StrCopy(npc->Name,31,ERMLString[-sind-1]);
 			}
@@ -3010,10 +3010,10 @@ int ERM_NPC(char Cmd,int Num,_ToDo_*sp,Mes *Mp)
 //  int  Exp;   // тек. опыт
 //  int  Level; // тек. уровень
 			CHECK_ParamsMin(2);
-			if(Apply(&v,4,Mp,0)){ MError("\"!!CO:X\"-cannot get or check the type of exp"); RETURN(0) }
-			if((v<0)||(v>2)){ MError("\"!!CO:X\"-index of exp type out of range (0...2)"); RETURN(0) }
+			if(Apply(&v,4,Mp,0)){ WL_MError2("-cannot get or check the type of exp"); RETURN(0) }
+			if((v<0)||(v>2)){ WL_MError3("-index of exp type out of range (0...2)\nIncorrect value: %d",v); RETURN(0) }
 			if(ind==-2){ // дл€ всех
-				if(Apply(&v2,4,Mp,1)){ MError("\"!!CO:X\"-cannot be got or checked for all Commanders."); RETURN(0) }
+				if(Apply(&v2,4,Mp,1)){ WL_MError2("-cannot be got or checked for all Commanders."); RETURN(0) }
 				switch(v){
 					case 0: for(i=0;i<HERNUM;i++) NPCs[i].OldHeroExp=v2; break;
 					case 1: for(i=0;i<HERNUM;i++) NPCs[i].Exp=v2;        break;
@@ -3030,18 +3030,18 @@ int ERM_NPC(char Cmd,int Num,_ToDo_*sp,Mes *Mp)
 		case 'B': // B - спец способности
 //  Dword  SpecBon[2];
 			CHECK_ParamsMin(2);
-			if(Apply(&v,4,Mp,0)){ MError("\"!!CO:B\"-cannot get or check the type of spec bonus"); RETURN(0) }
-			if((v<0)||(v>3)){ MError("\"!!CO:B\"-index of spec bonus type out of range (0...3)"); RETURN(0) }
+			if(Apply(&v,4,Mp,0)){ WL_MError2("-cannot get or check the type of spec bonus"); RETURN(0) }
+			if((v<0)||(v>3)){ WL_MError3("-index of spec bonus type out of range (0...3)\nIncorrect value: %d",v); RETURN(0) }
 			if(ind==-2){ // дл€ всех
-				if(Apply(&v2,4,Mp,1)){ MError("\"!!CO:B\"-cannot be got or checked for all Commanders."); RETURN(0) }
+				if(Apply(&v2,4,Mp,1)){ WL_MError2("-cannot be got or checked for all Commanders."); RETURN(0) }
 				switch(v){
 					case 0: // set/get all
 						ormask=*((Dword *)&v2);
 						for(i=0;i<HERNUM;i++) NPCs[i].SpecBon[0]=ormask; break;
 					case 1: // set/get one
-						if(Num<3){ MError("\"!!CO:P\"-wrong syntsx"); RETURN(0) }
-						if((v2<0)||(v2>14)){ MError("\"!!CO:B\"-index of spec bonus out of range (0...14)"); RETURN(0) }
-						if(Apply(&v3,4,Mp,2)){ MError("\"!!CO:B\"-cannot be got or checked for all Commanders."); RETURN(0) }
+						if(Num<3){ WL_MError2("-wrong syntsx"); RETURN(0) }
+						if((v2<0)||(v2>14)){ WL_MError3("-index of spec bonus out of range (0...14)\nIncorrect value: %d",v2); RETURN(0) }
+						if(Apply(&v3,4,Mp,2)){ WL_MError2("-cannot be got or checked for all Commanders."); RETURN(0) }
 						andmask=~(((Dword)1)<<v2);
 						if(v3!=0) ormask=(((Dword)1)<<v2);
 						for(i=0;i<HERNUM;i++){
@@ -3054,8 +3054,8 @@ int ERM_NPC(char Cmd,int Num,_ToDo_*sp,Mes *Mp)
 						for(i=0;i<HERNUM;i++) NPCs[i].SpecBon[1]=ormask; break;
 					case 3: // set/get en one
 						CHECK_ParamsMin(3);
-						if((v2<0)||(v2>14)){ MError("\"!!CO:B\"-index of spec bonus out of range (0...14)"); RETURN(0) }
-						if(Apply(&v3,4,Mp,2)){ MError("\"!!CO:B\"-cannot be got or checked for all Commanders."); RETURN(0) }
+						if((v2<0)||(v2>14)){ WL_MError3("-index of spec bonus out of range (0...14)\nIncorrect value: %d",v2); RETURN(0) }
+						if(Apply(&v3,4,Mp,2)){ WL_MError2("-cannot be got or checked for all Commanders."); RETURN(0) }
 						andmask=~(((Dword)1)<<v2);
 						if(v3!=0) ormask=(((Dword)1)<<v2);
 						for(i=0;i<HERNUM;i++){
@@ -3071,8 +3071,8 @@ int ERM_NPC(char Cmd,int Num,_ToDo_*sp,Mes *Mp)
 					ormask=npc->SpecBon[0]; if(Apply(&ormask,4,Mp,1)) break; npc->SpecBon[0]=ormask; break;
 				case 1: // set/get one
 					CHECK_ParamsMin(3);
-					if(Apply(&v2,4,Mp,1)){ MError("\"!!CO:B\"-cannot get or check spec bonus index."); RETURN(0) }
-					if((v2<0)||(v2>14)){ MError("\"!!CO:B\"-index of spec bonus out of range (0...14)"); RETURN(0) }
+					if(Apply(&v2,4,Mp,1)){ WL_MError2("-cannot get or check spec bonus index."); RETURN(0) }
+					if((v2<0)||(v2>14)){ WL_MError3("-index of spec bonus out of range (0...14)\nIncorrect value: %d",v2); RETURN(0) }
 					ormask=(((Dword)1)<<v2);
 					if(npc->SpecBon[0]&ormask) v3=1; else v3=0;
 					if(Apply(&v3,4,Mp,2)) break;
@@ -3084,8 +3084,8 @@ int ERM_NPC(char Cmd,int Num,_ToDo_*sp,Mes *Mp)
 					ormask=npc->SpecBon[1]; if(Apply(&ormask,4,Mp,1)) break; npc->SpecBon[1]=ormask; break;
 				case 3: // set/get en one
 					CHECK_ParamsMin(3);
-					if(Apply(&v2,4,Mp,1)){ MError("\"!!CO:B\"-cannot get or check spec bonus index."); RETURN(0) }
-					if((v2<0)||(v2>14)){ MError("\"!!CO:B\"-index of spec bonus out of range (0...14)"); RETURN(0) }
+					if(Apply(&v2,4,Mp,1)){ WL_MError2("-cannot get or check spec bonus index."); RETURN(0) }
+					if((v2<0)||(v2>14)){ WL_MError3("-index of spec bonus out of range (0...14)\nIncorrect value: %d",v2); RETURN(0) }
 					ormask=(((Dword)1)<<v2);
 					if(npc->SpecBon[1]&ormask) v3=1; else v3=0;
 					if(Apply(&v3,4,Mp,2)) break;

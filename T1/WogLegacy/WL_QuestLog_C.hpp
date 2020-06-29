@@ -73,20 +73,20 @@ int ERM_Qwest(char Cmd,int Num,_ToDo_* /*sp*/,Mes *Mp)
 		case 'A': // Anum/hero/owner/zvar;
 		{
 			CHECK_ParamsNum(4);
-			if(Apply(&num,4,Mp,0)) { MError("\"!!QW:A\"-cannot get or check num."); RETURN(0) }
-			if(Apply(&hero,4,Mp,1)) { MError("\"!!QW:A\"-cannot get or check hero number."); RETURN(0) }
-			if(Apply(&owner,4,Mp,2)) { MError("\"!!QW:A\"-cannot get or check owner."); RETURN(0) }
-			if(num<1){ MError("\"!!QW:A\"-Qwest number is incorrect (>0)."); RETURN(0) }
-			if((hero<-2)||(hero>=HERNUM)){ MError("\"!!QW:A\"-hero number is incorrect."); RETURN(0) }
+			if(Apply(&num,4,Mp,0)) { WL_MError2("-cannot get or check num."); RETURN(0) }
+			if(Apply(&hero,4,Mp,1)) { WL_MError2("-cannot get or check hero number."); RETURN(0) }
+			if(Apply(&owner,4,Mp,2)) { WL_MError2("-cannot get or check owner."); RETURN(0) }
+			if(num<1){ WL_MError3("-Quest number is incorrect (>0).\nIncorrect value: %d",num); RETURN(0) }
+			if((hero<-2)||(hero>=HERNUM)){ WL_MError3("-hero number is incorrect.\nIncorrect value: %d",hero); RETURN(0) }
 			if(hero==-1){
 				hero=ERM_HeroStr->Number;
-				if((hero<0)||(hero>=HERNUM)){ MError("\"!!QW:A\"-no current hero."); RETURN(0) }
+				if((hero<0)||(hero>=HERNUM)){ WL_MError2("-no current hero."); RETURN(0) }
 			}
-			if((owner<-2)||(owner>7)){ MError("\"!!QW:A\"-owner is incorrect (<-2 or >7)."); RETURN(0) }
+			if((owner<-2)||(owner>7)){ WL_MError3("-owner is incorrect (<-2 or >7).\nIncorrect value: %d",owner); RETURN(0) }
 			if(owner==-1) owner=CurrentUser();
 			qlp=FindQuest(num,hero,owner);
 			if(qlp==0) qlp=AddQuest(num,hero,owner);
-			if(qlp==0){ MError("\"!!QW:A\"-cannot add one more quest."); RETURN(0) }
+			if(qlp==0){ WL_MError2("-cannot add one more quest."); RETURN(0) }
 			if (Mp->VarI[3].Type != 7 && GetVarVal(&Mp->VarI[3]) == -1) // StrMan::Apply treats 0 as "restore original", not -1
 				Mp->VarI[3].IType = Mp->VarI[3].Type = Mp->VarI[3].Num = Mp->n[3] = 0;
 

@@ -1682,26 +1682,26 @@ int ERM_Universal(char Cmd,int Num,_ToDo_*,Mes *Mp)
 				case 1: RedrawMap(); break;
 				case 2: RedrawRes(); break;
 				case 3:
-					if(Num<2){ MError("\"!!UN:R3\"-insufficient parameters."); RETURN(0) } // #x/#y/#l/#o/#r
+					if(Num<2){ WL_MError2("-insufficient parameters."); RETURN(0) } // #x/#y/#l/#o/#r
 					v=Mp->n[1];
-					if((v<-1)||(v>=HERNUM)){ MError("\"!!UN:R3\"-wrong hero number."); RETURN(0) } // #x/#y/#l/#o/#r
+					if((v<-1)||(v>=HERNUM)){ WL_MError3("-wrong hero number.\nIncorrect value: %d",v); RETURN(0) } // #x/#y/#l/#o/#r
 					if(v==-1) RedrawHeroScreen(ERM_HeroStr);
 					else RedrawHeroScreen(GetHeroStr(v));
 					break;
 				case 4: RedrawTown(); break;
 				case 5: // установить вид курсора
-					if(Num<3){ MError("\"!!UN:R5\"-insufficient parameters."); RETURN(0) } // #x/#y/#l/#o/#r
+					if(Num<3){ WL_MError2("-insufficient parameters."); RETURN(0) } // #x/#y/#l/#o/#r
 					if(Apply(&MType,4,Mp,1)) break;
 					if(Apply(&MSType,4,Mp,2)) break;
 					SetMouseCursor(MSType,MType);
 					break;
 				case 6:
-					if(Num<2){ MError("\"!!UN:R6\"-insufficient parameters."); RETURN(0) } // #x/#y/#l/#o/#r
+					if(Num<2){ WL_MError2("-insufficient parameters."); RETURN(0) } // #x/#y/#l/#o/#r
 					if(Apply(&MType,4,Mp,1)) break;
 					DelayIt(MType); // delay for MType msec
 					break;
 				case 7: // enable/disable show/hide cursor
-					if(Num<2){ MError("\"!!UN:R7\"-insufficient parameters."); RETURN(0) } // #x/#y/#l/#o/#r
+					if(Num<2){ WL_MError2("-insufficient parameters."); RETURN(0) } // #x/#y/#l/#o/#r
 					if(Apply(&MType,4,Mp,1)) break;
 					if(MType){ // hide
 						ZHideCursor();
@@ -1710,13 +1710,13 @@ int ERM_Universal(char Cmd,int Num,_ToDo_*,Mes *Mp)
 					}
 					if(Num>2) Apply(&GLB_DisableMouse,4,Mp,2);
 					break;        
-				default: MError("\"!!UN:R\"-wrong parameter."); RETURN(0)
+				default: WL_MError3("-wrong parameter R%d",Mp->n[0]);; RETURN(0)
 			}
 			break;
 		case 'E': // проверить на доступность размещения
 			CHECK_ParamsMin(3); // #x/#y/#l
 			mp=GetMapItem(Mp->n[0],Mp->n[1],Mp->n[2]);
-			if(mp==0){ MError("\"!!UN:E\"-wrong map position."); RETURN(0) }
+			if(mp==0){ WL_MError2(Format("-wrong map position: %d %d %d",Mp->n[0],Mp->n[1],Mp->n[2])); RETURN(0) }
 			if(EmptyPlace2(mp)==0){ //занято
 				ERMFlags[0]=1;
 			}else{
@@ -1729,11 +1729,11 @@ int ERM_Universal(char Cmd,int Num,_ToDo_*,Mes *Mp)
 			x=Mp->n[0]; y=Mp->n[1]; l=Mp->n[2];
 			t=Mp->n[3]; st=Mp->n[4];
 			if(Num==5){ srf=-1; }
-			if(Num==6){ srf=Mp->n[5]; if((srf<-1)||(srf>8)){ MError("\"!!UN:I\"-wrong surface type (-1...8)."); RETURN(0) }}
+			if(Num==6){ srf=Mp->n[5]; if((srf<-1)||(srf>8)){ WL_MError3("-wrong surface type (-1...8).\nIncorrect value: %d",srf); RETURN(0) }}
 			t2=t; st2=st;
 			if(Num>6){ t2=Mp->n[5]; st2=Mp->n[6]; }
 			if(Num==7){ srf=-1; }
-			if(Num>7) { srf=Mp->n[7]; if((srf<-1)||(srf>8)){ MError("\"!!UN:I\"-wrong surface type (-1...8)."); RETURN(0) }}
+			if(Num>7) { srf=Mp->n[7]; if((srf<-1)||(srf>8)){ WL_MError3("-wrong surface type (-1...8).\nIncorrect value: %d",srf); RETURN(0) }}
 			if(Num==9)  redraw=Mp->n[8];
 			PlaceObject(x,y,l,t,st,t2,st2,srf);
 			if(redraw) RedrawMap();
@@ -1762,7 +1762,7 @@ int ERM_Universal(char Cmd,int Num,_ToDo_*,Mes *Mp)
 					str = StrMan::GetStoredStr(NextWeekMess);
 					StrMan::Apply(str, 0, NextWeekMess, Mp, 1);
 					break;
-				default: MError("\"!!UN:I\"-wrong first parameter."); RETURN(0)
+				default: WL_MError2("-wrong first parameter."); RETURN(0)
 			}
 			break;
 		case 'M': // M#/$ установить месяц...
@@ -1786,15 +1786,15 @@ int ERM_Universal(char Cmd,int Num,_ToDo_*,Mes *Mp)
 //          if((Mp->n[1]<0)||(Mp->n[1]>11)){ Error(); return 0; }
 //          Apply(&NewMonthMonTypes[Mp->n[1]],1,Mp,2);
 //          break;
-				default: MError("\"!!UN:M\"-wrong first parameter."); RETURN(0)
+				default: WL_MError3("-wrong first parameter.\nIncorrect value: %d",Mp->n[0]); RETURN(0)
 			}
 			break;
 		case 'N': // N#/z/subtype/...
 			CHECK_ParamsMin(3);
 			zi=0; Apply(&zi,4,Mp,1);
-			if(BAD_INDEX_LZ(zi)||(zi>1000)){ MError("\"!!UN:N\"-z var index out of range (-20...-1,1...1000)."); RETURN(0) }
+			if(BAD_INDEX_LZ(zi)||(zi>1000)){ WL_MError3("-z var index out of range (-20...-1,1...1000).\nIncorrect value: %d",zi); RETURN(0) }
 			v=-1; Apply(&v,4,Mp,2);
-			if(v<0){ MError("\"!!UN:N\"-incorrect type of object (<0)."); RETURN(0) }
+			if(v<0){ WL_MError3("-incorrect type of object (<0).\nIncorrect value: %d",v); RETURN(0) }
 			str = GetPureErmString(zi);
 			switch(Mp->n[0]){
 				case 0: // N0/z/st get name of artefact
@@ -1806,20 +1806,20 @@ int ERM_Universal(char Cmd,int Num,_ToDo_*,Mes *Mp)
 				case 2: // N2/z/st/sst  //  имя строения в определенном городе
 					CHECK_ParamsMin(4);
 					 v2=-1; Apply(&v2,4,Mp,3);
-					if(v2<0){ MError("\"!!UN:N\"-incorrect additioal type of object (<0)."); RETURN(0) }
+					if(v2<0){ WL_MError3("-incorrect additioal type of object (<0).\nIncorrect value: %d",v2); RETURN(0) }
 					StrCopy(str,512,GetBuildName(v,v2));
 					break;
 				case 3: // N3/z/st/sP  //  имя монстра(ов)
 					CHECK_ParamsMin(4);
 					 v2=-1; Apply(&v2,4,Mp,3);
-					if(v2<0){ MError("\"!!UN:N\"-incorrect additioal type of object (<0)."); RETURN(0) }
+					if(v2<0){ WL_MError3("-incorrect additioal type of object (<0).\nIncorrect value: %d",v2); RETURN(0) }
 					StrCopy(str,512,GetMonName(v,v2));
 					break;
 				case 4: // N4/z/st get name of secondary skill
 					StrCopy(str,512,GetSSkillName(v));
 					break;
 				case 5: // N5/z/optind save a value to INI file
-					if(Num<3){ MError("\"!!UN:N5\"-insufficient parameters."); RETURN(0) }
+					if(Num<3){ WL_MError2("-insufficient parameters."); RETURN(0) }
 					if(Num>3){
 						zi=0; Apply(&zi,4,Mp,3);
 						if(GetErmString(str2, zi)) RETURN(0)
@@ -1831,7 +1831,7 @@ int ERM_Universal(char Cmd,int Num,_ToDo_*,Mes *Mp)
 					WriteStrINI(str,itoa(v,UN_Buf,10),str2,str3);
 					break;
 				case 6: // N5/z/optind read a value to INI file
-					if(Num<3){ MError("\"!!UN:N6\"-insufficient parameters."); RETURN(0) }
+					if(Num<3){ WL_MError2("-insufficient parameters."); RETURN(0) }
 					if(Num>3){
 						zi=0; Apply(&zi,4,Mp,3);
 						if(GetErmString(str2, zi)) RETURN(0)
@@ -1842,14 +1842,14 @@ int ERM_Universal(char Cmd,int Num,_ToDo_*,Mes *Mp)
 					}else str3=".\\WoG.ini";
 					ReadStrINI(str,512,str,itoa(v,UN_Buf,10),str2,str3);
 					break;
-				default: MError("\"!!UN:N\"-wrong first parameter."); RETURN(0)
+				default: WL_MError3("-wrong first parameter: N%d",Mp->n[0]); RETURN(0)
 			}
 			break;
 		case 'C': // Cadr/syze/data модеф. память
 			CHECK_ParamsNum(3);
 //      Apply((void *)Mp->n[0],(char)Mp->n[1],Mp,2);
-			if(Apply(&v ,4,Mp,0)){ MError("\"!!UN:C\"-get or check syntax is not acceptable."); RETURN(0) }
-			if(Apply(&v2,4,Mp,1)){ MError("\"!!UN:C\"-get or check syntax is not acceptable."); RETURN(0) }
+			if(Apply(&v ,4,Mp,0)){ WL_MError2("-get or check syntax is not acceptable."); RETURN(0) }
+			if(Apply(&v2,4,Mp,1)){ WL_MError2("-get or check syntax is not acceptable."); RETURN(0) }
 			__asm{ 
 				mov eax,v 
 				mov eax,[eax]
@@ -1880,8 +1880,8 @@ int ERM_Universal(char Cmd,int Num,_ToDo_*,Mes *Mp)
 			break;
 		case 'X': // X?x/?l - получить размеры карты
 			CHECK_ParamsNum(2);
-			if(Mp->VarI[0].Check==0){ MError("\"!!UN:X\"-try to set X(Y)."); RETURN(0) }
-			if(Mp->VarI[1].Check==0){ MError("\"!!UN:X\"-try to set L."); RETURN(0) }
+			if(Mp->VarI[0].Check==0){ WL_MError2("-try to set X(Y)."); RETURN(0) }
+			if(Mp->VarI[1].Check==0){ WL_MError2("-try to set L."); RETURN(0) }
 			v=GetMapSize();
 			v2=GetMapLevels();
 			Apply(&v,4,Mp,0);
@@ -1889,17 +1889,17 @@ int ERM_Universal(char Cmd,int Num,_ToDo_*,Mes *Mp)
 			break;
 		case 'V': // V?wog/?erm - получить версии WoG и ERM
 			CHECK_ParamsMin(2);
-			if(Mp->VarI[0].Check==0){ MError("\"!!UN:V\"-try to set WoG version."); RETURN(0) }
-			if(Mp->VarI[1].Check==0){ MError("\"!!UN:V\"-try to set ERM version."); RETURN(0) }
+			if(Mp->VarI[0].Check==0){ WL_MError2("-try to set WoG version."); RETURN(0) }
+			if(Mp->VarI[1].Check==0){ WL_MError2("-try to set ERM version."); RETURN(0) }
 			v=WOG_VERSION;
 			v2=ERM_VERSION;
 			Apply(&v,4,Mp,0);
 			Apply(&v2,4,Mp,1);
 			if(Num>2){
 //CHECK_ParamsMin(5);
-				if(Mp->VarI[2].Check==0){ MError("\"!!UN:V\"-try to set parameter."); RETURN(0) }
-				if(Mp->VarI[3].Check==0){ MError("\"!!UN:V\"-try to set parameter."); RETURN(0) }
-				if(Mp->VarI[4].Check==0){ MError("\"!!UN:V\"-try to set parameter."); RETURN(0) }
+				if(Mp->VarI[2].Check==0){ WL_MError2("-try to set parameter."); RETURN(0) }
+				if(Mp->VarI[3].Check==0){ WL_MError2("-try to set parameter."); RETURN(0) }
+				if(Mp->VarI[4].Check==0){ WL_MError2("-try to set parameter."); RETURN(0) }
 				__asm{ 
 					mov eax,0x6992C4 
 					mov eax,[eax] 
@@ -1949,7 +1949,7 @@ int ERM_Universal(char Cmd,int Num,_ToDo_*,Mes *Mp)
 			}else if(Num==3){
 				_ArtSetUp_ *artsetup;
 				v2=-1; Apply(&v2,4,Mp,0);
-				if((v2<0)||(v2>=ARTNUM)){ MError("\"!!UN:A\"-wrong artifact number (internal)."); RETURN(0) }
+				if((v2<0)||(v2>=ARTNUM)){ WL_MError3("-wrong artifact number (internal).\nIncorrect value: %d",v2); RETURN(0) }
 				artsetup=&GetArtBase()[v2];
 				v=0; Apply(&v,4,Mp,1);
 				switch(v){
@@ -1984,38 +1984,38 @@ int ERM_Universal(char Cmd,int Num,_ToDo_*,Mes *Mp)
 						StrMan::Apply(ArtPickUp[v2], ArtPickUpBack[v2], ArtNames[v2].PickUp, Mp, 2);
 						break;
 					default: //0
-						MError("\"UN:A\"-wrong syntax (A$/$/$)."); RETURN(0)
+						WL_MError3("-wrong parameter A%d.",v); RETURN(0)
 				}
 				break;
 			}else if(Num>=4){
 				int Arts[14];
 				int CInd=-1; Apply(&CInd,4,Mp,0);
-				if((CInd<0)||(CInd>=32)){ MError("\"!!UN:A\"-wrong combo artifact index."); RETURN(0) }
+				if((CInd<0)||(CInd>=32)){ WL_MError3("-wrong combo artifact index.\nIncorrect value: %d",CInd); RETURN(0) }
 				int CNum=CArtSetup[CInd].Index; if(Apply(&CNum,4,Mp,1)) break;
-				if((CNum<0)||(CNum>=ARTNUM)){ MError("\"!!UN:A\"-wrong combo artifact number."); RETURN(0) }
+				if((CNum<0)||(CNum>=ARTNUM)){ WL_MError3("-wrong combo artifact number.\nIncorrect value: %d",CNum); RETURN(0) }
 				for(int i=2;i<Num;i++){ Arts[i-2]=-1; Apply(&Arts[i-2],4,Mp,i); }
 				ERMFlags[0]=BuildUpCombo(CNum,CInd,Num-2,Arts);
 			}
 			break;
 		case 'U': // Utype/subtype/?N  или Utype/subtype/i/varnumber
 			CHECK_ParamsMin(2);
-			if((Apply(&t,4,Mp,0))||(Apply(&st,4,Mp,1))){ MError("\"!!UN:U\"-cannot check or get Type and Subtype."); RETURN(0) }
+			if((Apply(&t,4,Mp,0))||(Apply(&st,4,Mp,1))){ WL_MError2("-cannot check or get Type and Subtype."); RETURN(0) }
 			if(Num==3){
 				srf=CalcObjects(t,st);
-				if(Apply(&srf,4,Mp,2)==0){ MError("\"!!UN:U\"-cannot set number of objects."); RETURN(0) }
+				if(Apply(&srf,4,Mp,2)==0){ WL_MError2("-cannot set number of objects."); RETURN(0) }
 			}else{
-				if(Apply(&srf,4,Mp,2)){ MError("\"!!UN:U\"-cannot get or check number of object."); RETURN(0) }
-				if(srf==0){ MError("\"!!UN:U\"-wrong object number (0). Must be>0, -1 or -2"); RETURN(0) }
-				if(Apply(&v,4,Mp,3)){ MError("\"!!UN:U\"-cannot get or check number of V variable."); RETURN(0) }
-				if((v<1)||(v>9998)){ MError("\"!!UN:U\"-wrong V var number (1...9998)."); RETURN(0) }
+				if(Apply(&srf,4,Mp,2)){ WL_MError2("-cannot get or check number of object."); RETURN(0) }
+				if(srf==0){ WL_MError2("-wrong object number (0). Must be>0, -1 or -2"); RETURN(0) }
+				if(Apply(&v,4,Mp,3)){ WL_MError2("-cannot get or check number of V variable."); RETURN(0) }
+				if((v<1)||(v>9998)){ WL_MError3("-wrong V var number (1...9998).\nIncorrect value: %d",v); RETURN(0) }
 //        if(srf==-1){
 				if(srf<0){
 					x=ERMVar2[v-1];
 					y=ERMVar2[v];
 					l=ERMVar2[v+1];
-					if(FindNextObjects(t,st,&x,&y,&l,srf)){ MError("\"!!UN:U\"-cannot find more objects."); RETURN(0) }
+					if(FindNextObjects(t,st,&x,&y,&l,srf)){ WL_MError2("-cannot find more objects."); RETURN(0) }
 				}else{
-					if(FindObjects(t,st,srf,&x,&y,&l)){ MError("\"!!UN:U\"-cannot get object coordinates."); RETURN(0) }
+					if(FindObjects(t,st,srf,&x,&y,&l)){ WL_MError2("-cannot get object coordinates."); RETURN(0) }
 				}
 				ERMVar2[v-1]=x;
 				ERMVar2[v]=y;
@@ -2024,13 +2024,13 @@ int ERM_Universal(char Cmd,int Num,_ToDo_*,Mes *Mp)
 			break;
 		case 'T': // Ttown/dwel/upgr/montype - тип монстров для найма
 			CHECK_ParamsMin(4);
-			t=-1; Apply(&t,4,Mp,0); if((t<0)||(t>8)){ MError("\"!!UN:T\"-wrong town number(0...8)."); RETURN(0) }
+			t=-1; Apply(&t,4,Mp,0); if((t<0)||(t>TOWNNUM)){ WL_MError3("-wrong town number(0...8).\nIncorrect value: %d",t); RETURN(0) }
 			mt=MonInTownBase(t);
-			st=-1; Apply(&st,4,Mp,1); if((st<0)||(st>6)){ MError("\"!!UN:T\"-wrong dwelling number(0...6)."); RETURN(0) }
-			t2=-1; Apply(&t2,4,Mp,2); if((t2<0)||(t2>1)){ MError("\"!!UN:T\"-wrong upgrade(0,1)."); RETURN(0) }
+			st=-1; Apply(&st,4,Mp,1); if((st<0)||(st>6)){ WL_MError3("-wrong dwelling number(0...6).\nIncorrect value: %d",st); RETURN(0) }
+			t2=-1; Apply(&t2,4,Mp,2); if((t2<0)||(t2>1)){ WL_MError3("-wrong upgrade(0,1).\nIncorrect value: %d",t2); RETURN(0) }
 			v=mt[t2*7+st];
 			if(Apply(&v,4,Mp,3)) break;
-			if((v<0)||(v>=MONNUM)){ MError("\"!!UN:T\"-wrong monster type."); RETURN(0) }
+			if((v<0)||(v>=MONNUM)){ WL_MError3("-wrong monster type.\nIncorrect value: %d",v); RETURN(0) }
 			mt[t2*7+st]=v;
 			break;
 		case 'L': // переместить в позицию
@@ -2049,7 +2049,7 @@ int ERM_Universal(char Cmd,int Num,_ToDo_*,Mes *Mp)
 				PL_OptionReset[0] = PL_WoGOptions[0][0];
 				break;
 			}
-			if((Mp->n[0]<0)||(Mp->n[0]>=WL_PL_WONUM)){ MError("\"!!UN:P\"-wrong first parameter."); RETURN(0) }
+			if((Mp->n[0]<0)||(Mp->n[0]>=WL_PL_WONUM)){ WL_MError3("-wrong first parameter.\nIncorrect value: %d",Mp->n[0]); RETURN(0) }
 			{
 				int isCheck = Apply(&PL_WoGOptions[0][Mp->n[0]],4,Mp,1);
 				if(Mp->n[0] >= 0 && Mp->n[0] <= 10)
@@ -2083,7 +2083,7 @@ int ERM_Universal(char Cmd,int Num,_ToDo_*,Mes *Mp)
 					Apply(&EnableMithrill,4,Mp,1);
 					break;
 				default: // сундук 1..., камни 7...10 
-					if((Mp->n[0]<0)||(Mp->n[0]>19)){ MError("\"!!UN:B\"-wrong first parameter."); RETURN(0) }
+					if((Mp->n[0]<0)||(Mp->n[0]>19)){ WL_MError3("-wrong first parameter.\nIncorrect value: %d",Mp->n[0]); RETURN(0) }
 					Apply(&EnableChest[Mp->n[0]],4,Mp,1);
 					break;
 			}
@@ -2124,9 +2124,9 @@ int ERM_Universal(char Cmd,int Num,_ToDo_*,Mes *Mp)
 		case 'G': // G#/#/#/$ имена
 			CHECK_ParamsMin(4);
 			switch(Mp->n[0]){
-				case 0:  // вторичных скилов 0/номер_скила/тип_текста/zvar
-					t=Mp->n[1];  if((t<0)||(t>28)){ MError("\"!!UN:G\"-wrong secondary skill number (0...27)."); RETURN(0) }
-					t2=Mp->n[2]; if((t2<0)||(t2>3)){ MError("\"!!UN:G\"-wrong secondary skill text type number (0...3)."); RETURN(0) }
+				case 0:  // вторичных скилов 0/номер_скила/тип_текста/zvar  !!! WL: t>28 changed to t>27
+					t=Mp->n[1];  if((t<0)||(t>27)){ WL_MError3("-wrong secondary skill number (0...27).\nIncorrect value: %d",t); RETURN(0) }
+					t2=Mp->n[2]; if((t2<0)||(t2>3)){ WL_MError3("-wrong secondary skill text type number (0...3).\nIncorrect value: %d",t2); RETURN(0) }
 					switch(t2){
 						case 0:
 							if (StrMan::Apply(SSNAME[t].Name, SSNameBack[t].Name, SSAllNames[t].Var[t2], Mp, 3))
@@ -2149,8 +2149,8 @@ int ERM_Universal(char Cmd,int Num,_ToDo_*,Mes *Mp)
 					}
 					break;
 				case 1:  // монстры 1/номер_монстра/тип_текста/zvar
-					t=Mp->n[1];  if((t<0)||(t>=MONNUM)){ MError("\"!!UN:G\"-wrong monster number."); RETURN(0) }
-					t2=Mp->n[2]; if((t2<0)||(t2>4)){ MError("\"!!UN:G\"-wrong monster text type number (0...4)."); RETURN(0) }
+					t=Mp->n[1];  if((t<0)||(t>=MONNUM)){ WL_MError3("-wrong monster number.\nIncorrect value: %d",t); RETURN(0) }
+					t2=Mp->n[2]; if((t2<0)||(t2>4)){ WL_MError3("-wrong monster text type number (0...4).\nIncorrect value: %d",t2); RETURN(0) }
 					switch(t2){
 						case 0: // single
 							if (StrMan::Apply(MonTable2[t].NameS, MonTable2Back[t].NameS, MonNames[t].Var[t2], Mp, 3))
@@ -2173,8 +2173,8 @@ int ERM_Universal(char Cmd,int Num,_ToDo_*,Mes *Mp)
 					}
 					break;
 				case 2:  // Спец.Героев 2/номер_героя/тип_текста(3-картинка)/zvar(номер картинки спец+1)
-					t=Mp->n[1];  if((t<0)||(t>=HERNUM)){ MError("\"!!UN:G\"-wrong hero number."); RETURN(0) }
-					t2=Mp->n[2]; if((t2<0)||(t2>3)){ MError("\"!!UN:G\"-wrong herospec text type number (0...3)."); RETURN(0) }
+					t=Mp->n[1];  if((t<0)||(t>=HERNUM)){ WL_MError3("-wrong hero number.\nIncorrect value: %d",t); RETURN(0) }
+					t2=Mp->n[2]; if((t2<0)||(t2>3)){ WL_MError3("-wrong herospec text type number (0...3).\nIncorrect value: %d",t2); RETURN(0) }
 					if(t2==3){ // картинка
 						v=HSpecNames[t].PicNum-1;
 						if(Apply(&v,4,Mp,3)) break;
@@ -2192,14 +2192,14 @@ int ERM_Universal(char Cmd,int Num,_ToDo_*,Mes *Mp)
 							StrMan::Apply(HSpecTable[t].SpDescr, HSpecBack[t].SpDescr, HSpecNames[t].Var[t2], Mp, 3);
 					}
 					break;
-				default: MError("\"!!UN:G\"-wrong first parameter."); RETURN(0)
+				default: WL_MError3("-wrong first parameter: G%d",Mp->n[0]); RETURN(0)
 			}
 			break;
 		case 'J': // J#/#/$ разное
 			switch(Mp->n[0]){
 				case 0: // доступность спеллов
 					CHECK_ParamsMin(3);
-					t=Mp->n[1];  if((t<0)||(t>=0x46)){ MError("\"!!UN:J\"-wrong spell number (0...69)."); RETURN(0) }
+					t=Mp->n[1];  if((t<0)||(t>69)){ WL_MError3("-wrong spell number (0...69).\nIncorrect value: %d",t); RETURN(0) }
 					v=SpellDisBase()[t];
 					if(Apply(&v,4,Mp,2)) break;
 					SpellDisBase()[t]=(char)v;
@@ -2222,10 +2222,10 @@ int ERM_Universal(char Cmd,int Num,_ToDo_*,Mes *Mp)
 					break;
 				case 3: // J3/^text^ or J3/# загрузка пользовательских опций
 					{ char *d;
-						if(Num!=2){ MError("\"!!UN:J3\"-wrong number of parameters."); RETURN(0) }
+						if(Num!=2){ WL_MError2("-wrong number of parameters."); RETURN(0) }
 						if(Mp->n[1]!=0){ // аргумент - z var
 							if(Apply(&v,4,Mp,1)){ WL_EWrongSyntax(); RETURN(0) }
-							if(BAD_INDEX_LZ(v)){ MError("\"!!UN:J3\"- z var out of range (-20...-1,1...1000+)."); RETURN(0) }
+							if(BAD_INDEX_LZ(v)){ WL_MError3("- z var out of range (-20...-1,1...1000+).\nIncorrect value: %d",v); RETURN(0) }
 							d=GetErmString(v);
 						}else{ // аргумент - ^текст^
 							d=ERM2String(&Mp->m.s[Mp->i],0,&v);
@@ -2235,39 +2235,39 @@ int ERM_Universal(char Cmd,int Num,_ToDo_*,Mes *Mp)
 						break;
 					}
 				case 4: // 3.58 set the AI thinking delay
-					if(Num<2){ MError("\"!!UN:J4\"-insufficient parameters."); RETURN(0) }
+					if(Num<2){ WL_MError2("-insufficient parameters."); RETURN(0) }
 					v=GetDelay();
 					if(Apply(&v,4,Mp,1)) break; // check,get
 					AI_Delay=v;
 					SetDelay(v);
 					break;
 				case 5: // 3.58 set auto save flag
-					if(Num<2){ MError("\"!!UN:J5\"-insufficient parameters."); RETURN(0) }
+					if(Num<2){ WL_MError2("-insufficient parameters."); RETURN(0) }
 					v=GetAutoSave();
 					if(Apply(&v,4,Mp,1)) break; // check,get
 					AutoSaveFlag=v;
 					SetAutoSave(v);
 					break;
 				case 6: // J6/#/$; 3.58 get a random artifact
-					if(Num<3){ MError("\"!!UN:J6\"-insufficient parameters."); RETURN(0) }
-					if(Apply(&v,4,Mp,1)){ MError("\"!!UN:J6\"-cannot check art level."); RETURN(0) }
+					if(Num<3){ WL_MError2("-insufficient parameters."); RETURN(0) }
+					if(Apply(&v,4,Mp,1)){ WL_MError2("-cannot check art level."); RETURN(0) }
 					v=GenArt(v);
 					Apply(&v,4,Mp,2);
 					break;
 				case 7: // J7/#/$; 3.58 get/set Merchant artifact
-					if(Num<3){ MError("\"!!UN:J7\"-insufficient parameters."); RETURN(0) }
-					if(Apply(&v,4,Mp,1)){ MError("\"!!UN:J7\"-cannot check art slot."); RETURN(0) }
+					if(Num<3){ WL_MError2("-insufficient parameters."); RETURN(0) }
+					if(Apply(&v,4,Mp,1)){ WL_MError2("-cannot check art slot."); RETURN(0) }
 					v2=GetMerchArt(v);
 					if(Apply(&v2,4,Mp,2)) break;
 					SetMerchArt(v,v2);
 					break;
 				case 8: // J8/#(modifier)/#(z var) or J8/#/^text^ set flag 1 - if file exists
 					{ char *d;
-						if(Num!=3){ MError("\"!!UN:J8\"-wrong number of parameters."); RETURN(0) }
+						if(Num!=3){ WL_MError2("-wrong number of parameters."); RETURN(0) }
 						if(Apply(&t,4,Mp,1)){ WL_EWrongSyntax(); RETURN(0) }
 						if(Mp->n[2]!=0){ // аргумент - z var
 							if(Apply(&v,4,Mp,2)){ WL_EWrongSyntax(); RETURN(0) }
-							if(BAD_INDEX_LZ(v)){ MError("\"!!UN:J8\"- z var out of range (-20...-1,1...1000+)."); RETURN(0) }
+							if(BAD_INDEX_LZ(v)){ WL_MError3("- z var out of range (-20...-1,1...1000+).\nIncorrect value: %d",v); RETURN(0) }
 							d=GetErmString(v);
 						}else{ // аргумент - ^текст^
 							d=ERM2String(&Mp->m.s[Mp->i],0,&v);
@@ -2278,14 +2278,14 @@ int ERM_Universal(char Cmd,int Num,_ToDo_*,Mes *Mp)
 					}
 				case 9: // J9/#(modifier)/#(z var) - get path to z var
 					{ char *d;
-						if(Num!=3){ MError("\"!!UN:J9\"-wrong number of parameters."); RETURN(0) }
+						if(Num!=3){ WL_MError2("-wrong number of parameters."); RETURN(0) }
 						if(Apply(&t,4,Mp,1)){ WL_EWrongSyntax(); RETURN(0) }
 						if(Mp->n[2]!=0){ // аргумент - z var
 							Apply(&v,4,Mp,2);
-							if(BAD_INDEX_LZ(v)||(v>1000)){ MError("\"!!UN:J9\"- z var out of range (-20...-1,1...1000)."); RETURN(0) }
+							if(BAD_INDEX_LZ(v)||(v>1000)){ WL_MError3("- z var out of range (-20...-1,1...1000).\nIncorrect value: %d",v); RETURN(0) }
 							d = GetPureErmString(v);
 						}else{ // аргумент - ^текст^
-							MError("\"!!UN:J9\"- must be z var."); 
+							WL_MError2("- must be z var."); 
 							RETURN(0)
 						}
 						StrCopy(d,512,GetFolder(t));
@@ -6906,7 +6906,7 @@ _ok101:;
 						}
 						switch(M.n[0]){
 							case 1: // A1/art/pos - поместить арт
-//                  if((M.n[2]<0)||(M.n[2]>18)){ MError("\"HE:A1\"-wrong slot number."); goto l_exit; }
+//                  if((M.n[2]<0)||(M.n[2]>18)){ WL_MError3("-wrong slot number.\nIncorrect value: %d",M.n[2]); goto l_exit; }
 								if((M.n[2]<0)||(M.n[2]>82)){ WL_MError3("wrong slot number.\nIncorrect value: %d",M.n[2]); goto l_exit; }
 								if(M.VarI[1].Check!=0){ // проверка на наличие
 									if(M.n[2]>18){ // 3.58 backpack
@@ -8131,7 +8131,7 @@ _found1:
 		}
 		case 'AR': // AR#:
 			if(Num==1){
-//                MError("\"!!AR$:\"-disabled old style syntax."); goto l_exit;
+//                WL_MError2("-disabled old style syntax."); goto l_exit;
 /*
 				if(M.n[0]<0) goto l_exit;
 				for(Ap=Ap0;Ap<Ap1;Ap++){

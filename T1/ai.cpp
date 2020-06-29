@@ -291,9 +291,9 @@ int ERM_AIRun(char Cmd,int Num,_ToDo_* /*sp*/,Mes *Mp)
 	switch(Cmd){
 		case 'S': // S#герой/#хоз€ин/#номер/$x/$y/$l/$значимость/$флаги
 			CHECK_ParamsMin(8);
-			if(Apply(&h,4,Mp,0)){ MError("\"!!AI:S\"-cannot get or check hero."); RETURN(0) }
-			if(Apply(&o,4,Mp,1)){ MError("\"!!AI:S\"-cannot get or check owner."); RETURN(0) }
-			if(Apply(&n,4,Mp,2)){ MError("\"!!AI:S\"-cannot get or check number."); RETURN(0) }
+			if(Apply(&h,4,Mp,0)){ WL_MError2("-cannot get or check hero."); RETURN(0) }
+			if(Apply(&o,4,Mp,1)){ WL_MError2("-cannot get or check owner."); RETURN(0) }
+			if(Apply(&n,4,Mp,2)){ WL_MError2("-cannot get or check number."); RETURN(0) }
 			ind=AIRGetThis((short)h,(short)o,(short)n);
 			if(ind<0){ // нет такого
 				/*mixpos=-1;*/ x=-1; y=-1; l=0;
@@ -322,9 +322,9 @@ int ERM_AIRun(char Cmd,int Num,_ToDo_* /*sp*/,Mes *Mp)
 			break;
 		case 'D': // D#герой/#хоз€ин/#номер
 			CHECK_ParamsMin(3);
-			if(Apply(&h,4,Mp,0)){ MError("\"!!AI:D\"-cannot get or check hero."); RETURN(0) }
-			if(Apply(&o,4,Mp,1)){ MError("\"!!AI:D\"-cannot get or check owner."); RETURN(0) }
-			if(Apply(&n,4,Mp,2)){ MError("\"!!AI:D\"-cannot get or check number."); RETURN(0) }
+			if(Apply(&h,4,Mp,0)){ WL_MError2("-cannot get or check hero."); RETURN(0) }
+			if(Apply(&o,4,Mp,1)){ WL_MError2("-cannot get or check owner."); RETURN(0) }
+			if(Apply(&n,4,Mp,2)){ WL_MError2("-cannot get or check number."); RETURN(0) }
 			if(n<1) AIRDelAll((short)h,(short)o);
 			else    AIRDelThis((short)h,(short)o,(short)n);
 			break;

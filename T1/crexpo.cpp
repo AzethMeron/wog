@@ -4846,15 +4846,15 @@ int ERM_AICrExp(char Cmd,int Num,_ToDo_*sp,Mes *Mp)
 //      CrExpMod::Copy(CrExpMod::Get(Type),CrExpMod::Get(v));
 			break;}
 		case 'D':
-			if(Type<-BFNUM || Type>=0){ MError("\"!!EA:D\"-wrong creature type index."); RETURN(0) }
+			if(Type<-BFNUM || Type>=0){ WL_MError3("-wrong creature type index.\nIncorrect value: %d",Type); RETURN(0) }
 			v=CrExpBon::BFBodyAct[-Type-1];
 			Apply(&v,4,Mp,0);
 			break;
 		case 'R':{ // add artifact R$art/$option
 			CHECK_ParamsMin(2);
-			if(Type<-BFNUM || Type>=0){ MError("\"!!EA:R\"-wrong creature type index."); RETURN(0) }
+			if(Type<-BFNUM || Type>=0){ WL_MError3("-wrong creature type index.\nIncorrect value: %d",Type); RETURN(0) }
 			CrExpo *cr=CrExpoSet::GetBF(-Type-1);
-			if(cr==0){ MError("\"!!EA:R\"-internal#1."); RETURN(0) }
+			if(cr==0){ WL_MError2("-internal#1."); RETURN(0) }
 			if(cr->HasArt()){ art=cr->GetArt(); opt=cr->GetSubArt(); }
 			else{ art=-1; opt=0; }
 			fl=0;
@@ -4870,7 +4870,7 @@ int ERM_AICrExp(char Cmd,int Num,_ToDo_*sp,Mes *Mp)
 			CrExpBon::ApplySpell(MonPos(-Type-1),0);
 			break;}
 		case 'E':{
-			if(Type<-BFNUM || Type>=0){ MError("\"!!EA:E\"-wrong creature type index."); RETURN(0) }
+			if(Type<-BFNUM || Type>=0){ WL_MError3("-wrong creature type index.\nIncorrect value: %d",Type); RETURN(0) }
 			CHECK_ParamsMin(4);
 			Type=-Type-1;
 			CrExpo *cr=&CrExpoSet::BFBody[Type];
