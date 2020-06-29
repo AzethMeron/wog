@@ -56,7 +56,7 @@ SetMusic = function(index, mod_relative_path)
   local final_path = mp3_relative_dir..mod_relative_path
   final_path = final_path:sub(1,#final_path - 4)
   -- Set music
-  print(final_path)
+  --print(final_path)
   MP:S(index,final_path)
 end
 

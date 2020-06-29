@@ -20,5 +20,6 @@ function global.events.EnterContext()
 	global[ModName].NewGrid = Options.NewGrid
 	global[ModName].MonStandAnim = Options.MonStandAnim
 	global[ModName].SoftGridShadow = Options.SoftGridShadow
-	global[ModName].SoftShadow = Options.SoftShadow
+	global[ModName].SoftShadow = Options.SoftShadow 
+	global[ModName].BuyAllCr = Options.BuyAllCr
 end

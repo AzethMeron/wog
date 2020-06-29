@@ -9,17 +9,20 @@
 
 #include <cstdio>
 
-// Error macros - use those instead of MError
+// Error macros - use those instead of MError. 
 #define WL_MError(str) { MError(str); }
-#define WL_MError1(str,arg) { char loc_buf[4096]; sprintf(loc_buf,str,arg); MError(loc_buf); }
+#define WL_MError1(str,arg) { MError(Format(str,arg)); }
 #define WL_MError2(str) { MError2(str); }
-#define WL_MError3(str,arg) { char loc_buf[4096]; sprintf(loc_buf,str,arg); MError2(loc_buf); }
+#define WL_MError3(str,arg) { MError2(Format(str,arg)); }
+//#define WL_MError1(str,arg) { char loc_buf[4096]; sprintf(loc_buf,str,arg); MError(loc_buf); }
+//#define WL_MError3(str,arg) { char loc_buf[4096]; sprintf(loc_buf,str,arg); MError2(loc_buf); }
+// ' MError' to be replaced
 
 #define WL_EWrongCommand() { WL_MError2("unknown command.") }
 #define WL_EWrongSyntax() { WL_MError2("wrong syntax.") }
 #define WL_EWrongParam(val) { WL_MError3("invalid parameter value: %d",val) }
-#define WL_EWrongParam2(name,val) { char loc_buf[4096]; sprintf(loc_buf,"invalid parameter '%s' value: %d",name,val); MError2(loc_buf); }
+#define WL_EWrongParam2(name,val) { MError2(Format("invalid parameter '%s' value: %d",name,val)); }
 // Don't use this one: use CHECK_ instead
-#define WL_EWrongParamsNum(num,str,n) { char loc_buf[4096]; sprintf(loc_buf,"wrong number of parameters: %d\nExpected %s %d",num,str,n); MError2(loc_buf); }
+#define WL_EWrongParamsNum(num,str,n) { MError2(Format("wrong number of parameters: %d\nExpected %s %d",num,str,n)); }
 
 #endif
