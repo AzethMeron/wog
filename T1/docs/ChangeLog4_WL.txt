@@ -8,7 +8,12 @@ Inside FU trigger you have arguments
 x1 - hero owner
 x2 - hero number
 
-~ actually changes to QW receiver are reversed for now, cuz wasn't finished and i will not finish it for some time
+~ !!! actually changes to QW receiver are reversed for now, cuz wasn't finished and i will not finish it for some time
+
+New syntax for receiver BA
+	!!BA:B#/1;
+		$ - string, z-var or ^^ constant
+		1 - dummy parameter, but must be present
 
 Wog Legacy naming convention:
 - All new files are in WogLegacy dir
@@ -42,4 +47,4 @@ Self-caused bugs
 
 Found bugs:
 [-] When using Lua/ERM, post triggers ($) cause error with _NOGLOBALS macro. I believe game mistake them as macros. Not fixed, but i have added .pre and .post syntax - those works. For example, now you can use OB(11).pre = function() 
-[ ] When using Lua/ERM, BA:B(string) looks to be broken. Not fixed
+[ ] When using Lua/ERM, BA:B(string) is broken. Not fixed, instead used StrMan::Apply in extended syntax - that does work well

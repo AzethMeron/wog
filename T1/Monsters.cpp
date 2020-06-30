@@ -14,6 +14,7 @@
 #include "CrExpo.h"
 #include "monsters.h"
 #include "global.h"
+#include "string.h"
 #define __FILENUM__ 6
 
 //static Byte *BACall_Mon=0;
@@ -6667,11 +6668,9 @@ int ERM_Battle(char Cmd,int Num,_ToDo_*,Mes *Mp)
 			}
 			else if(Num == 2)
 			{
-				// New syntax, made to use ERM z-var. Doesn't work yet
+				// New syntax, made to use Lua/ERM. 
 				v=0;
-				if( (Mp->n[1]<1) || (Mp->n[1]>1000) ) { WL_MError3("wrong z-var index\nIncorrect value: %d",Mp->n[1]); RETURN(0) }
-				Message(ERMString[Mp->n[1]]);
-				StrCopy(BFBackGrUDef,255,ERMString[Mp->n[1]]);
+				StrMan::Apply(BFBackGrUDef, Mp, 0, 255);
 				BF_BatFieldNum=v;
 			}
 			else
