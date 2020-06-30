@@ -124,5 +124,9 @@ BA(52).? = function()
 	elseif( overlay ~= 0 ) then bgp = ModuleOverlayPCX(overlay)
 	elseif(ModuleCheckBorder(x,y,l,battle_square_terrain) == false) then bgp = ModuleTerrainPCX(battle_square_terrain)
 	end
-	if(bgp ~= nil) then --[[Message(data_relative_dir..bgp)]] BA:B(data_relative_dir..bgp) end
+	if(bgp ~= nil) then 
+		--Message(data_relative_dir..bgp) 
+		local str_path = data_relative_dir..bgp
+		BA:B(str_path,1)
+	end
 end
