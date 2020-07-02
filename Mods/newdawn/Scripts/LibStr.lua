@@ -26,5 +26,6 @@ Scholar = {
 }
 
 BuyAllCreatures = {
-	
+	Header = "{Temporary string}",
+	Text = "Temporary string"
 }

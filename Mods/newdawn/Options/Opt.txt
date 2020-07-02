@@ -84,7 +84,6 @@ BattlePic	New battlefield pictures			true		true	Replace pictures in combat	{New 
 by Jakub Grzana
 
 Randomly change battleground picture based on terrain. 
-Doesn't work yet cuz of engine bug.
 NewMp	New music			true		true	Replace music with new	{New music}
 by Jakub Grzana
 

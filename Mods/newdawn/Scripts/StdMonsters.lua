@@ -254,16 +254,16 @@ Town = {
 			Upgraded = 101
 		},
 		[2] = {
-			Basic = 102,
-			Upgraded = 103
-		},
-		[3] = {
 			Basic = 104,
 			Upgraded = 105
 		},
-		[4] = {
+		[3] = {
 			Basic = 106,
 			Upgraded = 107
+		},
+		[4] = {
+			Basic = 102,
+			Upgraded = 103
 		},
 		[5] = {
 			Basic = 108,
