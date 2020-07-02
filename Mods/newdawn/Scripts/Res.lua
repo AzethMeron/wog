@@ -1,5 +1,10 @@
--- library script to manage resources
 -- by Jakub Grzana
+-- Library for abstract datatype - Resource table - operations on it
+
+-- Function that operates on actual players: GetPlayerRes, SetPlayerRes, AddPlayerRes 
+-- Manipulating Resource table data: Truncate, Subtract, Add, MultiplyByValue, Revert
+-- Analyze Resource table data: ShowRes, IsSufficent
+-- Other: MonsterCost
 
 --[[ Resource table = {
 	[0] = wood_num,
@@ -9,12 +14,15 @@
 	[4] = crystal_num,
 	[5] = gems_num,
 	[6] = gold_num,
-	[7] = mithril_num.
+	[7] = mithril_num
 }
 ]]
 
--- return table, [resource_id Format R] = num
-GetRes = function(player)
+------------------------------------------------------------------------------------------------
+
+-- player - Format E1
+-- return Resource table
+GetPlayerRes = function(player)
 	local res = {}
 	for i = 0,7,1 do
 		res[i] = OW:R(player,i,?v)
@@ -22,19 +30,25 @@ GetRes = function(player)
 	return res
 end
 
+-- player - Format E1
+-- res - resource table
 -- manual redraw required
-SetRes = function(player, res)
+SetPlayerRes = function(player, res)
 	for i = 0,7,1 do
 		OW:R(player,i,res[i])
 	end
 end
 
+-- player - Format E1
+-- res - resource table
 -- manual redraw required
-AddRes = function(player, res)
+AddPlayerRes = function(player, res)
 	for i = 0,7,1 do
 		OW:R(player,i,{res[i]})
 	end
 end
+
+------------------------------------------------------------------------------------------------
 
 -- return table with indexes 0..7, filled with zeros.
 Truncate = function()
@@ -45,6 +59,50 @@ Truncate = function()
 	return res
 end
 
+-- base, to_subtract - resource table
+-- return base - to_subtract
+Subtract = function(base, to_subtract)
+	local res = {}
+	for i = 0,7,1 do
+		res[i] = base[i] - to_subtract[i]
+	end
+	return res
+end
+
+-- base, to_add - resource table
+-- return base + to_add
+Add = function(base, to_add)
+	local res = {}
+	for i = 0,7,1 do
+		res[i] = base[i] + to_add[i]
+	end
+	return res
+end
+
+-- base - resource table
+-- multiplier - number
+-- return base * multiplier
+MultiplyByValue = function(base, multiplier)
+	local res = {}
+	for i = 0,7,1 do
+		res[i] = base[i] * multiplier
+	end
+	return res
+end
+
+-- base - resource table
+-- return base * (-1)
+Revert = function(base)
+	local res = {}
+	for i = 0,7,1 do
+		res[i] = base[i] * (-1)
+	end
+	return res
+end
+
+------------------------------------------------------------------------------------------------
+
+-- res - resource table
 -- for debug purposes
 ShowRes = function(res)
 	for i = 0,7,1 do
@@ -52,7 +110,9 @@ ShowRes = function(res)
 	end
 end
 
--- return true, if all lesser res are indeed lesser 
+-- bigger, lesser - resource table
+-- return true, if all parts of lesser <= bigger
+-- if any part of lesser > bigger, then false
 IsSufficent = function(bigger, lesser)
 	for i = 0,7,1 do
 		if(lesser[i] > bigger[i]) then
@@ -62,38 +122,11 @@ IsSufficent = function(bigger, lesser)
 	return true
 end
 
-Subtract = function(base, to_subtract)
-	local res = {}
-	for i = 0,7,1 do
-		res[i] = base[i] - to_subtract[i]
-	end
-	return res
-end
+------------------------------------------------------------------------------------------------
 
-Add = function(base, to_add)
-	local res = {}
-	for i = 0,7,1 do
-		res[i] = base[i] + to_add[i]
-	end
-	return res
-end
-
-MultiplyByValue = function(base, multiplier)
-	local res = {}
-	for i = 0,7,1 do
-		res[i] = base[i] * multiplier
-	end
-	return res
-end
-
-Revert = function(base)
-	local res = {}
-	for i = 0,7,1 do
-		res[i] = base[i] * (-1)
-	end
-	return res
-end
-
+-- mon_type - Format C
+-- get cost of monster - all resources
+-- including mithril, despite MA:C doesn't support it. Always [7] = 0
 MonsterCost = function(mon_type)
 	local cost = {}
 	for i = 0,6,1 do
@@ -102,3 +135,5 @@ MonsterCost = function(mon_type)
 	cost[7] = 0
 	return cost
 end
+
+------------------------------------------------------------------------------------------------

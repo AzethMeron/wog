@@ -216,6 +216,12 @@ GetCoords = function(vind)
 	return ERM.v[vind], ERM.v[vind+1], ERM.v[vind+2] 
 end
 
+SetCoords = function(vind,x,y,z)
+	ERM.v[vind] = x 
+	ERM.v[vind+1] = y 
+	ERM.v[vind+2] = z
+end
+
 -- input: Format SS
 -- output: Format SQ
 GetSQfromSS = function(skill_ss)
@@ -260,4 +266,33 @@ GetHeroData = function(hero_number)
 		type = t_type,
 		level = t_level
 	}
+end
+
+-- function to check if parameter if of right type
+-- return true if correct type
+-- return false if incorrect type
+-- parameter: parameter to be check
+-- datatype: string or table of strings, containg names of allowed types.
+-- nil, boolean, number, string, userdata, function, thread, table 
+CheckParameterType = function(parameter, datatype)
+	local param_type = type(parameter)
+	
+	if(type(datatype) == "string") then
+		return (datatype == param_type)
+	elseif(type(datatype) == "table" ) then
+		for i in datatype do
+			if(type(i) == "string") then
+				if(param_type == i) then
+					return true
+				end
+			else
+				PrintError("Lib:CheckParameterType","Malformed datatype - part of table isn't string")
+				return false 
+			end
+		end
+		return false
+	else
+		PrintError("Lib:CheckParameterType","Malformed datatype - not table nor string")
+		return false 
+	end
 end

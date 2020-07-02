@@ -51,7 +51,7 @@ GetCrToRecruit = function(player, cr_available, free_slots)
 	local cr_table = {}
 	local cost_table = Res.Truncate()
 	-- Gather available resources
-	local res = Res.GetRes(player)
+	local res = Res.GetPlayerRes(player)
 	-- iterate through creatures
 	for i = 6,0,-1 do
 		if(#cr_table >= #free_slots) then break end
@@ -182,8 +182,8 @@ CM(1).? = function()
 	if(flag == false) then return; end
 	
 	-- Remove resources
-	local player_res = Res.GetRes(-1)
-	Res.SetRes(-1,Res.Subtract(player_res,cost_table))
+	local player_res = Res.GetPlayerRes(-1)
+	Res.SetPlayerRes(-1,Res.Subtract(player_res,cost_table))
 	
 	-- Recruit
 	RecruitCr(-1,cr_table,free_slots)
