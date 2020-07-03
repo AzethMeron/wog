@@ -273,8 +273,9 @@ end
 -- return false if incorrect type
 -- parameter: parameter to be check
 -- datatype: string or table of strings, containg names of allowed types.
+-- func_name: optional, use you don't plan to manually print error to log
 -- nil, boolean, number, string, userdata, function, thread, table 
-CheckParameterType = function(parameter, datatype)
+CheckParameterType = function(parameter, datatype, func_name)
 	local param_type = type(parameter)
 	
 	if(type(datatype) == "string") then
@@ -290,6 +291,7 @@ CheckParameterType = function(parameter, datatype)
 				return false 
 			end
 		end
+		if(type(func_name) == "string") then PrintError(func_name,"Wrong parameter type: "..param_type) end
 		return false
 	else
 		PrintError("Lib:CheckParameterType","Malformed datatype - not table nor string")

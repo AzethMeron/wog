@@ -4,6 +4,7 @@ local Lib = require "Lib"
 local LibStr = require "LibStr"
 local StdMon = require "StdMonsters"
 local Res = require "Res"
+local Garrison = require "Garrison"
 
 CheckBuyCr = function()
 	return global[ModName].BuyAllCr
@@ -169,7 +170,7 @@ CM(1).? = function()
 	-- Check if rightclick on castle icon
 	local ob_number = CM:I(?v)
 	if(ob_number ~= 158) then return end -- !!! for tests, should be replaced with 159 
-
+	
 	-- Gather data about creatures in town
 	local cr_available = GetCrAvailable(-1)
 	

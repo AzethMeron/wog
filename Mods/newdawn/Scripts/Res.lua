@@ -1,10 +1,12 @@
 -- by Jakub Grzana
 -- Library for abstract datatype - Resource table - operations on it
 
+-- Manipulating data functions are NOT modifying arguments. You must get output value
+
 -- Function that operates on actual players: GetPlayerRes, SetPlayerRes, AddPlayerRes 
 -- Manipulating Resource table data: Truncate, Subtract, Add, MultiplyByValue, Revert
 -- Analyze Resource table data: ShowRes, IsSufficent
--- Other: MonsterCost
+-- Utilities: MonsterCost
 
 --[[ Resource table = {
 	[0] = wood_num,
@@ -93,11 +95,7 @@ end
 -- base - resource table
 -- return base * (-1)
 Revert = function(base)
-	local res = {}
-	for i = 0,7,1 do
-		res[i] = base[i] * (-1)
-	end
-	return res
+	return MultiplyByValue(base,-1)
 end
 
 ------------------------------------------------------------------------------------------------
