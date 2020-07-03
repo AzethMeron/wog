@@ -1,6 +1,9 @@
 -- Library script, for many common/universal functions
 -- by Jakub Grzana
 
+local StdMon = require "StdMonsters"
+local Res = require "Res"
+
 ---------------------------------------------------------------------------------------------
 ------------------------------- CHECK FOR ENABLED MODULES -----------------------------------
 

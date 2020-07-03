@@ -11,7 +11,7 @@
 -- Function that operates on actual objects: GetTownGarrison, GetHeroGarrison, SetTownGarrison, SetHeroGarrison
 -- Manipulating garrison data: Truncate, AddCreature, Move, RemoveCreature, RemoveCreatureFromSlot
 -- Analyze garrison data: FindCreature, FindSlotForCreature, CountStacks, ShowGarrison
--- Utilities: 
+-- Utilities: GetCreatureAvailable, GetCreatureToRecruit, RecruitCreature
 
 --[[ Garrison = {
 	[slot] = { Type, Num }
@@ -22,6 +22,8 @@ Num - number (0 if none)
 ]]
 
 local Lib = require "Lib"
+local StdMon = require "StdMonsters"
+local Res = require "Res"
 
 ------------------------------------------------------------------------------------------------
 
@@ -242,6 +244,98 @@ ShowGarrison = function(garrison)
 		end
 		IF:L(mess)
 	end
+end
+
+------------------------------------------------------------------------------------------------
+
+-- castle ID: parameter, CA(castle_id). Might be -1 or indirect reference. No support for x/y/z for now
+-- town_type: Format T
+-- return Garrison table. Structure: 
+-- [tier] - creature tier, 0..6. 
+-- .Num - number of creatures available. 
+-- .Type - number, creature type, Format C
+GetCreatureAvailable = function(castle_id, town_type)
+	local cr_available = {}
+	for i = 0,6,1 do
+		local cr_basic_num, cr_upgraded_num = CA(castle_id):M1(i, ?v, ?v)
+		if(cr_basic_num > 0) then
+			cr_available[i] = {
+				Num = cr_basic_num,
+				Type = StdMon.Town[town_type][i].Basic,
+			}
+		elseif(cr_upgraded_num > 0) then
+			cr_available[i] = {
+				Num = cr_upgraded_num,
+				Type = StdMon.Town[town_type][i].Upgraded,
+			}
+		else 
+			cr_available[i] = {
+				Type = -1,
+				Num = 0
+			}
+		end
+	end
+	return cr_available
+end
+
+-- res: Resource datatype
+-- cr_available, town_garrison_: Garrison datatype
+-- return table of creatures that player can recruit. with regard of garrison slots AND resources. Garrison: cr_table[tier] = { Num, Type = Format C }
+-- together with table of resources. Resource table: cost_table = { [Res] = num }
+GetCreatureToRecruit = function(res, cr_available, town_garrison_)
+	local cr_table = {}
+	local cost_table = Res.Truncate()
+	local town_garrison = Copy(town_garrison_)
+	-- iterate through creatures
+	for i = 6,0,-1 do
+		if(cr_available[i].Type ~= -1) then
+			local slot = FindSlotForCreature(town_garrison,cr_available[i].Type)
+			if( slot ~= -1 ) then
+				for i_num = cr_available[i].Num, 1, -1 do
+					local cost_per_unit = Res.MonsterCost(cr_available[i].Type)
+					local cost = Res.MultiplyByValue(cost_per_unit,i_num)
+					if(Res.IsSufficent(res,cost)) then
+						res = Res.Subtract(res,cost)
+						cr_table[i] = {
+							Type = cr_available[i].Type,
+							Num = i_num
+						}
+						cost_table = Res.Add(cost_table, cost)
+						AddCreature(town_garrison,cr_available[i].Type,i_num)
+						break
+					end
+				end
+			end
+		end
+		-- For the sake of keeping Garrison format
+		if(cr_table[i] == nil) then
+			cr_table[i] = {
+				Type = -1,
+				Num = 0
+			}
+		end
+	end 
+	return cr_table, cost_table
+end
+
+-- town: -1 or indirect reference
+-- cr_table: garrison datatype
+RecruitCreature = function(town, cr_table)
+	local town_garrison = GetTownGarrison(town)
+	for i = 0,6,1 do
+		if(cr_table[i].Type ~= -1) then
+			local basic, upg = CA(town):M1(i,?v,?v)
+			if(upg > 0) then
+				local num = cr_table[i].Num * -1
+				CA(town):M1(i,nil,{num})
+			elseif(basic > 0) then
+				local num = cr_table[i].Num * -1
+				CA(town):M1(i,{num},nil)
+			end
+			AddCreature(town_garrison,cr_table[i].Type,cr_table[i].Num)
+		end
+	end
+	SetTownGarrison(town,town_garrison)
 end
 
 ------------------------------------------------------------------------------------------------
