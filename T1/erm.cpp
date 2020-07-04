@@ -2041,7 +2041,7 @@ int ERM_Universal(char Cmd,int Num,_ToDo_*,Mes *Mp)
 				}else t=0;
 				if(Apply(&t,4,Mp,2)) break;
 				SetObel(Mp->n[0],Mp->n[1],t);
-			}else{ WL_EWrongParamsNum(Num,"3 or",4); RETURN(0) }// #x/#y/#l/#d
+			}else{ WL_EWrongSyntax(); RETURN(0) }// #x/#y/#l/#d
 			break;
 		case 'P': // параметры настройки
 			if(Num<2){
@@ -3157,7 +3157,7 @@ Dword GetDinMixPos(_ToDo_ *sp)
 			MixPos=PosMixed(x,y,l);
 			break;
 		default: // t/st
-			WL_EWrongParamsNum(sp->ParSet,"1 or",3); RETURN(0)
+			WL_MError("GetDinMixPos: wrong syntax"); RETURN(0)
 /*
 		VarNum *vnp=(VarNum *)&sp->Par[0];
 		ind=GetVarVal(vnp);

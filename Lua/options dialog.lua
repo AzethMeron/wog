@@ -582,14 +582,10 @@ function internal.events.ShowDialog(t)
 	end
 end
 
-
 -- function _G.Q(...)
 	-- dofile[[c:\_WoG\wog359\trunk\Lua\options dialog.lua]]
 	-- return d_WogOptions(...)
 -- end
-
-
-
 
 --[[
 

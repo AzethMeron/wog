@@ -2062,6 +2062,7 @@ end
 internal.dofile(internal.CoreScriptsPath.."DialogsComposite.lua")
 internal.dofile(internal.CoreScriptsPath.."DialogsPredefined.lua")
 internal.dofile(internal.CoreScriptsPath.."options dialog.lua")
+internal.dofile(internal.CoreScriptsPath.."about dialog.lua")
 
 
 

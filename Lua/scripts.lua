@@ -78,6 +78,7 @@ local persist = internal.persist
 local unpersist = internal.unpersist
 
 local LoadModOptions = internal.LoadModOptions
+local LoadModAbout = internal.LoadModAbout
 
 local print = print
 local dump = dump
@@ -440,6 +441,7 @@ local function FetchModScripts(mask, mod)
 	return files
 end
 
+
 local function FetchFiles(mask, mod)
 	local files = {mod = mod}
 	for f in path_find(mask) do
@@ -462,6 +464,7 @@ local function LoadMod(path, name)
 	LocLuaFolders[#LocLuaFolders + 1] = FetchFiles(path.."Localization\\*.lua", name)
 	-- ErsFolders[#ErsFolders + 1] = FetchFiles(path.."erm\\*.ers", name)
 	LoadModOptions(name, path)
+	LoadModAbout(name, path)
 end
 
 -- load mods now

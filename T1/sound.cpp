@@ -213,7 +213,7 @@ int ERM_MP3(char Cmd,int Num,_ToDo_* /*sp*/,Mes *Mp)
 				StrCopy(MP3[ind-1].New,256,"");
 			}else if(Num==2){
 				StrMan::Apply(MP3[ind-1].New, Mp, 1, 256);
-			}else{ WL_EWrongParamsNum(Num,"1 or",2); RETURN(0) }
+			}else{ WL_EWrongSyntax(); RETURN(0) }
 			break;
 		case 'N':
 		{

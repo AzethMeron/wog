@@ -493,7 +493,8 @@ dofile(CoreScriptsPath.."events.lua")
 dofile(CoreScriptsPath.."ert.lua")
 dofile(CoreScriptsPath.."erm.lua")
 dofile(CoreScriptsPath.."options.lua")
-dofile(CoreScriptsPath.."scripts.lua")  -- also load/save game, mods
+dofile(CoreScriptsPath.."about.lua")
+dofile(CoreScriptsPath.."scripts.lua")  -- LOAD MOD happens here, also load/save game
 -- dofile(CoreScriptsPath.."DefReplace.lua")
 dofile(CoreScriptsPath.."Dialogs.lua")
 
@@ -501,7 +502,9 @@ for f in path_find(CoreScriptsPath.."Misc/*.lua") do
 	dofile(f)
 end
 
+
 local require = _G.require
 local event = internal.event
+
 
 --]=]
