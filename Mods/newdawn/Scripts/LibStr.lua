@@ -25,7 +25,9 @@ Scholar = {
 	["AskForPermission"] = "Temporary string"
 }
 
+-- Same strings are used in Buy All Creatures, and Buy Given Tier!
 BuyAllCreatures = {
-	Header = "{Temporary string}",
-	Text = "Temporary string"
+	Header = "{Buy Creatures}",
+	Text = "Available for hire",
+	NoCr = "No creatures available"
 }

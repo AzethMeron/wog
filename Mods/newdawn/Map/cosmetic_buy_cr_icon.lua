@@ -87,6 +87,26 @@ DialogManager = function(cr_table, cost_table)
 	end
 end
 
+-- num: 0..6, number in cr_available
+-- town: -1 or indirect reference
+-- return slot, -1 if not found
+GetRealSlot = function(garrison, clicked_icon, town)
+	local dwellings = {}
+	local ind = 0
+	for i = 0,6,1 do
+		local backup_flag = ERM.flags[1]
+		CA(town):B(3,30+i,1)
+		local flag = ERM.flags[1]
+		if(flag == true) then
+			dwellings[ind] = garrison[i].Type
+			ind = ind + 1
+		end
+		ERM.flags[1] = backup_flag
+	end
+	if(ind <= clicked_icon) then return -1 end
+	return Garrison.FindCreature(garrison,dwellings[clicked_icon])
+end
+
 CM(1).? = function()
 	if(CheckBuyCrCondition() ~= true) then return; end
 	-- Check if current player
@@ -96,24 +116,28 @@ CM(1).? = function()
 	if(click_type ~= 12) then return; end
 	-- Check if rightclick on castle icon
 	local ob_number = CM:I(?v)
-	if(ob_number ~= 159) then return end -- !!! for tests, should be replaced with 159 
+	if(ob_number < 164) or (ob_number > 170) then return end -- !!! for tests, should be replaced with 159 
 	
-	-- Gather data about creatures in town
+	-- Gather data about town and player
 	local town_type = CA(-1):T(?v)
 	local cr_available = Garrison.GetCreatureAvailable(-1,town_type)
-	
-	-- Get Cr that player can recruit
 	local res = Res.GetPlayerRes(-1)
 	local town_garrison = Garrison.GetTownGarrison(-1) -- is modified, but it isn't reflected in game
-	local cr_table, cost_table = Garrison.GetCreatureToRecruit(res,cr_available,town_garrison)
+
+	-- Analyze Data
+	local clicked_icon = ob_number - 164
+	local tier_to_recruit = GetRealSlot(cr_available,clicked_icon,-1)
+	if(tier_to_recruit == -1) then return; end
+	local tmp = Garrison.Truncate()
+	tmp[tier_to_recruit] = cr_available[tier_to_recruit]
+	local cr_table, cost_table = Garrison.GetCreatureToRecruit(res,tmp,town_garrison)
 	
 	-- Show Dialog
 	local flag = DialogManager(cr_table,cost_table)
 	if(flag == false) then return; end
 	
 	-- Remove resources
-	local player_res = Res.GetPlayerRes(-1)
-	Res.SetPlayerRes(-1,Res.Subtract(player_res,cost_table))
+	Res.SetPlayerRes(-1,Res.Subtract(res,cost_table))
 	
 	-- Recruit 
 	Garrison.RecruitCreature(-1,cr_table)

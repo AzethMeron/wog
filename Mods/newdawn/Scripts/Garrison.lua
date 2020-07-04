@@ -318,6 +318,9 @@ GetCreatureToRecruit = function(res, cr_available, town_garrison_)
 	return cr_table, cost_table
 end
 
+-- Remove creatures stored in cr_table from creatures available for hire
+-- and place them in garrison/defender hero
+-- Resources are NOT removed, and there is NO check for sufficent slots
 -- town: -1 or indirect reference
 -- cr_table: garrison datatype
 RecruitCreature = function(town, cr_table)
