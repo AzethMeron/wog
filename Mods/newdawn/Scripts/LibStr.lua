@@ -8,7 +8,7 @@ ShrineHint = {
 }
 
 QuickCombat = {
-	["Header"] = "{Quick Combat Battle Options}",
+	["Header"] = "Quick Combat Battle Options",
 	["Manually"] = "Play out the battle manually",
 	["Quick"] = "Use Quick Combat to resolve the battle",
 	["ConserveMana"] = "Use Quick Combat but don't cast hero spells (conserve spell points)"
