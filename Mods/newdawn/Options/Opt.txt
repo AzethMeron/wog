@@ -57,6 +57,7 @@ BuyAllCr	Buy creature button			true		true	Click on icon of castle to buy all cre
 by Jakub Grzana
 
 Click on icon of castle to buy all creatures, or on icon of unit to recruit given unit.
+Interface	Interface improvements			true		true	TODO 	TODO
 QuickCombat	Quick combat settings			true		true	Every battle you can choose if you wish to play manually, using quick combat or quick combat without using mana	{Quick Combat Settings}
 by Jakub Grzana
 

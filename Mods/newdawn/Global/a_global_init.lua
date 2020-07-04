@@ -22,4 +22,5 @@ function global.events.EnterContext()
 	global[ModName].SoftGridShadow = Options.SoftGridShadow
 	global[ModName].SoftShadow = Options.SoftShadow 
 	global[ModName].BuyAllCr = Options.BuyAllCr
+	global[ModName].Interface = Options.Interface
 end
