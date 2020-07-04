@@ -58,33 +58,40 @@ local _NOGLOBALS
 local AboutMods = {}
 internal.AboutMods = AboutMods
 
--- AboutMods[modname][category][paragraph] = { Header, Text, OptionalGraphics }
+-- AboutMods[modname].Cat[category][paragraph] = { Header, Text, OptionalGraphics }
 -- AboutMods[modname] might be nil if there is no About\\*.txt
+-- AboutMods[modname] = {Cat,Text,}
+-- AboutMods[modname].Cat[category].Paragraph
 -- category: Name$, Text$, Hint$, LongHint$
--- paragraph: Name$, Text$, Hint$, LongHint$, Content$, Graphic$ 
--- finally, structure - Name$, Text$, Hint$, LongHint$, Content$, Graphic$ 
+-- Name$, Text$, Hint$, LongHint$, Content$, Graphic$ 
+-- finally, structure of file - Name$, Text$, Hint$, LongHint$, Content$, Graphic$ 
 
 local function LoadAboutFile(mod, filepath)
 	local cur_category = nil
 	for _, t in ipairs(LoadTextTable(filepath)) do
 		if not t.Name or t.Name == "" then
 			-- Do nothing
+		elseif (tostring(t.Name) == "Enabled:") then
+			AboutMods[mod].Text = t.Text or mod
+			AboutMods[mod].Hint = t.Hint
+			AboutMods[mod].LongHint = t.LongHint
 		elseif(tostring(t.Name) == "category:") then
 			cur_category = tostring(t.Text)
-			if(AboutMods[mod][cur_category] == nil) then 
-				AboutMods[mod][cur_category] = {
+			if(AboutMods[mod].Cat[cur_category] == nil) then 
+				AboutMods[mod].Cat[cur_category] = {
 					["Hint"] = tostring(t.Hint),
 					["LongHint"] = tostring(t.LongHint),
+					["Paragraph"] = {},
 				} 
 			end
 		else
 			if(cur_category ~= nil) then
 				if string_find(t.Name, "[%.\r\n\"%z]") or string_sub(t.Name, 1, 1) == "-" then
-					error("illigal paragraph name: "..tostring(t.Name))
-				elseif(AboutMods[mod][cur_category][tostring(t.Name)] ~= nil) then
+					error("Illigal paragraph name: "..tostring(t.Name))
+				elseif(AboutMods[mod].Cat[cur_category].Paragraph[tostring(t.Name)] ~= nil) then
 					error("Paragraph already exist: "..tostring(t.Name))
 				else
-					AboutMods[mod][cur_category][tostring(t.Name)] = {
+					AboutMods[mod].Cat[cur_category].Paragraph[tostring(t.Name)] = {
 						["Text"] = t.Text,
 						["Hint"] = t.Hint,
 						["LongHint"] = t.LongHint,
@@ -92,7 +99,6 @@ local function LoadAboutFile(mod, filepath)
 						["Graphic"] = t.Graphic,
 					}
 				end 
-				
 			else
 				error("Trying to load paragraph without declared category. Mod: "..mod)
 			end
@@ -102,7 +108,7 @@ end
 
 function internal.LoadModAbout(mod, path)
 	for f in path_find(path.."About\\*.txt") do
-		if(AboutMods[mod] == nil) then AboutMods[mod] = {} end
+		if(AboutMods[mod] == nil) then AboutMods[mod] = { Cat = {}, Text = mod} end
 		LoadAboutFile(mod, f)
 	end
 end
