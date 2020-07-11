@@ -17,12 +17,12 @@ QuickCombat = {
 TemplateCaption = "Choose random map template"
 
 WitchHut = {
-	["AskForPermission"] = "Temporary string",
-	["AlreadyKnown"] = "Temporary string"
+	["AskForPermission"] = "{Witch Hut}\n\nFor reasons beyond your comprehension, witch offers to teach you secondary skill.",
+	["AlreadyKnown"] = "{WitchHut}\n\nYou could learn this skill here, but you already know it."
 }
 
 Scholar = {
-	["AskForPermission"] = "Temporary string"
+	["AskForPermission"] = "{Scholar}\n\nFor reasons beyond your comprehension, scholars is very eager to teach you secondary skill.",
 }
 
 -- Same strings are used in Buy All Creatures, and Buy Given Tier!

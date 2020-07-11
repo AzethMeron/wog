@@ -57,7 +57,11 @@ BuyAllCr	Buy creature button			true		true	Click on icon of castle to buy all cre
 by Jakub Grzana
 
 Click on icon of castle to buy all creatures, or on icon of unit to recruit given unit.
-Interface	Interface improvements			true		true	TODO 	TODO
+Interface	Interface improvements			true		true	Fast creature split	{Interface Improvements}
+by Jakub Grzana
+
+Leftclick+Ctrl on creature in your army to create separate stack with 1 unit.
+More macros will be added in the future.
 QuickCombat	Quick combat settings			true		true	Every battle you can choose if you wish to play manually, using quick combat or quick combat without using mana	{Quick Combat Settings}
 by Jakub Grzana
 
@@ -141,11 +145,12 @@ o35	Easier neutral battles for AI	35		true			Increase statistics of computer pla
 Option 35, by Jakub Grzana
 
 Increase primary skills of all computer heroes while fighting with neutral stacks, resulting in less casualties.
-o36	Improved AI leveling	36		true			Improved AI algorithm to choose secondary skills	{Improved AI leveling}
+o36	Improved AI leveling	36		true			TODO: Improved AI algorithm to choose secondary skills	{Improved AI leveling}
 Option 37, by Jakub Grzana
 
 Computer player's choose secondary skills more wisely, based on their allignment, hero type, available spells and more.
-Not finished yet.
+
+{Not finished yet.}
 
 group:	Dwellings
 o7	Dwellings accumulate creatures	7		true			All dwellings on adventure map accumulate creatures from week to week.	{Dwelling accumulate creatures}
