@@ -541,7 +541,7 @@ end
 function DlgF.OnShow(dlg)
 	if internal.context ~= "map" then
 		dlg:Redraw()
-		Message(TEXT.OptionsOnShow, 4)
+		Message(TEXT.OptionsOnShow)
 	end
 end
 

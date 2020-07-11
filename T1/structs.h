@@ -57,7 +57,7 @@
 #define RESNUM_0       6    // станд. кол-во ресурсов (6)
 #define RESNUM         7    // кол. рес. с Мифрилом
 #define MONNUM_0       150  // Do not change!!!
-#define MONNUM         500  //(150+9+1+4+4+5+1+9*2+5) Diakon
+#define MONNUM         197  //(150+9+1+4+4+5+1+9*2+5) Diakon INCREASE THIS TO MAKE MORE CR
 #define MONNUM_OLD     197  // Diakon
 #define GHOSTTYPE     (150+9)   // привидение
 #define GHOSTNUM       5        // количество их генерации

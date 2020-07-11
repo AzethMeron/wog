@@ -63,8 +63,9 @@ internal.AboutMods = AboutMods
 -- AboutMods[modname] = {Cat,Text,}
 -- AboutMods[modname].Cat[category].Paragraph
 -- category: Name$, Text$, Hint$, LongHint$
--- Name$, Text$, Hint$, LongHint$, Content$, Graphic$ 
+-- paragraphs: Name$, Text$, Hint$, LongHint$, Content$, Graphic$ 
 -- finally, structure of file - Name$, Text$, Hint$, LongHint$, Content$, Graphic$ 
+-- should work properly, not tested because don't know to use dialogs yet
 
 local function LoadAboutFile(mod, filepath)
 	local cur_category = nil
@@ -72,9 +73,9 @@ local function LoadAboutFile(mod, filepath)
 		if not t.Name or t.Name == "" then
 			-- Do nothing
 		elseif (tostring(t.Name) == "Enabled:") then
-			AboutMods[mod].Text = t.Text or mod
-			AboutMods[mod].Hint = t.Hint
-			AboutMods[mod].LongHint = t.LongHint
+			AboutMods[mod].Text = tostring(t.Text) or mod
+			AboutMods[mod].Hint = tostring(t.Hint)
+			AboutMods[mod].LongHint = tostring(t.LongHint)
 		elseif(tostring(t.Name) == "category:") then
 			cur_category = tostring(t.Text)
 			if(AboutMods[mod].Cat[cur_category] == nil) then 
@@ -92,11 +93,11 @@ local function LoadAboutFile(mod, filepath)
 					error("Paragraph already exist: "..tostring(t.Name))
 				else
 					AboutMods[mod].Cat[cur_category].Paragraph[tostring(t.Name)] = {
-						["Text"] = t.Text,
-						["Hint"] = t.Hint,
-						["LongHint"] = t.LongHint,
-						["Content"] = t.Content,
-						["Graphic"] = t.Graphic,
+						["Text"] = tostring(t.Text),
+						["Hint"] = tostring(t.Hint),
+						["LongHint"] = tostring(t.LongHint),
+						["Content"] = tostring(t.Content),
+						["Graphic"] = tostring(t.Graphic),
 					}
 				end 
 			else

@@ -52,13 +52,14 @@ local d_MainMenuButton = dialogs.MainMenuButton
 local TEXT = internal.TEXT
 local dofile = dofile
 local AboutMods = internal.AboutMods
+local Message = Message
 
 ----------- No globals from this point ------------
 
 local _NOGLOBALS
 
 ---------------------------------------------------
-
+--[[
 local BlueStyle = nil
 local FillColor = BlueStyle and RGB(20, 20, 54) or RGB(102, 72, 54)
 local BorderLColor = BlueStyle and RGB(99, 113, 173) or 33574
@@ -182,6 +183,42 @@ local function BtnClick(it, cmd)
 	local dlg = BuildDlg()
 	dlg.Items.Outer:NeedSize()
 	dlg:Show() 
+end
+
+]]
+
+local function BtnClick(it, cmd)
+	-- !!! Temporary
+	local line = {
+		"{Welcome to Wake of Gods 3.59}",
+		"This isn't exactly a mod, but a platform that can host many different mods, including old {WoG} that you know. Making your own mods or custom scenarios is now easier than ever before.",
+		
+		"",
+		"{Learn ERM}",
+		"{E}vent {R}elated {M}odel is scripting (programming) language that can change game behaviour, bend it to your will. You can use ERM to make enormous mods, or maps with custom objects and winning conditions. Possibilities are nearly unlimited. ",
+		"You can learn ERM with tutorials. Just go to {ERM/Lua Help} and ERN tutorials section. However if you're Polish, check out {Polish ERM tutorial}",
+		
+		"",
+		"{Learn Lua}",
+		"Lua is popular scripting language you can use in 3.59 engine. Using Lua/ERM instead of plain ERM is preffered - syntax is MUCH more readable than ERM and all commands are accessible here. Furthemore, for advanced modders Lua offers low-level modding tools. Possibilities are literally unlimited, but low-level modding is very hard.",
+		"You can learn Lua with any tutorials in the internet. In {ERM/Lua Help} there is one in LUA section. Although you should learn basics of ERM first.",
+		
+		"",
+		"{Join WoG Legacy}",
+		"If you want to help with 3.59/NewDawn development or just learn H3 modding, join my Discord Channel. You don't need to know programming to help. {Mapmakers}, {artists} and {writers} are welcome too.",
+		
+		"",
+		"{Links}",
+		"Discord channel: {discord.gg/n7m7vrq}",
+		"ERM/Lua Help: {azethmeron.github.io}",
+		"Polish ERM tutorial: {tinyurl.com/ERMdlaOpornych}",
+		"Source on github: {github.com/AzethMeron/wog}",
+	}
+	local fline = ""
+	for ind,iline in pairs(line) do
+		fline = fline..iline.."\n"
+	end
+	Message(fline)
 end
 
 function internal.events.ShowDialog(t)
