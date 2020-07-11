@@ -69,10 +69,15 @@ QuickCombat = function(player_owner, player_hero)
 	-- Manage "conserve mana" option if no hero
 	local last_chosen = LastChosenQuickCombatSetting[player_owner]
 	if(player_hero==-2) then ConserveMana = 0; if(last_chosen == 4) then last_chosen = 1 end end
+	
 	-- Message
+	local v_temp = ERM.v[vind]
 	IF:G( 1, vind, last_chosen, Header, Manually, Quick, ConserveMana, 0, 0, 0, 0, 0, 0, 0, 0, 0)
 	local chosen = ERM.v[vind]
+	ERM.v[vind] = v_temp
+	
 	-- Set globals
+	LastChosenQuickCombatSetting[player_owner] = chosen
 	FightingHero = player_hero
 	StoredMana = 0
 	-- Manage options
