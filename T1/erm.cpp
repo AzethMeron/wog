@@ -625,38 +625,38 @@ int CheckVarIndex(int vi, int vtype, bool allowBigZ)
 		case 0: // число
 			break;
 		case 1:
-			if((vi<1)||(vi>1000)){ WL_MError3("Flag is out of set (1...1000) in CheckVarIndex.\nIncorrect value: %d",vi); RETURN(0) }
+			if((vi<1)||(vi>1000)){ WL_MError1("Flag is out of set (1...1000) in CheckVarIndex.\nIncorrect value: %d",vi); RETURN(0) }
 			break;
 		case 2: // f...t
-			if((vi<1)||(vi>15)){ WL_MError2("Var is out of set (f...t) in CheckVarIndex."); RETURN(0) }
+			if((vi<1)||(vi>15)){ WL_MError("Var is out of set (f...t) in CheckVarIndex."); RETURN(0) }
 			break;
 		case 3: // v1...1000
-			if(BAD_INDEX_V(vi)){ WL_MError3("Var is out of set (v1...v10000) in CheckVarIndex.\nIncorrect value: %d",vi); RETURN(0) }
+			if(BAD_INDEX_V(vi)){ WL_MError1("Var is out of set (v1...v10000) in CheckVarIndex.\nIncorrect value: %d",vi); RETURN(0) }
 			break;
 		case 4: // w1...100
-			if((vi<1)||(vi>200)){ WL_MError3("Var is out of set (w1...w200) in CheckVarIndex.\nIncorrect value: %d",vi); RETURN(0) }
+			if((vi<1)||(vi>200)){ WL_MError1("Var is out of set (w1...w200) in CheckVarIndex.\nIncorrect value: %d",vi); RETURN(0) }
 			break;
 		case 5: // x1...16
-			if((vi<1)||(vi>16)){ WL_MError3("Var is out of set (x1...x16) in CheckVarIndex.\nIncorrect value: %d",vi); RETURN(0) }
+			if((vi<1)||(vi>16)){ WL_MError1("Var is out of set (x1...x16) in CheckVarIndex.\nIncorrect value: %d",vi); RETURN(0) }
 			break;
 		case 6: // y1...100
-			if((vi<-100)||(vi==0)||(vi>100)){ WL_MError3("Var is out of set (y-100...y-1,y1...y100) as index in CheckVarIndex.\nIncorrect value: %d",vi); RETURN(0) }
+			if((vi<-100)||(vi==0)||(vi>100)){ WL_MError1("Var is out of set (y-100...y-1,y1...y100) as index in CheckVarIndex.\nIncorrect value: %d",vi); RETURN(0) }
 			break;
 		case 7: // z1...500
 			if (allowBigZ)
 			{
-				if(BAD_INDEX_LZ(vi)){ WL_MError3("Var is out of set (z-20...z-1,z1...z1000+) in CheckVarIndex.\nIncorrect value: %d",vi); RETURN(0) }
+				if(BAD_INDEX_LZ(vi)){ WL_MError1("Var is out of set (z-20...z-1,z1...z1000+) in CheckVarIndex.\nIncorrect value: %d",vi); RETURN(0) }
 			}
 			else
 			{
-				if(BAD_INDEX_LZ(vi)||(vi>1000)){ WL_MError3("Var is out of set (z-20...z-1,z1...z1000) in CheckVarIndex.\nIncorrect value: %d",vi); RETURN(0) }
+				if(BAD_INDEX_LZ(vi)||(vi>1000)){ WL_MError1("Var is out of set (z-20...z-1,z1...z1000) in CheckVarIndex.\nIncorrect value: %d",vi); RETURN(0) }
 			}
 			break;
 		case 8: // e1...100
-			if((vi<-100)||(vi==0)||(vi>100)){ WL_MError3("Var is out of set (e-100...e-1,e1...e100) in CheckVarIndex.\nIncorrect value: %d",vi); RETURN(0) }
+			if((vi<-100)||(vi==0)||(vi>100)){ WL_MError1("Var is out of set (e-100...e-1,e1...e100) in CheckVarIndex.\nIncorrect value: %d",vi); RETURN(0) }
 			break;
 		default:
-			WL_MError2("Incorrect variable in CheckVarIndex."); RETURN(0)
+			WL_MError("Incorrect variable in CheckVarIndex."); RETURN(0)
 	}
 	RETURN(1)
 }
@@ -695,7 +695,7 @@ int GetVarIndex(VarNum *vnp, bool allowBigZ)
 	{
 		int *p;
 		p = GetVarAddress(vi, it);
-		if (p == 0) { WL_MError2("Incorrect index variable in GetVarIndex."); RETURN(0) }
+		if (p == 0) { WL_MError("Incorrect index variable in GetVarIndex."); RETURN(0) }
 		vi = *p;
 	}
 	RETURN( CheckVarIndex(vi, vnp->Type, allowBigZ) ? vi : 0 )
@@ -718,7 +718,7 @@ int GetVarVal(VarNum *vnp)
 			break;
 		default:
 			p = GetVarAddress(vi, vnp->Type);
-			if(p == 0) { WL_MError2("Incorrect Var GetVarVal."); RETURN(0) }
+			if(p == 0) { WL_MError("Incorrect Var GetVarVal."); RETURN(0) }
 			vi = *p;
 	}
 	RETURN(vi)
@@ -747,7 +747,7 @@ int SetVarVal(VarNum *vnp,int Val)
 			break;
 		default:
 			p = GetVarAddress(vi, vnp->Type);
-			if(p == 0) { WL_MError2("Incorrect Var SetVarVal."); RETURN(0) }
+			if(p == 0) { WL_MError("Incorrect Var SetVarVal."); RETURN(0) }
 			*p = Val;
 	}
 	RETURN(1)
@@ -2310,7 +2310,7 @@ int ERM_Universal(char Cmd,int Num,_ToDo_*,Mes *Mp)
 							Apply(&v,4,Mp,1);
 							if(GetPureErmString(d, v)) RETURN(0)
 						}else{ // аргумент - ^текст^
-							MError("\"!!UN:J12\"- must be z var."); 
+							WL_MError2("- must be z var."); 
 							RETURN(0)
 						}
 						strncpy(d,MapName,511);
@@ -2932,7 +2932,7 @@ int AddTimer(Word fd, Word ld, Word p, Word o)
 			break;
 	if (i > LastAutoTimer)
 	{
-		if (i == 200) { WL_MError2("too many timers"); return -1; }
+		if (i == 200) { WL_MError("too many timers"); return -1; }
 		LastAutoTimer = i;
 		ERMTimer[i].FirstDay = fd;
 		ERMTimer[i].LastDay = ld;
@@ -5907,8 +5907,8 @@ int ProcessDisable(_ToDo_ *sp,int z)
 	Dword   event,object;
 	Byte    pr,cur;
 
-	if((z<0)||(z>7)){WL_MError3("Z command has a wrong parameter (Z4...Z7).\nIncorrect value: %d",z); RETURN(1) }
-	if((z>=0)&&(z<=3)){WL_MError2("Z0...Z3 commands are obsolete and are not supported anymore."); RETURN(1) }
+	if((z<0)||(z>7)){WL_MError1("Z command has a wrong parameter (Z4...Z7).\nIncorrect value: %d",z); RETURN(1) }
+	if((z>=0)&&(z<=3)){WL_MError("Z0...Z3 commands are obsolete and are not supported anymore."); RETURN(1) }
 	object=sp->Pointer;
 	cp=FirstTrigger;
 	while(cp!=0 && cp->Event!=0){
@@ -6243,7 +6243,7 @@ int Apply(void *dp,char size,Mes *mp,char ind)
 					break;
 				default:
 					p = GetVarAddress(vi, mp->VarI[ind].Type);
-					if (p == 0) { WL_MError2("wrong var type (f...t,v,w,x,y,e)."); RETURN(-1) }
+					if (p == 0) { WL_MError("wrong var type (f...t,v,w,x,y,e)."); RETURN(-1) }
 					*p = v;
 					if (mp->f[ind])
 					{
