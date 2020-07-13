@@ -3,6 +3,8 @@ Heroes 3.5: In the Wake of Gods 3.59 alpha.
 
 WoG Legacy docs
 ---
+Most important features: https://drive.google.com/file/d/1QxOKFQ6G0NerG8xEb-2iGE-DhmcAEtQO/view
+
 Building from source tutorial: https://drive.google.com/open?id=1gpGqdj4BOo-crjxbtmoPp9r81cZDBBEZ&fbclid=IwAR0P7ZD2XBeMHBLDx41OMqfhkhBqC-8bxE02asWiw_z0dnfyXvCKCOJgqOc
 
 Always up-to-date ERM/Lua Help: https://azethmeron.github.io
