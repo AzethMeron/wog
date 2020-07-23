@@ -26,7 +26,6 @@
 #include "TOWNS/towns.h"
 #define __FILENUM__ 8
 
- // TEMPORARY
 #pragma comment(lib, "User32.lib")
 #pragma comment(lib, "Gdi32.lib")
 
@@ -68,7 +67,7 @@ char *ManName[]={
 //int MSUB = -804; // Diakon
 //int GENMONNUM = 0xC5;
 //int GENMON = GENMONNUM -1;
-/////////////////////////////////////////////
+///////////////////////////////////////////////
 
 ///////////////////////////////////////////////
 // тип игры 0-английская, 1-русская
@@ -181,9 +180,9 @@ _MonInfo_ _MonAdd[MONNUM-MONNUM_0]={          // все не боятся страха
 {-1,3,"monk","ZM194Z.def",  0x00000010},// 194 Werewolf
 {-1,5,"bgor","ZM195Z.def",  0x00024019},// 195 Fire Horse
 { 4,6,"ghdr","ZM196Z.def",  0x8006148F},// 196 Dracolish
-//{ 7,5,"wyvm","zwyvm.def",  0x00000013},// 197 Infernal Wywern
 /*//<<<<<<< .mine
 //=======
+{-1,1,"pike","cpkman.def",  0x00000000},// 197
 {-1,1,"pike","cpkman.def",  0x00000000},// 198
 {-1,1,"pike","cpkman.def",  0x00000000},// 199
 {-1,1,"pike","cpkman.def",  0x00000000},// 200
@@ -375,8 +374,7 @@ int SkelTransAdd[MONNUM-MONNUM_0+5]={
  56,  //194, //  Werewolf
  56,  //195  //  Fire Horse
  68,  //196, //  Dracolish
-
- /*56,  //197
+ 56,  //197
  56,  //198
  56,  //199
  56,  //200
@@ -434,7 +432,7 @@ int SkelTransAdd[MONNUM-MONNUM_0+5]={
  56,  //252
  56,  //253
  56  //254
- //56  //255*/
+ //56  //255
 };
 
 void FindERMn(void);
@@ -2444,7 +2442,7 @@ void Initialize(void)
 
 	StartDLLService();
 	if(LoadZVSDialogs()) return /*Exit()*/;
-	//CommonDialog("Hi from a Heroes3 extension!");
+	//  CommonDialog("Hi from a Heroes3 extension!");
 //  START("Start Up Initialization");
 
 //InitWoGSetup();

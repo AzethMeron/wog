@@ -1,3 +1,5 @@
+#pragma once
+
 #ifndef __LOD__
 #define __LOD__
 

@@ -160,19 +160,19 @@ int ERM_TL(char Cmd,int Num,_ToDo_* /*sp*/,Mes *Mp)
 			Apply(&SpecTimerON,4,Mp,0);
 			break;
 		case 'C': // control
-			if(Apply(&v,4,Mp,0)){ WL_MError2("-cannot get or check control."); RETURN(0) }
+			if(Apply(&v,4,Mp,0)){ MError("\"!!TL:C\"-cannot get or check control."); RETURN(0) }
 			switch(v){
 				case 0: // continue
 					MPContinueTimer(); break;
 				case 1: // pause
 					MPPauseTimer(); break;
 				default:
-					WL_MError2("-incorrect command."); RETURN(0)
+					MError("\"!!TL:C\"-incorrect command."); RETURN(0)
 			}
 			break;
 		case 'T': // get/set times
 			CHECK_ParamsMin(2);
-			if(Apply(&v,4,Mp,0)){ WL_MError2("-cannot get or check index."); RETURN(0) }
+			if(Apply(&v,4,Mp,0)){ MError("\"!!TL:T\"-cannot get or check index."); RETURN(0) }
 			switch(v){
 				case 0: // current time in ms (get)
 					v2=timeGetTime(); Apply(&v2,4,Mp,1); break;
@@ -245,7 +245,7 @@ int ERM_TL(char Cmd,int Num,_ToDo_* /*sp*/,Mes *Mp)
 			else    AIRDelThis((short)h,(short)o,(short)n);
 			break;
 */
-		default: WL_EWrongCommand(); RETURN(0)
+		default: EWrongCommand(); RETURN(0)
 	}
 	RETURN(1)
 }

@@ -91,7 +91,7 @@ void SetHeroPic(int hn,char *Lpic,char *Spic, char * /*path*/)
 	STARTNA(__LINE__,Lpic)
 	_HeroSpecCus_ *p;
 
-	if((hn<0)||(hn>=HERNUM)){ WL_EWrongParam2("hero number",hn); RETURNV }
+	if((hn<0)||(hn>=HERNUM)){ EWrongParam(); RETURNV }
 	p=&HeroSpecCus[hn];
 	p->Used=1;
 	StrCopy(p->HPLName,13,Lpic);
@@ -105,7 +105,7 @@ void ChangeHeroPic(int hn,char *Lpic,char *Spic)
 	_HeroSpecCus_ *p;
 	_HeroInfo_    *hp=GetHIBase();
 
-	if((hn<0)||(hn>=HERNUM)){ WL_EWrongParam2("hero number",hn); RETURNV }
+	if((hn<0)||(hn>=HERNUM)){ EWrongParam(); RETURNV }
 	p=&HeroSpecCus[hn];
 	if((Lpic==0)&&(Spic==0)){ // восстановить оригинал
 		p->Used=0;
@@ -140,8 +140,8 @@ void ChangeHeroPicN(int hn,int hn1)
 	_HeroSpecCus_ *p;
 	_HeroInfo_    *hp=GetHIBase();
 
-	if((hn<0)||(hn>=HERNUM)){ WL_EWrongParam2("hero number",hn); RETURNV }
-	if((hn1<0)||(hn1>=HERNUM)){ WL_EWrongParam2("hero number",hn1); RETURNV }
+	if((hn<0)||(hn>=HERNUM)){ EWrongParam(); RETURNV }
+	if((hn1<0)||(hn1>=HERNUM)){ EWrongParam(); RETURNV }
 	p=&HeroSpecCus[hn];
 	if(hn==hn1) p->Used=0; else p->Used=1;
 	hp[hn].HPLName=HeroInfoBack[hn1].HPLName;
@@ -1126,7 +1126,7 @@ static int _DelCurse(int hn,int cr,int ind)
 			{
 				j = 0;
 				while (LockGroups(j) != i || hp->IArt[j][0] != -1)
-					if (++j > 18){ WL_MError("Curse error - unable to find place for artifact"); RETURN(0) }
+					if (++j > 18){ MError("Curse error - unable to find place for artifact"); RETURN(0) }
 				hp->IArt[j][0] = cu->Backup[0];
 				hp->IArt[j][1] = cu->Backup[1];
 			}
@@ -1149,7 +1149,7 @@ int AddCurse(int cr,int val,int len,int flag,int hi)
 		}
 		RETURN(0)
 	}
-	if (flag != 2) { WL_MError("assertion failed in AddCurse"); RETURN(-1) }
+	if (flag != 2) { MError("assertion failed in AddCurse"); RETURN(-1) }
 	for(i=0;i<CURSENUM;i++){
 		if(CurseInfo[i].Type!=cr) continue;
 		if(CurseInfo[i].HeroInd!=hi) continue;
@@ -1173,9 +1173,9 @@ int AddCurse(int cr,int val,int len,int flag,int hi)
 int ERM_Curse(Mes &M, int Num, int hn)
 {
 	STARTNA(__LINE__, 0)
-	CHECK_ParamsMin(3);
+	if(Num<3){ EWrongParamsNum(); RETURN(1) }
 	if(Num<4)  M.n[3] = 1;
-	if(M.n[3]<0 || M.n[3]>3){ WL_MError3("wrong action kind (0...3).\nIncorrect value: %d",M.n[0]); RETURN(1) }
+	if(M.n[3]<0 || M.n[3]>3){ MError2("wrong action kind (0...3)."); RETURN(1) }
 	if(M.n[3]==3 && !M.VarI[1].Check && !M.VarI[2].Check)
 		RETURN(AddCurse(0, 0, 0, 3, hn));
 
@@ -1184,7 +1184,7 @@ int ERM_Curse(Mes &M, int Num, int hn)
 	if (i < 0)
 	{
 		i = FindFreeCurse();
-		if (i < 0) { WL_MError2("too many curses."); RETURN(1) }
+		if (i < 0) { MError2("too many curses."); RETURN(1) }
 	}
 	
 	int val = CurseInfo[i].CurseVal, len = max(CurseInfo[i].StartDay + CurseInfo[i].Length - GetCurDate(), 0);
@@ -1206,7 +1206,7 @@ int ERM_Curse(Mes &M, int Num, int hn)
 		if ((CurseInfo[i].Length != 0) && _DelCurse(hn, cr, i)) { Error(); RETURN(1) }
 		RETURN(0)
 	}
-	if (cr == CURSE_SLOCK && (val < -1 || val > 13)){ WL_MError2("wrong slot number (-1...13)"); RETURN(1) }
+	if (cr == CURSE_SLOCK && (val < -1 || val > 13)){ MError2("wrong slot number (-1...13)"); RETURN(1) }
 	if (cr == CURSE_SLOCK && val != CurseInfo[i].CurseVal && CurseInfo[i].Length != 0)
 		if (_DelCurse(hn, cr, i))
 			{	Error(); RETURN(1) }
@@ -1214,7 +1214,7 @@ int ERM_Curse(Mes &M, int Num, int hn)
 	if (CurseInfo[i].Length == 0)
 	{
 		char* err = _AddCurse(hn, cr, &val, i);
-		if (err){ WL_MError2(err); RETURN(1) }
+		if (err){ MError2(err); RETURN(1) }
 	}
 	CurseInfo[i].Type = cr;
 	CurseInfo[i].HeroInd = hn;
@@ -1309,7 +1309,7 @@ int LoadCurse(int /*ver*/)
 	STARTNA(__LINE__, 0)
 	char buf[4]; if(Loader(buf,4)) RETURN(1)
 	if(buf[0]!='L'||buf[1]!='C'||buf[2]!='R'||buf[3]!='S')
-			{WL_MError("LoadCurse cannot start loading"); RETURN(1) }
+			{MError("LoadCurse cannot start loading"); RETURN(1) }
 	if(Loader(CurseInfo,sizeof(CurseInfo))) RETURN(1)
 	if(Loader(HeroSpecCus,sizeof(HeroSpecCus))) RETURN(1)
 	RefreshHeroPic();

@@ -1,3 +1,5 @@
+#pragma once
+
 #ifndef _DXPROXY_H_
 #define _DXPROXY_H_
 

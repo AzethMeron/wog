@@ -1,3 +1,5 @@
+#pragma once
+
 #define MAXMAPSIZE 144
 //extern short Way[MAXMAPSIZE+2][MAXMAPSIZE+2];
 //extern short Stp[MAXMAPSIZE+2][MAXMAPSIZE+2];

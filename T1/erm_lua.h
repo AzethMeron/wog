@@ -1,3 +1,6 @@
+#pragma once
+
+
 #ifndef __ERM_LUA__
 #define __ERM_LUA__
 

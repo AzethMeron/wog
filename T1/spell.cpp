@@ -28,7 +28,7 @@ int ERM_Spell(char Cmd,int Num,_ToDo_*sp,Mes *Mp)
 	//char *txt;
 	_Spell_ *Spell=NULL;
 	ind=GetVarVal(&sp->Par[0]);
-	if(ind<0 || ind>=SPELLNUM){ WL_MError3("- incorrect spell index.\nIncorrect value: %d",ind); RETURN(0) }
+	if(ind<0 || ind>=SPELLNUM){ MError("\"SS\"- incorrect spell index."); RETURN(0) }
 	Spell=&Spells[ind];
 //  ERMFlags[0]=0;
 	switch(Cmd){
@@ -74,7 +74,7 @@ int ERM_Spell(char Cmd,int Num,_ToDo_*sp,Mes *Mp)
 		case 'C': // C#/$
 			CHECK_ParamsMin(2);
 			Apply(&vv,4,Mp,0);
-			if(vv<0 || vv>3){ WL_MError3("- wrong index.\nIncorrect value: %d",vv); RETURN(0) }
+			if(vv<0 || vv>3){ MError("\"SS:C\"- wrong index."); RETURN(0) }
 			Apply(&Spell->Cost[vv],4,Mp,1);
 			break;
 //  int    Eff_Power;       // +30h
@@ -85,33 +85,33 @@ int ERM_Spell(char Cmd,int Num,_ToDo_*sp,Mes *Mp)
 		case 'E': // E#/$
 			CHECK_ParamsMin(2);
 			Apply(&vv,4,Mp,0);
-			if(vv<0 || vv>3){ WL_MError3("- wrong index.\nIncorrect value: %d",vv); RETURN(0) }
+			if(vv<0 || vv>3){ MError("\"SS:E\"- wrong index."); RETURN(0) }
 			Apply(&Spell->Effect[vv],4,Mp,1);
 			break;
 //  int    Chance2GetVar[9];// +44h chance per class
 		case 'H': // H#/$
 			CHECK_ParamsMin(2);
 			Apply(&vv,4,Mp,0);
-			if(vv<0 || vv>8){ WL_MError3("- wrong index.\nIncorrect value: %d",vv); RETURN(0) }
+			if(vv<0 || vv>8){ MError("\"SS:H\"- wrong index."); RETURN(0) }
 			Apply(&Spell->Chance2GetVar[vv],4,Mp,1);
 			break;
 //  int    AIValue[4];      // +68h 
 		case 'I': // I#/$
 			CHECK_ParamsMin(2);
 			Apply(&vv,4,Mp,0);
-			if(vv<0 || vv>3){ WL_MError3("- wrong index.\nIncorrect value: %d",vv); RETURN(0) }
+			if(vv<0 || vv>3){ MError("\"SS:I\"- wrong index."); RETURN(0) }
 			Apply(&Spell->AIValue[vv],4,Mp,1);
 			break;
 //  char  *Descript[4];     // +78h
 		case 'D': //D#/$
 			CHECK_ParamsMin(2);
 			Apply(&vv,4,Mp,0);
-			if(vv<0 || vv>3){ WL_MError3("- wrong index.\nIncorrect value: %d",vv); RETURN(0) }
+			if(vv<0 || vv>3){ MError("\"SS:D\"- wrong index."); RETURN(0) }
 			StrMan::Apply(Spell->Descript[vv], SpellsBackUp->Descript[vv], ZVars[ind][2+vv], Mp, 1);
 			//if(Apply(&ZVars[ind][2+vv],4,Mp,1)) break;
 			//txt=GetText(ind,2+vv); if(txt!=NULL) Spell->Descript[vv]=txt;
 			break;
-		default: WL_EWrongCommand(); RETURN(0)
+		default: EWrongCommand(); RETURN(0)
 	}
 	RETURN(1)
 }
@@ -189,8 +189,8 @@ int ParseSpTraitsTxt(void){
 		RETURN(1)
 	}
 	TxtFile fl;
-	if(LoadTXT("sptraits.txt",&fl)==-1){ WL_MError("Cannot load Sptraits.txt"); RETURN(0) }
-	if(fl.sn < (SPELLNUM+5+3+3+3)){ WL_MError("Sptraits.txt - not enough spells"); UnloadTXT(&fl); RETURN(0) }
+	if(LoadTXT("sptraits.txt",&fl)==-1){ MError("Cannot load Sptraits.txt"); RETURN(0) }
+	if(fl.sn < (SPELLNUM+5+3+3+3)){ MError("Sptraits.txt - not enough spells"); UnloadTXT(&fl); RETURN(0) }
 //  char *txt;
 	// Adventure Spells
 	for(i= 0;i<10;i++) ParseSpell(&fl,i,i+5);

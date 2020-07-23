@@ -79,7 +79,7 @@ int LoadMP3(int /*ver*/)
 //  }
 	char buf[4]; if(Loader(buf,4)) RETURN(1)
 	if(buf[0]!='L'||buf[1]!='M'||buf[2]!='P'||buf[3]!='3')
-		{WL_MError("LoadMP3 cannot start loading"); RETURN(1)}
+		{MError("LoadMP3 cannot start loading"); RETURN(1)}
 	for(int i=0;i<MP3NUM;i++){
 		if(Loader(MP3[i].New,256)) RETURN(1)
 	}
@@ -185,7 +185,7 @@ int ERM_MP3(char Cmd,int Num,_ToDo_* /*sp*/,Mes *Mp)
 			CHECK_ParamsNum(1);
 			v = FindThis(MP3Name, false) + 1;
 			if(Apply(&v,4,Mp,0)) break; // check or get
-			if((v<1)||(v>MP3NUM)){ WL_MError3("wrong MP3 table index (1...200).\nIncorrect value: %d",v); RETURN(0) }
+			if((v<1)||(v>MP3NUM)){ MError2("wrong MP3 table index (1...200)."); RETURN(0) }
 			if(MP3[v-1].New[0]) // was set
 				StrCopy(MP3Name,256,MP3[v-1].New);
 			else
@@ -195,10 +195,10 @@ int ERM_MP3(char Cmd,int Num,_ToDo_* /*sp*/,Mes *Mp)
 			CHECK_ParamsMax(2);
 			if(Num==2){ // с переменной (устарело)
 				if(Mp->n[0]==1){
-					if(BAD_INDEX_LZ(Mp->n[1])){ WL_MError3("wrong z var index (-20...-1, 1...1000+).\nIncorrect value: %d",Mp->n[1]); RETURN(0) }
+					if(BAD_INDEX_LZ(Mp->n[1])){ MError("\"MP:P\"-wrong z var index (-20...-1, 1...1000+)."); RETURN(0) }
 					const char * str = GetErmString(Mp->n[1]);
 					if (str) StrCopy(MP3Name,256,str);
-				}else{ WL_MError2("wrong syntax (P1/$)."); RETURN(0) }
+				}else{ MError("\"MP:P\"-wrong syntax (P1/$)."); RETURN(0) }
 			}else{
 				StrMan::Apply(MP3Name, Mp, 0, 256);
 			}
@@ -207,13 +207,13 @@ int ERM_MP3(char Cmd,int Num,_ToDo_* /*sp*/,Mes *Mp)
 			           // S#/^text^ установить файл для #
 			CHECK_ParamsMax(2);
 			ind=0;
-			if(Apply(&ind,4,Mp,0)){ WL_MError2("cannot get or check num."); RETURN(0) }
-			if((ind<1)||(ind>MP3NUM)){ WL_MError3("wrong MP3 table index (1...200)\nIncorrect value: %d",ind); RETURN(0) }
+			if(Apply(&ind,4,Mp,0)){ MError2("cannot get or check num."); RETURN(0) }
+			if((ind<1)||(ind>MP3NUM)){ MError2("wrong MP3 table index (1...200)."); RETURN(0) }
 			if(Num==1){ // S# восстановить оригинальный
 				StrCopy(MP3[ind-1].New,256,"");
 			}else if(Num==2){
 				StrMan::Apply(MP3[ind-1].New, Mp, 1, 256);
-			}else{ WL_EWrongSyntax(); RETURN(0) }
+			}else{ EWrongParamsNum(); RETURN(0) }
 			break;
 		case 'N':
 		{
@@ -225,7 +225,7 @@ int ERM_MP3(char Cmd,int Num,_ToDo_* /*sp*/,Mes *Mp)
 			else
 			{
 				if (Apply(&v, 4, Mp, 0)) break;
-				if((v<1)||(v>MP3NUM)){ WL_MError3("wrong MP3 table index (1...200).\nIncorrect value: %d",v); RETURN(0) }
+				if((v<1)||(v>MP3NUM)){ MError2("wrong MP3 table index (1...200)."); RETURN(0) }
 				if (MP3[v-1].New[0])
 					StrCopy(PlayMP3Name, 256, MP3[v-1].New);
 				else
@@ -234,7 +234,7 @@ int ERM_MP3(char Cmd,int Num,_ToDo_* /*sp*/,Mes *Mp)
 			PlayMP3();
 			break;
 		}
-		default: WL_EWrongCommand(); RETURN(0)
+		default: EWrongCommand(); RETURN(0)
 	}
 	RETURN(1)
 }
@@ -307,7 +307,7 @@ int ERM_Sound(char Cmd,int Num,_ToDo_*,Mes *Mp)
 				call   eax
 			}
 			break;
-		default: WL_EWrongCommand(); RETURN(0)
+		default: EWrongCommand(); RETURN(0)
 	}
 	RETURN(1)
 }

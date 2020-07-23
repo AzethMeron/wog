@@ -1,3 +1,5 @@
+#pragma once
+
 extern int ExpoFromBattle;
 
 // functions for executable

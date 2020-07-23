@@ -1,3 +1,5 @@
+#pragma once
+
 //#include "classes.h"
 int LoadMP3(int ver);
 int SaveMP3(void);

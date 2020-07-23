@@ -1050,14 +1050,14 @@ int ERM_CasDem(char Cmd,int Num,_ToDo_*,Mes *Mp)
 			break;
 		case 'E': // Etown_type/build_type/exp_val опыт геро€ дл€ разрушени€
 			CHECK_ParamsMin(3);
-			if((Mp->n[0]<0)||(Mp->n[0]>=TOWNNUM)){ WL_EWrongParam2("town type",Mp->n[0]); RETURN(0) }
-			if((Mp->n[1]<0)||(Mp->n[1]>43)){ WL_EWrongParam2("structure id",Mp->n[1]); RETURN(0) }
+			if((Mp->n[0]<0)||(Mp->n[0]>8)){ EWrongParam(); RETURN(0) }
+			if((Mp->n[1]<0)||(Mp->n[1]>43)){ EWrongParam(); RETURN(0) }
 			Apply(&CSCheck[Mp->n[1]].Town[Mp->n[0]].MinHeroExp,4,Mp,2);
 			break;
 		case 'A': // Atown_type/build_type/army_hp сила армии теро€ дл€ разрушени€
 			CHECK_ParamsMin(3);
-			if((Mp->n[0]<0)||(Mp->n[0]>=TOWNNUM)){ WL_EWrongParam2("town type",Mp->n[0]); RETURN(0) }
-			if((Mp->n[1]<0)||(Mp->n[1]>43)){ WL_EWrongParam2("structure id",Mp->n[1]); RETURN(0) }
+			if((Mp->n[0]<0)||(Mp->n[0]>8)){ EWrongParam(); RETURN(0) }
+			if((Mp->n[1]<0)||(Mp->n[1]>43)){ EWrongParam(); RETURN(0) }
 			Apply(&CSCheck[Mp->n[1]].Town[Mp->n[0]].MinArmyPow,4,Mp,2);
 			break;
 		// 3.59
@@ -1068,11 +1068,11 @@ int ERM_CasDem(char Cmd,int Num,_ToDo_*,Mes *Mp)
 			// B3/town/struct/$/$ - exclusion dependence
 			// B4/town/struct/#/#/#... - exclusion dependence
 			CHECK_ParamsMin(4);
-			int cs; if(Apply(&cs,4,Mp,0)){ WL_MError2("- cannot get case"); RETURN(0) }
-			int tp; if(Apply(&tp,4,Mp,1)){ WL_MError2("- cannot get town type"); RETURN(0) }
-			if(tp<0 || tp>=TOWNNUM){ WL_MError3("- incorrect town type\nIncorrect value: %d",tp); RETURN(0) }
-			int st; if(Apply(&st,4,Mp,2)){ WL_MError2("- cannot get structure"); RETURN(0) }
-			if(st<0 || st>=44){ WL_MError3("- incorrect structure type\nIncorrect value: %d",st); RETURN(0) }
+			int cs; if(Apply(&cs,4,Mp,0)){ MError("\"!!CD:B\"- cannot get case"); RETURN(0) }
+			int tp; if(Apply(&tp,4,Mp,1)){ MError("\"!!CD:B\"- cannot get town type"); RETURN(0) }
+			if(tp<0 || tp>=TOWNNUM){ MError("\"!!CD:B\"- incorrect town type"); RETURN(0) }
+			int st; if(Apply(&st,4,Mp,2)){ MError("\"!!CD:B\"- cannot get structure"); RETURN(0) }
+			if(st<0 || st>=44){ MError("\"!!CD:B\"- incorrect structure type"); RETURN(0) }
 			int i,fl,val/*,val2*/;
 			_BuildMask_ *Masks; *(Dword *)&Masks=0x66CD98;
 			_BuildMask_  var;
@@ -1091,7 +1091,7 @@ int ERM_CasDem(char Cmd,int Num,_ToDo_*,Mes *Mp)
 					}
 					break;
 				case 1:
-					if(Num<5){ WL_MError2("-wrong syntax"); RETURN(0) }
+					if(Num<5){ MError("\"!!CD:B1\"-wrong syntax"); RETURN(0) }
 					var=BuildDepends[tp][st];
 //          val =BuildDepends[tp][st].Lo;
 //          val2=BuildDepends[tp][st].Hi;
@@ -1108,16 +1108,16 @@ int ERM_CasDem(char Cmd,int Num,_ToDo_*,Mes *Mp)
 				case 2:
 					var.Lo=0; var.Hi=0;
 					for(i=0;i<Num-3;i++){
-						if(Apply(&val,4,Mp,i+3)){ WL_MError2("- get/check syntax not supported"); RETURN(0) }
+						if(Apply(&val,4,Mp,i+3)){ MError("\"!!CD:B2\"- get/check syntax not supported"); RETURN(0) }
 //            if(val==-1) break;
-						if(val<0 || val>=44){ WL_MError3("- incorrect structure type\nIncorrect value: %d",val); RETURN(0) }
+						if(val<0 || val>=44){ MError("\"!!CD:B2\"- incorrect structure type"); RETURN(0) }
 						var.Lo |= Masks[val].Lo; var.Lo |= BuildDepends[tp][val].Lo;
 						var.Hi |= Masks[val].Hi; var.Hi |= BuildDepends[tp][val].Hi;
 					}
 					BuildDepends[tp][st]=var;
 					break;
 				case 3:
-					if(Num<5){ WL_MError2("-wrong syntax"); RETURN(0) }
+					if(Num<5){ MError("\"!!CD:B3\"-wrong syntax"); RETURN(0) }
 					var =BuildExclusions[tp][st];
 					fl=0;
 					if(Apply(&var.Lo,4,Mp,3)) fl=1; // check/get
@@ -1128,18 +1128,18 @@ int ERM_CasDem(char Cmd,int Num,_ToDo_*,Mes *Mp)
 				case 4:
 					var.Lo=0; var.Hi=0;
 					for(i=0;i<Num-3;i++){
-						if(Apply(&val,4,Mp,i+3)){ WL_MError2("- get/check syntax not supported"); RETURN(0) }
+						if(Apply(&val,4,Mp,i+3)){ MError("\"!!CD:B4\"- get/check syntax not supported"); RETURN(0) }
 //            if(val==-1) break;
-						if(val<0 || val>=44){ WL_MError3("- incorrect structure type\nIncorrect value: %d",val); RETURN(0) }
+						if(val<0 || val>=44){ MError("\"!!CD:B4\"- incorrect structure type"); RETURN(0) }
 						var.Lo |= Masks[val].Lo; var.Lo |= BuildExclusions[tp][val].Lo;
 						var.Hi |= Masks[val].Hi; var.Hi |= BuildExclusions[tp][val].Hi;
 					}
 					BuildExclusions[tp][st]=var;
 					break;
-				default: WL_MError2("-incorrect command type."); RETURN(0)
+				default: MError("\"!!CD:B\"-incorrect command type."); RETURN(0)
 			}
 			break;}
-		default: WL_MError2("-incorrect command."); RETURN(0)
+		default: MError("\"!!CD\"-incorrect command."); RETURN(0)
 	}
 	RETURN(1)
 }
@@ -1740,7 +1740,7 @@ int __fastcall CorrectTownIncome(_CastleSetup_ * town, int income)
 	ci.Level = -1;
 	CIstruct = &ci;
 
-	pointer = WL_FUNC_COUNT+373;
+	pointer = 30373;
 	ProcessERM();
 
 	CIstruct = old;
@@ -1759,7 +1759,7 @@ int __fastcall CorrectTownGrowth(_CastleSetup_ * town, int income, int level)
 	ci.Level = level;
 	CIstruct = &ci;
 
-	pointer = WL_FUNC_COUNT+374;
+	pointer = 30374;
 	ProcessERM();
 
 	CIstruct = old;
@@ -1769,7 +1769,7 @@ int __fastcall CorrectTownGrowth(_CastleSetup_ * town, int income, int level)
 int ERM_CastleIncome(char Cmd, int Num, _ToDo_*, Mes *Mp)
 {
 	STARTNA(__LINE__,&Mp->m.s[Mp->i])
-	if (CIstruct == 0) { WL_MError2("not in !?CI trigger"); RETURN(0) }
+	if (CIstruct == 0) { MError2("not in !?CI trigger"); RETURN(0) }
 	switch(Cmd)
 	{
 		case 'I':
@@ -1784,7 +1784,7 @@ int ERM_CastleIncome(char Cmd, int Num, _ToDo_*, Mes *Mp)
 			Apply(&CIstruct->Level, 4, Mp, 0);
 			break;
 		default:
-			WL_EWrongCommand() RETURN(0)
+			EWrongCommand(); RETURN(0)
 	}
 	RETURN(1)
 }
@@ -1797,14 +1797,14 @@ int ERM_Castle(char Cmd,int Num,_ToDo_*sp,Mes *Mp)
 	Byte b,*msk;
 	Dword MixPos;
 	_MapItem_ *mip=0;
-	_CastleSetup_ *dp=GetCastleBase(); if(dp==0){ WL_MError2("-no Castles defined for a map.."); RETURN(0) }
+	_CastleSetup_ *dp=GetCastleBase(); if(dp==0){ MError("\"!!CA\"-no Castles defined for a map.."); RETURN(0) }
 //  _CastleState_ *csp;
 	switch(sp->ParSet){
 		case 2: // флаг/номер
 			i=GetVarVal(&sp->Par[0]);
-			if(i!=0){ WL_MError2("-first parameter out of range (0)."); RETURN(0) }
+			if(i!=0){ MError("\"CA#/#\"-first parameter out of range (0)."); RETURN(0) }
 			i=GetVarVal(&sp->Par[1]);
-			if((i<0)||(i>=GetCastleNum())){ WL_MError3("-cannot find castle (out of range).\nIncorrect value: %d",i); RETURN(0) }
+			if((i<0)||(i>=GetCastleNum())){ MError("\"CA$\"-cannot find castle (out of range)."); RETURN(0) }
 			dp=&dp[i];
 			break;
 		case 1: // позици€ indirect (-1=текущий)
@@ -1828,12 +1828,12 @@ int ERM_Castle(char Cmd,int Num,_ToDo_*sp,Mes *Mp)
 			mip=GetMapItem2(MixPos);
 			stp=(int *)mip;
 			tp=CheckPlace4Hero(mip,(Dword **)&stp);
-			if(tp!=98){ WL_MError2("-not a Castle."); RETURN(0) }
-			if(*stp>=GetCastleNum()){ WL_MError2("-Castle number out of array."); RETURN(0) }
+			if(tp!=98){ MError("\"!!CA\"-not a Castle."); RETURN(0) }
+			if(*stp>=GetCastleNum()){ MError("\"!!CA\"-Castle number out of array."); RETURN(0) }
 			dp=&dp[*stp];
 			break;
 		default: // ???
-			WL_MError2("-incorrect syntax.");
+			MError("\"CA???\"-incorrect syntax.");
 			RETURN(0)
 	}
 	switch(Cmd){
@@ -1845,7 +1845,7 @@ int ERM_Castle(char Cmd,int Num,_ToDo_*sp,Mes *Mp)
 					if(hn==dp->IHero) break;
 					dp->IHero=hn;
 					if(hn==-1) break;
-					if((hn<0)||(hn>=HERNUM)){ WL_MError3("-wrong hero number\nIncorrect value: %d",hn); RETURN(0) }
+					if((hn<0)||(hn>=HERNUM)){ MError("\"!!CA:H\"-wrong hero number"); RETURN(0) }
 					GetHeroStr(hn)->x=dp->x;
 					GetHeroStr(hn)->y=dp->y;
 					GetHeroStr(hn)->l=dp->l;
@@ -1856,13 +1856,13 @@ int ERM_Castle(char Cmd,int Num,_ToDo_*sp,Mes *Mp)
 					if(hn==dp->VHero) break;
 					dp->VHero=hn;
 					if(hn==-1) break;
-					if((hn<0)||(hn>=HERNUM)){ WL_MError3("-wrong hero number\nIncorrect value: %d",hn); RETURN(0) }
+					if((hn<0)||(hn>=HERNUM)){ MError("\"!!CA:H\"-wrong hero number"); RETURN(0) }
 					GetHeroStr(hn)->x=dp->x;
 					GetHeroStr(hn)->y=dp->y;
 					GetHeroStr(hn)->l=dp->l;
 					GetHeroStr(hn)->Visible=1;
 					break;
-				default: WL_MError2("-wrong first parameter (0,1)"); RETURN(0)
+				default: MError("\"!!CA:H\"-wrong first parameter (0,1)"); RETURN(0)
 			}
 			break;
 		case 'U': // U$ номер замка
@@ -1904,7 +1904,7 @@ int ERM_Castle(char Cmd,int Num,_ToDo_*sp,Mes *Mp)
 			}
 			break;
 		case 'N': // N^text^ , M$, M-1 Ќазвание
-			if(NewMesMan(Mp,&dp->Name,0)){ WL_MError2("-Cannot set a Castle Name."); RETURN(0) }
+			if(NewMesMan(Mp,&dp->Name,0)){ MError("\"!!CA:N\"-Cannot set a Castle Name."); RETURN(0) }
 			break;
 		case 'P': // P$/$/$ позици€ замка
 			Apply(&dp->x,-1,Mp,0); // unsigned 3.58 bug fix
@@ -1949,28 +1949,28 @@ int ERM_Castle(char Cmd,int Num,_ToDo_*sp,Mes *Mp)
 					Apply(&dp->MagLevel,1,Mp,0);
 					break;
 				case 2: // G$/$ кол-во закл на уровень уровень маг гильдии
-					if((Mp->n[0]<0)||(Mp->n[0]>4)){ WL_MError3("-A level of Magic Guild out of range (0...4).\nIncorrect value: %d",Mp->n[0]); RETURN(0) }
+					if((Mp->n[0]<0)||(Mp->n[0]>4)){ MError("\"!!CA:G\"-A level of Magic Guild out of range (0...4)."); RETURN(0) }
 					Apply(&dp->MagicHild[Mp->n[0]],1,Mp,1);
 					break;
 				case 3: // G$/$/$ заклинани€
-					if((Mp->n[0]<0)||(Mp->n[0]>4)){ WL_EWrongParam2("magic guild level",Mp->n[0]); RETURN(0) }
-					if((Mp->n[1]<0)||(Mp->n[1]>5)){ WL_EWrongParam2("guild slot",Mp->n[0]); RETURN(0) }
+					if((Mp->n[0]<0)||(Mp->n[0]>4)){ EWrongParam(); RETURN(0) }
+					if((Mp->n[1]<0)||(Mp->n[1]>5)){ EWrongParam(); RETURN(0) }
 					Apply(&dp->Spels[Mp->n[0]][Mp->n[1]],4,Mp,2);
 					break;
-				default: WL_MError2("-incorrect command type (1...3)."); RETURN(0)
+				default: MError("\"!!CA:G\"-incorrect command type (1...3)."); RETURN(0)
 			}
 			break;
 		case 'M': // монстры
 			switch(Mp->n[0]){
 				case 1: // M1/pos/$/$ рост монстров и тип ?
 					CHECK_ParamsNum(4);
-					if((Mp->n[1]<0)||(Mp->n[1]>6)){ WL_MError3("-level out of range (0...6).\nIncorrect value: %d",Mp->n[1]); RETURN(0) }
+					if((Mp->n[1]<0)||(Mp->n[1]>6)){ MError("\"!!CA:M\"-level out of range (0...6)."); RETURN(0) }
 					Apply(&dp->Monsters[0][Mp->n[1]],2,Mp,2);
 					Apply(&dp->Monsters[1][Mp->n[1]],2,Mp,3);
 					break;
 				case 2: // M2/pos/$/$ охрана замка тип и кол-во
 					CHECK_ParamsNum(4);
-					if((Mp->n[1]<0)||(Mp->n[1]>6)){ WL_MError3("-position out of range (0...6).\nIncorrect value: %d",Mp->n[1]); RETURN(0) }
+					if((Mp->n[1]<0)||(Mp->n[1]>6)){ MError("\"!!CA:M\"-position out of range (0...6)."); RETURN(0) }
 					Apply(&dp->GuardsT[Mp->n[1]],4,Mp,2);
 					Apply(&dp->GuardsN[Mp->n[1]],4,Mp,3);
 					break;
@@ -1981,7 +1981,7 @@ int ERM_Castle(char Cmd,int Num,_ToDo_*sp,Mes *Mp)
 					break;
 				case 4: // M4/pos/$ прирост монстра в неделю
 					CHECK_ParamsNum(3);
-					if((Mp->n[1]<0)||(Mp->n[1]>6)){ WL_MError3("-level out of range (0...6).\nIncorrect value: %d",Mp->n[1]); RETURN(0) }
+					if((Mp->n[1]<0)||(Mp->n[1]>6)){ MError("\"!!CA:M\"-level out of range (0...6)."); RETURN(0) }
 					j = Mp->n[1];
 					__asm
 					{
@@ -1993,13 +1993,13 @@ int ERM_Castle(char Cmd,int Num,_ToDo_*sp,Mes *Mp)
 					}
 					Apply(&j, 4, Mp, 2);
 					break;
-				default: WL_MError2("incorrect command type (1...4)."); RETURN(0)
+				default: MError2("incorrect command type (1...4)."); RETURN(0)
 			}
 			break;
 		case 'B': // здани€
 			if (Mp->n[0] != 3 || Num != 3)
 				CHECK_ParamsNum(2);
-			if((Mp->n[1]<0)||(Mp->n[1]>43)){ WL_MError3("-wrong building number (0...43).\nIncorrect value: %d",Mp->n[1]); RETURN(0) }
+			if((Mp->n[1]<0)||(Mp->n[1]>43)){ MError("\"!!CA:B\"-wrong building number (0...43)."); RETURN(0) }
 			i=Mp->n[1]/8; j=Mp->n[1]%8;
 			b=(Byte)(1<<j);
 			switch(Mp->n[0]){
@@ -2019,7 +2019,7 @@ int ERM_Castle(char Cmd,int Num,_ToDo_*sp,Mes *Mp)
 					break;
 				case 3: // B3/$ проверить
 					if (Num < 3)  Mp->n[2] = 0;
-					if (Mp->n[2] < 0 || Mp->n[2] > 2){ WL_MError2("-wrong check number (0...2)."); RETURN(0) }
+					if (Mp->n[2] < 0 || Mp->n[2] > 2){ MError("\"!!CA:B3\"-wrong check number (0...2)."); RETURN(0) }
 					switch (Mp->n[2])
 					{
 						case 0:  i = dp->Built[i];  break;
@@ -2042,7 +2042,7 @@ int ERM_Castle(char Cmd,int Num,_ToDo_*sp,Mes *Mp)
 					BuildTownStruct(dp,Mp->n[1]);
 					dp->BuiltThisTurn=i;
 					break;
-				default: WL_MError2("-incorrect command type (1...5)."); RETURN(0)
+				default: MError("\"!!CA:B\"-incorrect command type (1...5)."); RETURN(0)
 			}
 			break;
 		case 'S': // S$ income
@@ -2057,7 +2057,7 @@ int ERM_Castle(char Cmd,int Num,_ToDo_*sp,Mes *Mp)
 			}
 			Apply(&j, 4, Mp, 0);
 			break;
-		default: WL_MError2("-incorrect command."); RETURN(0)
+		default: MError("\"!!CA\"-incorrect command."); RETURN(0)
 	 }
 //  }
 	RETURN(1)

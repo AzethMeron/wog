@@ -28,8 +28,6 @@
 #include "erm_lua.h"
 #include "global.h"
 
-#include "WogLegacy/WLA_ERM_C.hpp"
-
 bool IsLuaCall = false;
 
 _Cmd_     *Heap;
@@ -70,7 +68,7 @@ char  ERMString[1000][512];  char ERMStringMacro[1000][16];
 char  ERMStringUsed[1000];
 static char  Std_ERMLString[VAR_COUNT_LZ][512];
 char  (*ERMLString)[512] = Std_ERMLString;
-char  ERMFunUsed[WL_FUNC_COUNT];
+char  ERMFunUsed[30000];
 char  ERMTimerUsed[100];
 int   ERMVarUsedStore=0; //делать ли дамп использования переменных
 int   ERMVarCheck4DblStore=0; // проверять на дублирование
@@ -342,7 +340,7 @@ char *GetInternalErmString(int index)
 {
 	if(BAD_INDEX_LZ(index))
 	{
-		WL_MError3("wrong z var index (-20...-1,1...1000+).\nIncorrect value: %d",index);
+		MError2("wrong z var index (-20...-1,1...1000+).");
 		return 0;
 	}
 
@@ -450,7 +448,7 @@ char *GetErmText(Mes *Mp,int ind){
 	STARTNA(__LINE__, 0)
 	char *ret = 0;
 	int vv;
-	if(Mp->VarI[ind].Check!=0){ WL_MError2("cannot use get or check syntax."); RETURN(0) }
+	if(Mp->VarI[ind].Check!=0){ MError2("cannot use get or check syntax."); RETURN(0) }
 
 	int strType = Mp->VarI[ind].Type;
 	if (strType == 7)
@@ -466,7 +464,7 @@ char *GetErmText(Mes *Mp,int ind){
 		}
 		else
 		{
-			WL_MError2("string expected.");
+			MError2("string expected.");
 		}
 	RETURN(ret);
 }
@@ -514,13 +512,13 @@ int ERM_Function(char Cmd,int Num,_ToDo_*sp,Mes *Mp)
 			TriggerGoTo=0;
 			CHECK_ParamsMax(1);
 			if(Num == 1)  TriggerGoTo = Mp->n[0];
-			if(TriggerGoTo<-256){ WL_MError3("cannot jump more than 256 triggers back. Tried: ",TriggerGoTo); RETURN(0) }
+			if(TriggerGoTo<-256){ MError2("cannot jump more than 256 triggers back."); RETURN(0) }
 			break;
 		case 'X':
 		{
 			CHECK_ParamsNum(2);
 			v = Mp->n[0] - 1;
-			if((v<0)||(v>=16)){ WL_MError3("x var index out of range (1...16).\nIncorrect value: %d",v); RETURN(0) }
+			if((v<0)||(v>=16)){ MError2("x var index out of range (1...16)."); RETURN(0) }
 			int check = 0;
 			if (LastFUMes && v < LastFUNum)
 			{
@@ -536,7 +534,7 @@ int ERM_Function(char Cmd,int Num,_ToDo_*sp,Mes *Mp)
 		case 'C': // 3.58f check wrong Y var usage outside of trigger
 			YVarInsideFunction=Mp->n[0];
 			break;
-		default: WL_EWrongCommand(); RETURN(0)
+		default: EWrongCommand(); RETURN(0)
 	}
 	RETURN(1)
 }
@@ -613,7 +611,7 @@ int ERM_Do(char Cmd,int Num,_ToDo_*sp,Mes *Mp)
 				Apply(&NewX[i],4,Mp,(char)i);
 			}
 			break;
-		default: WL_EWrongCommand(); RETURN(0)
+		default: EWrongCommand(); RETURN(0)
 	}
 	RETURN(1)
 }
@@ -625,38 +623,38 @@ int CheckVarIndex(int vi, int vtype, bool allowBigZ)
 		case 0: // число
 			break;
 		case 1:
-			if((vi<1)||(vi>1000)){ WL_MError1("Flag is out of set (1...1000) in CheckVarIndex.\nIncorrect value: %d",vi); RETURN(0) }
+			if((vi<1)||(vi>1000)){ MError2("Flag is out of set (1...1000) in CheckVarIndex."); RETURN(0) }
 			break;
 		case 2: // f...t
-			if((vi<1)||(vi>15)){ WL_MError("Var is out of set (f...t) in CheckVarIndex."); RETURN(0) }
+			if((vi<1)||(vi>15)){ MError2("Var is out of set (f...t) in CheckVarIndex."); RETURN(0) }
 			break;
 		case 3: // v1...1000
-			if(BAD_INDEX_V(vi)){ WL_MError1("Var is out of set (v1...v10000) in CheckVarIndex.\nIncorrect value: %d",vi); RETURN(0) }
+			if(BAD_INDEX_V(vi)){ MError2("Var is out of set (v1...v10000) in CheckVarIndex."); RETURN(0) }
 			break;
 		case 4: // w1...100
-			if((vi<1)||(vi>200)){ WL_MError1("Var is out of set (w1...w200) in CheckVarIndex.\nIncorrect value: %d",vi); RETURN(0) }
+			if((vi<1)||(vi>200)){ MError2("Var is out of set (w1...w200) in CheckVarIndex."); RETURN(0) }
 			break;
 		case 5: // x1...16
-			if((vi<1)||(vi>16)){ WL_MError1("Var is out of set (x1...x16) in CheckVarIndex.\nIncorrect value: %d",vi); RETURN(0) }
+			if((vi<1)||(vi>16)){ MError2("Var is out of set (x1...x16) in CheckVarIndex."); RETURN(0) }
 			break;
 		case 6: // y1...100
-			if((vi<-100)||(vi==0)||(vi>100)){ WL_MError1("Var is out of set (y-100...y-1,y1...y100) as index in CheckVarIndex.\nIncorrect value: %d",vi); RETURN(0) }
+			if((vi<-100)||(vi==0)||(vi>100)){ MError2("Var is out of set (y-100...y-1,y1...y100) as index in CheckVarIndex."); RETURN(0) }
 			break;
 		case 7: // z1...500
 			if (allowBigZ)
 			{
-				if(BAD_INDEX_LZ(vi)){ WL_MError1("Var is out of set (z-20...z-1,z1...z1000+) in CheckVarIndex.\nIncorrect value: %d",vi); RETURN(0) }
+				if(BAD_INDEX_LZ(vi)){ MError2("Var is out of set (z-20...z-1,z1...z1000+) in CheckVarIndex."); RETURN(0) }
 			}
 			else
 			{
-				if(BAD_INDEX_LZ(vi)||(vi>1000)){ WL_MError1("Var is out of set (z-20...z-1,z1...z1000) in CheckVarIndex.\nIncorrect value: %d",vi); RETURN(0) }
+				if(BAD_INDEX_LZ(vi)||(vi>1000)){ MError2("Var is out of set (z-20...z-1,z1...z1000) in CheckVarIndex."); RETURN(0) }
 			}
 			break;
 		case 8: // e1...100
-			if((vi<-100)||(vi==0)||(vi>100)){ WL_MError1("Var is out of set (e-100...e-1,e1...e100) in CheckVarIndex.\nIncorrect value: %d",vi); RETURN(0) }
+			if((vi<-100)||(vi==0)||(vi>100)){ MError2("Var is out of set (e-100...e-1,e1...e100) in CheckVarIndex."); RETURN(0) }
 			break;
 		default:
-			WL_MError("Incorrect variable in CheckVarIndex."); RETURN(0)
+			MError2("Incorrect variable in CheckVarIndex."); RETURN(0)
 	}
 	RETURN(1)
 }
@@ -695,7 +693,7 @@ int GetVarIndex(VarNum *vnp, bool allowBigZ)
 	{
 		int *p;
 		p = GetVarAddress(vi, it);
-		if (p == 0) { WL_MError("Incorrect index variable in GetVarIndex."); RETURN(0) }
+		if (p == 0) { MError2("Incorrect index variable in GetVarIndex."); RETURN(0) }
 		vi = *p;
 	}
 	RETURN( CheckVarIndex(vi, vnp->Type, allowBigZ) ? vi : 0 )
@@ -718,7 +716,7 @@ int GetVarVal(VarNum *vnp)
 			break;
 		default:
 			p = GetVarAddress(vi, vnp->Type);
-			if(p == 0) { WL_MError("Incorrect Var GetVarVal."); RETURN(0) }
+			if(p == 0) { MError2("Incorrect Var GetVarVal."); RETURN(0) }
 			vi = *p;
 	}
 	RETURN(vi)
@@ -734,7 +732,7 @@ int SetVarVal(VarNum *vnp,int Val)
 	if(vnp->Type != 0 && vi == 0) RETURN(0)
 	switch(vnp->Type){
 		case 7: // z-20..z-1,z1...1000
-			if(BAD_INDEX_LZ(Val)){ WL_MError3("Var z is out of set (-20...-1,1...1000+) as source in SetVarVal.\nIncorrect value: %d",Val); RETURN(0) }
+			if(BAD_INDEX_LZ(Val)){ MError2("Var z is out of set (-20...-1,1...1000+) as source in SetVarVal."); RETURN(0) }
 			if(Val>1000) txt=ERM2String(StringSet::GetText(Val),1,0);
 			else if(Val<0) txt=ERMLString[-Val-1];
 			else txt=ERMString[Val-1];
@@ -747,7 +745,7 @@ int SetVarVal(VarNum *vnp,int Val)
 			break;
 		default:
 			p = GetVarAddress(vi, vnp->Type);
-			if(p == 0) { WL_MError("Incorrect Var SetVarVal."); RETURN(0) }
+			if(p == 0) { MError2("Incorrect Var SetVarVal."); RETURN(0) }
 			*p = Val;
 	}
 	RETURN(1)
@@ -959,7 +957,7 @@ void ClearVarUsedList(void)
 	for(i=0;i<200;i++)   ERMVarHUsed[i]=0;
 	for(i=0;i<1000;i++)  ERMStringUsed[i]=0;
 	for(i=0;i<1000;i++)  ERMFlagsUsed[i]=0;
-	for(i=0;i<WL_FUNC_COUNT;i++) ERMFunUsed[i]=0;
+	for(i=0;i<30000;i++) ERMFunUsed[i]=0;
 	for(i=0;i<100;i++)   ERMTimerUsed[i]=0;
 	RETURNV
 }
@@ -1055,7 +1053,7 @@ void WriteVarUsed(void)
 	}
 	StrCopy(cp,81,"Functions triggers [t] and receivers/instructions [r,d] [FU(DO)1...FU(DO)30000]:"); cp+=80;
 	*cp++=0x0D; *cp++=0x0A;
-	for(i=0;i<WL_FUNC_COUNT;i++){
+	for(i=0;i<30000;i++){
 		if(ERMFunUsed[i]==0) continue;
 		*cp++='F'; *cp++='U';
 		len=i2a(i+1,buf); buf[len]=0;
@@ -1179,7 +1177,7 @@ void LogTriggerConditions(_Cmd_ *cp,char *Line)
 void LogERMFunctionTrigger(int fn,char *Line,int flag=ERMVarCheck4DblStore) // 1...30000
 {
 	STARTNA(__LINE__, 0)
-	if((fn<1)||(fn>WL_FUNC_COUNT)){
+	if((fn<1)||(fn>30000)){
 		Message("Cannot LOG index of function [trigger]",1);
 		Message(Line,1);
 		RETURNV
@@ -1222,7 +1220,7 @@ void LogERMAnyReceiver(Word Id,VarNum Par,char * /*Line*/,int flag=ERMVarCheck4D
 	}
 	switch(Id){
 		case 'UF':// VC 'FU':
-			if((ind<1)||(ind>WL_FUNC_COUNT)){
+			if((ind<1)||(ind>30000)){
 //        MError("Function receiver or instruction cannot be logged (variable value is not defined yet).");
 //        Message(Line,1);
 //        просто пропустем
@@ -1232,7 +1230,7 @@ void LogERMAnyReceiver(Word Id,VarNum Par,char * /*Line*/,int flag=ERMVarCheck4D
 			ERMFunUsed[ind-1]|=2; // receiver or instruction
 			break;
 		case 'OD':// VC 'DO':
-			if((ind<1)||(ind>WL_FUNC_COUNT)){
+			if((ind<1)||(ind>30000)){
 //        MError("Cycle receiver or instruction cannot be logged (variable value is not defined yet).");
 //        Message(Line,1);
 //        просто пропустем
@@ -1277,7 +1275,7 @@ int ERM_VarControl(char Cmd,int /*Num*/,_ToDo_*,Mes *Mp)
 			WriteVarUsed();
 			break;
 		default:
-			WL_EWrongCommand();
+			EWrongCommand();
 			RETURN(0)
 	}
 	RETURN(1)
@@ -1580,7 +1578,7 @@ int ERM_UniversalEx(char Cmd,int Num,_ToDo_*,Mes *Mp)
 			CHECK_ParamsNum(1);
 			v = timeGetTime();
 			if (Apply(&v, 4, Mp, 0)) break;
-			Message(Format("Time delta: %d miliseconds", timeGetTime() - v));
+			Message(Format("Time delta: %d", timeGetTime() - v));
 			break;
 		}
 
@@ -1588,7 +1586,7 @@ int ERM_UniversalEx(char Cmd,int Num,_ToDo_*,Mes *Mp)
 		{ 
 			CHECK_ParamsNum(2);
 			int n = Mp->n[0];
-			if(n < 0 || n >= TextConstCount || TextConstValid[n] == 0){ WL_MError3("wrong index: ",n); RETURN(0) }
+			if(n < 0 || n >= TextConstCount || TextConstValid[n] == 0){ MError2("wrong index."); RETURN(0) }
 			StrMan::Apply(TextConst[n], TextConstBackup[n], TextConstVars[n], Mp, 1);
 			break;
 		}
@@ -1597,7 +1595,7 @@ int ERM_UniversalEx(char Cmd,int Num,_ToDo_*,Mes *Mp)
 		{
 			CHECK_ParamsNum(2);
 			int n = Mp->n[0];
-			if(n < 0 || n >= TOWNNUM){ WL_MError3("town type out of range (0...8).\nIncorrect value: %d",n); RETURN(0) }
+			if(n < 0 || n > 8){ MError2("town type out of range (0...8)."); RETURN(0) }
 			if (Apply(&GrailEnabled[n], 4, Mp, 1)) break;
 			UpdateGrailEnabled(n);
 			break;
@@ -1642,7 +1640,7 @@ int ERM_UniversalEx(char Cmd,int Num,_ToDo_*,Mes *Mp)
 		/**/
 
 		default:
-			WL_EWrongCommand();
+			EWrongCommand();
 			RETURN(0)
 	}
 	RETURN(1)
@@ -1682,26 +1680,26 @@ int ERM_Universal(char Cmd,int Num,_ToDo_*,Mes *Mp)
 				case 1: RedrawMap(); break;
 				case 2: RedrawRes(); break;
 				case 3:
-					if(Num<2){ WL_MError2("-insufficient parameters."); RETURN(0) } // #x/#y/#l/#o/#r
+					if(Num<2){ MError("\"!!UN:R3\"-insufficient parameters."); RETURN(0) } // #x/#y/#l/#o/#r
 					v=Mp->n[1];
-					if((v<-1)||(v>=HERNUM)){ WL_MError3("-wrong hero number.\nIncorrect value: %d",v); RETURN(0) } // #x/#y/#l/#o/#r
+					if((v<-1)||(v>=HERNUM)){ MError("\"!!UN:R3\"-wrong hero number."); RETURN(0) } // #x/#y/#l/#o/#r
 					if(v==-1) RedrawHeroScreen(ERM_HeroStr);
 					else RedrawHeroScreen(GetHeroStr(v));
 					break;
 				case 4: RedrawTown(); break;
 				case 5: // установить вид курсора
-					if(Num<3){ WL_MError2("-insufficient parameters."); RETURN(0) } // #x/#y/#l/#o/#r
+					if(Num<3){ MError("\"!!UN:R5\"-insufficient parameters."); RETURN(0) } // #x/#y/#l/#o/#r
 					if(Apply(&MType,4,Mp,1)) break;
 					if(Apply(&MSType,4,Mp,2)) break;
 					SetMouseCursor(MSType,MType);
 					break;
 				case 6:
-					if(Num<2){ WL_MError2("-insufficient parameters."); RETURN(0) } // #x/#y/#l/#o/#r
+					if(Num<2){ MError("\"!!UN:R6\"-insufficient parameters."); RETURN(0) } // #x/#y/#l/#o/#r
 					if(Apply(&MType,4,Mp,1)) break;
 					DelayIt(MType); // delay for MType msec
 					break;
 				case 7: // enable/disable show/hide cursor
-					if(Num<2){ WL_MError2("-insufficient parameters."); RETURN(0) } // #x/#y/#l/#o/#r
+					if(Num<2){ MError("\"!!UN:R7\"-insufficient parameters."); RETURN(0) } // #x/#y/#l/#o/#r
 					if(Apply(&MType,4,Mp,1)) break;
 					if(MType){ // hide
 						ZHideCursor();
@@ -1710,13 +1708,13 @@ int ERM_Universal(char Cmd,int Num,_ToDo_*,Mes *Mp)
 					}
 					if(Num>2) Apply(&GLB_DisableMouse,4,Mp,2);
 					break;        
-				default: WL_MError3("-wrong parameter R%d",Mp->n[0]);; RETURN(0)
+				default: MError("\"!!UN:R\"-wrong parameter."); RETURN(0)
 			}
 			break;
 		case 'E': // проверить на доступность размещения
 			CHECK_ParamsMin(3); // #x/#y/#l
 			mp=GetMapItem(Mp->n[0],Mp->n[1],Mp->n[2]);
-			if(mp==0){ WL_MError2(Format("-wrong map position: %d %d %d",Mp->n[0],Mp->n[1],Mp->n[2])); RETURN(0) }
+			if(mp==0){ MError("\"!!UN:E\"-wrong map position."); RETURN(0) }
 			if(EmptyPlace2(mp)==0){ //занято
 				ERMFlags[0]=1;
 			}else{
@@ -1729,11 +1727,11 @@ int ERM_Universal(char Cmd,int Num,_ToDo_*,Mes *Mp)
 			x=Mp->n[0]; y=Mp->n[1]; l=Mp->n[2];
 			t=Mp->n[3]; st=Mp->n[4];
 			if(Num==5){ srf=-1; }
-			if(Num==6){ srf=Mp->n[5]; if((srf<-1)||(srf>8)){ WL_MError3("-wrong surface type (-1...8).\nIncorrect value: %d",srf); RETURN(0) }}
+			if(Num==6){ srf=Mp->n[5]; if((srf<-1)||(srf>8)){ MError("\"!!UN:I\"-wrong surface type (-1...8)."); RETURN(0) }}
 			t2=t; st2=st;
 			if(Num>6){ t2=Mp->n[5]; st2=Mp->n[6]; }
 			if(Num==7){ srf=-1; }
-			if(Num>7) { srf=Mp->n[7]; if((srf<-1)||(srf>8)){ WL_MError3("-wrong surface type (-1...8).\nIncorrect value: %d",srf); RETURN(0) }}
+			if(Num>7) { srf=Mp->n[7]; if((srf<-1)||(srf>8)){ MError("\"!!UN:I\"-wrong surface type (-1...8)."); RETURN(0) }}
 			if(Num==9)  redraw=Mp->n[8];
 			PlaceObject(x,y,l,t,st,t2,st2,srf);
 			if(redraw) RedrawMap();
@@ -1762,7 +1760,7 @@ int ERM_Universal(char Cmd,int Num,_ToDo_*,Mes *Mp)
 					str = StrMan::GetStoredStr(NextWeekMess);
 					StrMan::Apply(str, 0, NextWeekMess, Mp, 1);
 					break;
-				default: WL_MError2("-wrong first parameter."); RETURN(0)
+				default: MError("\"!!UN:I\"-wrong first parameter."); RETURN(0)
 			}
 			break;
 		case 'M': // M#/$ установить месяц...
@@ -1786,15 +1784,15 @@ int ERM_Universal(char Cmd,int Num,_ToDo_*,Mes *Mp)
 //          if((Mp->n[1]<0)||(Mp->n[1]>11)){ Error(); return 0; }
 //          Apply(&NewMonthMonTypes[Mp->n[1]],1,Mp,2);
 //          break;
-				default: WL_MError3("-wrong first parameter.\nIncorrect value: %d",Mp->n[0]); RETURN(0)
+				default: MError("\"!!UN:M\"-wrong first parameter."); RETURN(0)
 			}
 			break;
 		case 'N': // N#/z/subtype/...
 			CHECK_ParamsMin(3);
 			zi=0; Apply(&zi,4,Mp,1);
-			if(BAD_INDEX_LZ(zi)||(zi>1000)){ WL_MError3("-z var index out of range (-20...-1,1...1000).\nIncorrect value: %d",zi); RETURN(0) }
+			if(BAD_INDEX_LZ(zi)||(zi>1000)){ MError("\"!!UN:N\"-z var index out of range (-20...-1,1...1000)."); RETURN(0) }
 			v=-1; Apply(&v,4,Mp,2);
-			if(v<0){ WL_MError3("-incorrect type of object (<0).\nIncorrect value: %d",v); RETURN(0) }
+			if(v<0){ MError("\"!!UN:N\"-incorrect type of object (<0)."); RETURN(0) }
 			str = GetPureErmString(zi);
 			switch(Mp->n[0]){
 				case 0: // N0/z/st get name of artefact
@@ -1806,20 +1804,20 @@ int ERM_Universal(char Cmd,int Num,_ToDo_*,Mes *Mp)
 				case 2: // N2/z/st/sst  //  имя строения в определенном городе
 					CHECK_ParamsMin(4);
 					 v2=-1; Apply(&v2,4,Mp,3);
-					if(v2<0){ WL_MError3("-incorrect additioal type of object (<0).\nIncorrect value: %d",v2); RETURN(0) }
+					if(v2<0){ MError("\"!!UN:N\"-incorrect additioal type of object (<0)."); RETURN(0) }
 					StrCopy(str,512,GetBuildName(v,v2));
 					break;
 				case 3: // N3/z/st/sP  //  имя монстра(ов)
 					CHECK_ParamsMin(4);
 					 v2=-1; Apply(&v2,4,Mp,3);
-					if(v2<0){ WL_MError3("-incorrect additioal type of object (<0).\nIncorrect value: %d",v2); RETURN(0) }
+					if(v2<0){ MError("\"!!UN:N\"-incorrect additioal type of object (<0)."); RETURN(0) }
 					StrCopy(str,512,GetMonName(v,v2));
 					break;
 				case 4: // N4/z/st get name of secondary skill
 					StrCopy(str,512,GetSSkillName(v));
 					break;
 				case 5: // N5/z/optind save a value to INI file
-					if(Num<3){ WL_MError2("-insufficient parameters."); RETURN(0) }
+					if(Num<3){ MError("\"!!UN:N5\"-insufficient parameters."); RETURN(0) }
 					if(Num>3){
 						zi=0; Apply(&zi,4,Mp,3);
 						if(GetErmString(str2, zi)) RETURN(0)
@@ -1831,7 +1829,7 @@ int ERM_Universal(char Cmd,int Num,_ToDo_*,Mes *Mp)
 					WriteStrINI(str,itoa(v,UN_Buf,10),str2,str3);
 					break;
 				case 6: // N5/z/optind read a value to INI file
-					if(Num<3){ WL_MError2("-insufficient parameters."); RETURN(0) }
+					if(Num<3){ MError("\"!!UN:N6\"-insufficient parameters."); RETURN(0) }
 					if(Num>3){
 						zi=0; Apply(&zi,4,Mp,3);
 						if(GetErmString(str2, zi)) RETURN(0)
@@ -1842,14 +1840,14 @@ int ERM_Universal(char Cmd,int Num,_ToDo_*,Mes *Mp)
 					}else str3=".\\WoG.ini";
 					ReadStrINI(str,512,str,itoa(v,UN_Buf,10),str2,str3);
 					break;
-				default: WL_MError3("-wrong first parameter: N%d",Mp->n[0]); RETURN(0)
+				default: MError("\"!!UN:N\"-wrong first parameter."); RETURN(0)
 			}
 			break;
 		case 'C': // Cadr/syze/data модеф. память
 			CHECK_ParamsNum(3);
 //      Apply((void *)Mp->n[0],(char)Mp->n[1],Mp,2);
-			if(Apply(&v ,4,Mp,0)){ WL_MError2("-get or check syntax is not acceptable."); RETURN(0) }
-			if(Apply(&v2,4,Mp,1)){ WL_MError2("-get or check syntax is not acceptable."); RETURN(0) }
+			if(Apply(&v ,4,Mp,0)){ MError("\"!!UN:C\"-get or check syntax is not acceptable."); RETURN(0) }
+			if(Apply(&v2,4,Mp,1)){ MError("\"!!UN:C\"-get or check syntax is not acceptable."); RETURN(0) }
 			__asm{ 
 				mov eax,v 
 				mov eax,[eax]
@@ -1875,13 +1873,13 @@ int ERM_Universal(char Cmd,int Num,_ToDo_*,Mes *Mp)
 					mov [edx],eax 
 								} 
 					break;
-				default: WL_EWrongSyntax(); RETURN(0)
+				default: EWrongSyntax(); RETURN(0)
 			}
 			break;
 		case 'X': // X?x/?l - получить размеры карты
 			CHECK_ParamsNum(2);
-			if(Mp->VarI[0].Check==0){ WL_MError2("-try to set X(Y)."); RETURN(0) }
-			if(Mp->VarI[1].Check==0){ WL_MError2("-try to set L."); RETURN(0) }
+			if(Mp->VarI[0].Check==0){ MError("\"!!UN:X\"-try to set X(Y)."); RETURN(0) }
+			if(Mp->VarI[1].Check==0){ MError("\"!!UN:X\"-try to set L."); RETURN(0) }
 			v=GetMapSize();
 			v2=GetMapLevels();
 			Apply(&v,4,Mp,0);
@@ -1889,17 +1887,17 @@ int ERM_Universal(char Cmd,int Num,_ToDo_*,Mes *Mp)
 			break;
 		case 'V': // V?wog/?erm - получить версии WoG и ERM
 			CHECK_ParamsMin(2);
-			if(Mp->VarI[0].Check==0){ WL_MError2("-try to set WoG version."); RETURN(0) }
-			if(Mp->VarI[1].Check==0){ WL_MError2("-try to set ERM version."); RETURN(0) }
+			if(Mp->VarI[0].Check==0){ MError("\"!!UN:V\"-try to set WoG version."); RETURN(0) }
+			if(Mp->VarI[1].Check==0){ MError("\"!!UN:V\"-try to set ERM version."); RETURN(0) }
 			v=WOG_VERSION;
 			v2=ERM_VERSION;
 			Apply(&v,4,Mp,0);
 			Apply(&v2,4,Mp,1);
 			if(Num>2){
 //CHECK_ParamsMin(5);
-				if(Mp->VarI[2].Check==0){ WL_MError2("-try to set parameter."); RETURN(0) }
-				if(Mp->VarI[3].Check==0){ WL_MError2("-try to set parameter."); RETURN(0) }
-				if(Mp->VarI[4].Check==0){ WL_MError2("-try to set parameter."); RETURN(0) }
+				if(Mp->VarI[2].Check==0){ MError("\"!!UN:V\"-try to set parameter."); RETURN(0) }
+				if(Mp->VarI[3].Check==0){ MError("\"!!UN:V\"-try to set parameter."); RETURN(0) }
+				if(Mp->VarI[4].Check==0){ MError("\"!!UN:V\"-try to set parameter."); RETURN(0) }
 				__asm{ 
 					mov eax,0x6992C4 
 					mov eax,[eax] 
@@ -1949,7 +1947,7 @@ int ERM_Universal(char Cmd,int Num,_ToDo_*,Mes *Mp)
 			}else if(Num==3){
 				_ArtSetUp_ *artsetup;
 				v2=-1; Apply(&v2,4,Mp,0);
-				if((v2<0)||(v2>=ARTNUM)){ WL_MError3("-wrong artifact number (internal).\nIncorrect value: %d",v2); RETURN(0) }
+				if((v2<0)||(v2>=ARTNUM)){ MError("\"!!UN:A\"-wrong artifact number (internal)."); RETURN(0) }
 				artsetup=&GetArtBase()[v2];
 				v=0; Apply(&v,4,Mp,1);
 				switch(v){
@@ -1984,38 +1982,38 @@ int ERM_Universal(char Cmd,int Num,_ToDo_*,Mes *Mp)
 						StrMan::Apply(ArtPickUp[v2], ArtPickUpBack[v2], ArtNames[v2].PickUp, Mp, 2);
 						break;
 					default: //0
-						WL_MError3("-wrong parameter A%d.",v); RETURN(0)
+						MError("\"UN:A\"-wrong syntax (A$/$/$)."); RETURN(0)
 				}
 				break;
 			}else if(Num>=4){
 				int Arts[14];
 				int CInd=-1; Apply(&CInd,4,Mp,0);
-				if((CInd<0)||(CInd>=32)){ WL_MError3("-wrong combo artifact index.\nIncorrect value: %d",CInd); RETURN(0) }
+				if((CInd<0)||(CInd>=32)){ MError("\"!!UN:A\"-wrong combo artifact index."); RETURN(0) }
 				int CNum=CArtSetup[CInd].Index; if(Apply(&CNum,4,Mp,1)) break;
-				if((CNum<0)||(CNum>=ARTNUM)){ WL_MError3("-wrong combo artifact number.\nIncorrect value: %d",CNum); RETURN(0) }
+				if((CNum<0)||(CNum>=ARTNUM)){ MError("\"!!UN:A\"-wrong combo artifact number."); RETURN(0) }
 				for(int i=2;i<Num;i++){ Arts[i-2]=-1; Apply(&Arts[i-2],4,Mp,i); }
 				ERMFlags[0]=BuildUpCombo(CNum,CInd,Num-2,Arts);
 			}
 			break;
 		case 'U': // Utype/subtype/?N  или Utype/subtype/i/varnumber
 			CHECK_ParamsMin(2);
-			if((Apply(&t,4,Mp,0))||(Apply(&st,4,Mp,1))){ WL_MError2("-cannot check or get Type and Subtype."); RETURN(0) }
+			if((Apply(&t,4,Mp,0))||(Apply(&st,4,Mp,1))){ MError("\"!!UN:U\"-cannot check or get Type and Subtype."); RETURN(0) }
 			if(Num==3){
 				srf=CalcObjects(t,st);
-				if(Apply(&srf,4,Mp,2)==0){ WL_MError2("-cannot set number of objects."); RETURN(0) }
+				if(Apply(&srf,4,Mp,2)==0){ MError("\"!!UN:U\"-cannot set number of objects."); RETURN(0) }
 			}else{
-				if(Apply(&srf,4,Mp,2)){ WL_MError2("-cannot get or check number of object."); RETURN(0) }
-				if(srf==0){ WL_MError2("-wrong object number (0). Must be>0, -1 or -2"); RETURN(0) }
-				if(Apply(&v,4,Mp,3)){ WL_MError2("-cannot get or check number of V variable."); RETURN(0) }
-				if((v<1)||(v>9998)){ WL_MError3("-wrong V var number (1...9998).\nIncorrect value: %d",v); RETURN(0) }
+				if(Apply(&srf,4,Mp,2)){ MError("\"!!UN:U\"-cannot get or check number of object."); RETURN(0) }
+				if(srf==0){ MError("\"!!UN:U\"-wrong object number (0). Must be>0, -1 or -2"); RETURN(0) }
+				if(Apply(&v,4,Mp,3)){ MError("\"!!UN:U\"-cannot get or check number of V variable."); RETURN(0) }
+				if((v<1)||(v>9998)){ MError("\"!!UN:U\"-wrong V var number (1...9998)."); RETURN(0) }
 //        if(srf==-1){
 				if(srf<0){
 					x=ERMVar2[v-1];
 					y=ERMVar2[v];
 					l=ERMVar2[v+1];
-					if(FindNextObjects(t,st,&x,&y,&l,srf)){ WL_MError2("-cannot find more objects."); RETURN(0) }
+					if(FindNextObjects(t,st,&x,&y,&l,srf)){ MError("\"!!UN:U\"-cannot find more objects."); RETURN(0) }
 				}else{
-					if(FindObjects(t,st,srf,&x,&y,&l)){ WL_MError2("-cannot get object coordinates."); RETURN(0) }
+					if(FindObjects(t,st,srf,&x,&y,&l)){ MError("\"!!UN:U\"-cannot get object coordinates."); RETURN(0) }
 				}
 				ERMVar2[v-1]=x;
 				ERMVar2[v]=y;
@@ -2024,13 +2022,13 @@ int ERM_Universal(char Cmd,int Num,_ToDo_*,Mes *Mp)
 			break;
 		case 'T': // Ttown/dwel/upgr/montype - тип монстров для найма
 			CHECK_ParamsMin(4);
-			t=-1; Apply(&t,4,Mp,0); if((t<0)||(t>TOWNNUM)){ WL_MError3("-wrong town number(0...8).\nIncorrect value: %d",t); RETURN(0) }
+			t=-1; Apply(&t,4,Mp,0); if((t<0)||(t>8)){ MError("\"!!UN:T\"-wrong town number(0...8)."); RETURN(0) }
 			mt=MonInTownBase(t);
-			st=-1; Apply(&st,4,Mp,1); if((st<0)||(st>6)){ WL_MError3("-wrong dwelling number(0...6).\nIncorrect value: %d",st); RETURN(0) }
-			t2=-1; Apply(&t2,4,Mp,2); if((t2<0)||(t2>1)){ WL_MError3("-wrong upgrade(0,1).\nIncorrect value: %d",t2); RETURN(0) }
+			st=-1; Apply(&st,4,Mp,1); if((st<0)||(st>6)){ MError("\"!!UN:T\"-wrong dwelling number(0...6)."); RETURN(0) }
+			t2=-1; Apply(&t2,4,Mp,2); if((t2<0)||(t2>1)){ MError("\"!!UN:T\"-wrong upgrade(0,1)."); RETURN(0) }
 			v=mt[t2*7+st];
 			if(Apply(&v,4,Mp,3)) break;
-			if((v<0)||(v>=MONNUM)){ WL_MError3("-wrong monster type.\nIncorrect value: %d",v); RETURN(0) }
+			if((v<0)||(v>=MONNUM)){ MError("\"!!UN:T\"-wrong monster type."); RETURN(0) }
 			mt[t2*7+st]=v;
 			break;
 		case 'L': // переместить в позицию
@@ -2041,7 +2039,7 @@ int ERM_Universal(char Cmd,int Num,_ToDo_*,Mes *Mp)
 				}else t=0;
 				if(Apply(&t,4,Mp,2)) break;
 				SetObel(Mp->n[0],Mp->n[1],t);
-			}else{ WL_EWrongSyntax(); RETURN(0) }// #x/#y/#l/#d
+			}else{ EWrongParamsNum(); RETURN(0) }// #x/#y/#l/#d
 			break;
 		case 'P': // параметры настройки
 			if(Num<2){
@@ -2049,7 +2047,7 @@ int ERM_Universal(char Cmd,int Num,_ToDo_*,Mes *Mp)
 				PL_OptionReset[0] = PL_WoGOptions[0][0];
 				break;
 			}
-			if((Mp->n[0]<0)||(Mp->n[0]>=WL_PL_WONUM)){ WL_MError3("-wrong first parameter.\nIncorrect value: %d",Mp->n[0]); RETURN(0) }
+			if((Mp->n[0]<0)||(Mp->n[0]>=PL_WONUM)){ MError("\"!!UN:P\"-wrong first parameter."); RETURN(0) }
 			{
 				int isCheck = Apply(&PL_WoGOptions[0][Mp->n[0]],4,Mp,1);
 				if(Mp->n[0] >= 0 && Mp->n[0] <= 10)
@@ -2083,7 +2081,7 @@ int ERM_Universal(char Cmd,int Num,_ToDo_*,Mes *Mp)
 					Apply(&EnableMithrill,4,Mp,1);
 					break;
 				default: // сундук 1..., камни 7...10 
-					if((Mp->n[0]<0)||(Mp->n[0]>19)){ WL_MError3("-wrong first parameter.\nIncorrect value: %d",Mp->n[0]); RETURN(0) }
+					if((Mp->n[0]<0)||(Mp->n[0]>19)){ MError("\"!!UN:B\"-wrong first parameter."); RETURN(0) }
 					Apply(&EnableChest[Mp->n[0]],4,Mp,1);
 					break;
 			}
@@ -2124,9 +2122,9 @@ int ERM_Universal(char Cmd,int Num,_ToDo_*,Mes *Mp)
 		case 'G': // G#/#/#/$ имена
 			CHECK_ParamsMin(4);
 			switch(Mp->n[0]){
-				case 0:  // вторичных скилов 0/номер_скила/тип_текста/zvar  !!! WL: t>28 changed to t>27
-					t=Mp->n[1];  if((t<0)||(t>27)){ WL_MError3("-wrong secondary skill number (0...27).\nIncorrect value: %d",t); RETURN(0) }
-					t2=Mp->n[2]; if((t2<0)||(t2>3)){ WL_MError3("-wrong secondary skill text type number (0...3).\nIncorrect value: %d",t2); RETURN(0) }
+				case 0:  // вторичных скилов 0/номер_скила/тип_текста/zvar
+					t=Mp->n[1];  if((t<0)||(t>28)){ MError("\"!!UN:G\"-wrong secondary skill number (0...27)."); RETURN(0) }
+					t2=Mp->n[2]; if((t2<0)||(t2>3)){ MError("\"!!UN:G\"-wrong secondary skill text type number (0...3)."); RETURN(0) }
 					switch(t2){
 						case 0:
 							if (StrMan::Apply(SSNAME[t].Name, SSNameBack[t].Name, SSAllNames[t].Var[t2], Mp, 3))
@@ -2149,8 +2147,8 @@ int ERM_Universal(char Cmd,int Num,_ToDo_*,Mes *Mp)
 					}
 					break;
 				case 1:  // монстры 1/номер_монстра/тип_текста/zvar
-					t=Mp->n[1];  if((t<0)||(t>=MONNUM)){ WL_MError3("-wrong monster number.\nIncorrect value: %d",t); RETURN(0) }
-					t2=Mp->n[2]; if((t2<0)||(t2>4)){ WL_MError3("-wrong monster text type number (0...4).\nIncorrect value: %d",t2); RETURN(0) }
+					t=Mp->n[1];  if((t<0)||(t>=MONNUM)){ MError("\"!!UN:G\"-wrong monster number."); RETURN(0) }
+					t2=Mp->n[2]; if((t2<0)||(t2>4)){ MError("\"!!UN:G\"-wrong monster text type number (0...4)."); RETURN(0) }
 					switch(t2){
 						case 0: // single
 							if (StrMan::Apply(MonTable2[t].NameS, MonTable2Back[t].NameS, MonNames[t].Var[t2], Mp, 3))
@@ -2173,8 +2171,8 @@ int ERM_Universal(char Cmd,int Num,_ToDo_*,Mes *Mp)
 					}
 					break;
 				case 2:  // Спец.Героев 2/номер_героя/тип_текста(3-картинка)/zvar(номер картинки спец+1)
-					t=Mp->n[1];  if((t<0)||(t>=HERNUM)){ WL_MError3("-wrong hero number.\nIncorrect value: %d",t); RETURN(0) }
-					t2=Mp->n[2]; if((t2<0)||(t2>3)){ WL_MError3("-wrong herospec text type number (0...3).\nIncorrect value: %d",t2); RETURN(0) }
+					t=Mp->n[1];  if((t<0)||(t>=HERNUM)){ MError("\"!!UN:G\"-wrong hero number."); RETURN(0) }
+					t2=Mp->n[2]; if((t2<0)||(t2>3)){ MError("\"!!UN:G\"-wrong herospec text type number (0...3)."); RETURN(0) }
 					if(t2==3){ // картинка
 						v=HSpecNames[t].PicNum-1;
 						if(Apply(&v,4,Mp,3)) break;
@@ -2192,14 +2190,14 @@ int ERM_Universal(char Cmd,int Num,_ToDo_*,Mes *Mp)
 							StrMan::Apply(HSpecTable[t].SpDescr, HSpecBack[t].SpDescr, HSpecNames[t].Var[t2], Mp, 3);
 					}
 					break;
-				default: WL_MError3("-wrong first parameter: G%d",Mp->n[0]); RETURN(0)
+				default: MError("\"!!UN:G\"-wrong first parameter."); RETURN(0)
 			}
 			break;
 		case 'J': // J#/#/$ разное
 			switch(Mp->n[0]){
 				case 0: // доступность спеллов
 					CHECK_ParamsMin(3);
-					t=Mp->n[1];  if((t<0)||(t>69)){ WL_MError3("-wrong spell number (0...69).\nIncorrect value: %d",t); RETURN(0) }
+					t=Mp->n[1];  if((t<0)||(t>=0x46)){ MError("\"!!UN:J\"-wrong spell number (0...69)."); RETURN(0) }
 					v=SpellDisBase()[t];
 					if(Apply(&v,4,Mp,2)) break;
 					SpellDisBase()[t]=(char)v;
@@ -2222,10 +2220,10 @@ int ERM_Universal(char Cmd,int Num,_ToDo_*,Mes *Mp)
 					break;
 				case 3: // J3/^text^ or J3/# загрузка пользовательских опций
 					{ char *d;
-						if(Num!=2){ WL_MError2("-wrong number of parameters."); RETURN(0) }
+						if(Num!=2){ MError("\"!!UN:J3\"-wrong number of parameters."); RETURN(0) }
 						if(Mp->n[1]!=0){ // аргумент - z var
-							if(Apply(&v,4,Mp,1)){ WL_EWrongSyntax(); RETURN(0) }
-							if(BAD_INDEX_LZ(v)){ WL_MError3("- z var out of range (-20...-1,1...1000+).\nIncorrect value: %d",v); RETURN(0) }
+							if(Apply(&v,4,Mp,1)){ EWrongSyntax(); RETURN(0) }
+							if(BAD_INDEX_LZ(v)){ MError("\"!!UN:J3\"- z var out of range (-20...-1,1...1000+)."); RETURN(0) }
 							d=GetErmString(v);
 						}else{ // аргумент - ^текст^
 							d=ERM2String(&Mp->m.s[Mp->i],0,&v);
@@ -2235,39 +2233,39 @@ int ERM_Universal(char Cmd,int Num,_ToDo_*,Mes *Mp)
 						break;
 					}
 				case 4: // 3.58 set the AI thinking delay
-					if(Num<2){ WL_MError2("-insufficient parameters."); RETURN(0) }
+					if(Num<2){ MError("\"!!UN:J4\"-insufficient parameters."); RETURN(0) }
 					v=GetDelay();
 					if(Apply(&v,4,Mp,1)) break; // check,get
 					AI_Delay=v;
 					SetDelay(v);
 					break;
 				case 5: // 3.58 set auto save flag
-					if(Num<2){ WL_MError2("-insufficient parameters."); RETURN(0) }
+					if(Num<2){ MError("\"!!UN:J5\"-insufficient parameters."); RETURN(0) }
 					v=GetAutoSave();
 					if(Apply(&v,4,Mp,1)) break; // check,get
 					AutoSaveFlag=v;
 					SetAutoSave(v);
 					break;
 				case 6: // J6/#/$; 3.58 get a random artifact
-					if(Num<3){ WL_MError2("-insufficient parameters."); RETURN(0) }
-					if(Apply(&v,4,Mp,1)){ WL_MError2("-cannot check art level."); RETURN(0) }
+					if(Num<3){ MError("\"!!UN:J6\"-insufficient parameters."); RETURN(0) }
+					if(Apply(&v,4,Mp,1)){ MError("\"!!UN:J6\"-cannot check art level."); RETURN(0) }
 					v=GenArt(v);
 					Apply(&v,4,Mp,2);
 					break;
 				case 7: // J7/#/$; 3.58 get/set Merchant artifact
-					if(Num<3){ WL_MError2("-insufficient parameters."); RETURN(0) }
-					if(Apply(&v,4,Mp,1)){ WL_MError2("-cannot check art slot."); RETURN(0) }
+					if(Num<3){ MError("\"!!UN:J7\"-insufficient parameters."); RETURN(0) }
+					if(Apply(&v,4,Mp,1)){ MError("\"!!UN:J7\"-cannot check art slot."); RETURN(0) }
 					v2=GetMerchArt(v);
 					if(Apply(&v2,4,Mp,2)) break;
 					SetMerchArt(v,v2);
 					break;
 				case 8: // J8/#(modifier)/#(z var) or J8/#/^text^ set flag 1 - if file exists
 					{ char *d;
-						if(Num!=3){ WL_MError2("-wrong number of parameters."); RETURN(0) }
-						if(Apply(&t,4,Mp,1)){ WL_EWrongSyntax(); RETURN(0) }
+						if(Num!=3){ MError("\"!!UN:J8\"-wrong number of parameters."); RETURN(0) }
+						if(Apply(&t,4,Mp,1)){ EWrongSyntax(); RETURN(0) }
 						if(Mp->n[2]!=0){ // аргумент - z var
-							if(Apply(&v,4,Mp,2)){ WL_EWrongSyntax(); RETURN(0) }
-							if(BAD_INDEX_LZ(v)){ WL_MError3("- z var out of range (-20...-1,1...1000+).\nIncorrect value: %d",v); RETURN(0) }
+							if(Apply(&v,4,Mp,2)){ EWrongSyntax(); RETURN(0) }
+							if(BAD_INDEX_LZ(v)){ MError("\"!!UN:J8\"- z var out of range (-20...-1,1...1000+)."); RETURN(0) }
 							d=GetErmString(v);
 						}else{ // аргумент - ^текст^
 							d=ERM2String(&Mp->m.s[Mp->i],0,&v);
@@ -2278,14 +2276,14 @@ int ERM_Universal(char Cmd,int Num,_ToDo_*,Mes *Mp)
 					}
 				case 9: // J9/#(modifier)/#(z var) - get path to z var
 					{ char *d;
-						if(Num!=3){ WL_MError2("-wrong number of parameters."); RETURN(0) }
-						if(Apply(&t,4,Mp,1)){ WL_EWrongSyntax(); RETURN(0) }
+						if(Num!=3){ MError("\"!!UN:J9\"-wrong number of parameters."); RETURN(0) }
+						if(Apply(&t,4,Mp,1)){ EWrongSyntax(); RETURN(0) }
 						if(Mp->n[2]!=0){ // аргумент - z var
 							Apply(&v,4,Mp,2);
-							if(BAD_INDEX_LZ(v)||(v>1000)){ WL_MError3("- z var out of range (-20...-1,1...1000).\nIncorrect value: %d",v); RETURN(0) }
+							if(BAD_INDEX_LZ(v)||(v>1000)){ MError("\"!!UN:J9\"- z var out of range (-20...-1,1...1000)."); RETURN(0) }
 							d = GetPureErmString(v);
 						}else{ // аргумент - ^текст^
-							WL_MError2("- must be z var."); 
+							MError("\"!!UN:J9\"- must be z var."); 
 							RETURN(0)
 						}
 						StrCopy(d,512,GetFolder(t));
@@ -2310,17 +2308,17 @@ int ERM_Universal(char Cmd,int Num,_ToDo_*,Mes *Mp)
 							Apply(&v,4,Mp,1);
 							if(GetPureErmString(d, v)) RETURN(0)
 						}else{ // аргумент - ^текст^
-							WL_MError2("- must be z var."); 
+							MError("\"!!UN:J12\"- must be z var."); 
 							RETURN(0)
 						}
 						strncpy(d,MapName,511);
 					}
 					break;
-				default: WL_MError2("wrong first parameter."); RETURN(0)
+				default: MError("\"!!UN:J\"-wrong first parameter."); RETURN(0)
 			}
 			break;
 		default:
-			WL_EWrongCommand()
+			EWrongCommand();
 			RETURN(0)
 	}
 	RETURN(1)
@@ -2350,7 +2348,7 @@ int __fastcall ChangeFlagColor(_MapItem_ *mip, int r)
 	FCstruct = &fc;
 
 	Map2Coord(mip, &ERM_PosX, &ERM_PosY, &ERM_PosL);
-	pointer = WL_FUNC_COUNT+375;
+	pointer = 30375;
 	ProcessERM();
 
 	FCstruct = old;
@@ -2360,7 +2358,7 @@ int __fastcall ChangeFlagColor(_MapItem_ *mip, int r)
 int ERM_FlagColor(char Cmd, int Num, _ToDo_*, Mes *Mp)
 {
 	STARTNA(__LINE__,&Mp->m.s[Mp->i])
-	if (FCstruct == 0) { WL_MError2("not in !?FC trigger"); RETURN(0) }
+	if (FCstruct == 0) { MError2("not in !?FC trigger"); RETURN(0) }
 	switch(Cmd)
 	{
 		case 'T':
@@ -2376,7 +2374,7 @@ int ERM_FlagColor(char Cmd, int Num, _ToDo_*, Mes *Mp)
 			Apply(&FCstruct->Color, 4, Mp, 0);
 			break;
 		default:
-			WL_EWrongCommand() RETURN(0)
+			EWrongCommand(); RETURN(0)
 	}
 	RETURN(1)
 }
@@ -2409,7 +2407,7 @@ int __fastcall DigGrailTrigger(_Hero_ * hero, int r, int x, int y, int z)
 	ERM_GM_ai = IsThis(hero->Owner);
 	ERM_HeroStr = hero;
 	ERM_PosX = x; ERM_PosY = y; ERM_PosL = z;
-	pointer = WL_FUNC_COUNT+376;
+	pointer = 30376;
 	ProcessERM();
 
 	DGstruct = old;
@@ -2419,7 +2417,7 @@ int __fastcall DigGrailTrigger(_Hero_ * hero, int r, int x, int y, int z)
 int ERM_DigGrail(char Cmd, int Num, _ToDo_*, Mes *Mp)
 {
 	STARTNA(__LINE__,&Mp->m.s[Mp->i])
-	if (DGstruct == 0) { WL_MError2("not in !?DG trigger"); RETURN(0) }
+	if (DGstruct == 0) { MError2("not in !?DG trigger"); RETURN(0) }
 	switch(Cmd)
 	{
 		case 'P':
@@ -2437,7 +2435,7 @@ int ERM_DigGrail(char Cmd, int Num, _ToDo_*, Mes *Mp)
 			Apply(&DGstruct->Std, 4, Mp, 0);
 			break;
 		default:
-			WL_EWrongCommand() RETURN(0)
+			EWrongCommand(); RETURN(0)
 	}
 	RETURN(1)
 }
@@ -2460,10 +2458,10 @@ char *FindMacro(Mes *mp,int Set)
 	}
 	for(s=mp->i,e=mp->i+1;e<mp->m.l;e++){
 		ch=mp->m.s[e];
-		if(ch==0){ WL_MError("Macro was not found."); RETURN(0) }
+		if(ch==0){ MError("Macro was not found."); RETURN(0) }
 		if(ch==cch){
 			for(i=0,j=s+1; (j<e)&&(i<16); i++,j++) FM_buf[i]=mp->m.s[j];
-			if(j!=e){ WL_MError("Macro is too long (>16 characters)."); RETURN(0) }
+			if(j!=e){ MError("Macro is too long (>16 characters)."); RETURN(0) }
 			for(;i<18;i++) FM_buf[i]=0;
 			mp->i=e+1;
 			RETURN(FM_buf)
@@ -2480,7 +2478,7 @@ char *FindMacro2(char *str,int Set, int *shift)
 	if(Set) cch='@'; else cch='$';
 	for(i=0;;i++){
 		ch=str[i];
-		if(ch== 0 ){ WL_MError("Macro was not found."); RETURN(0) }
+		if(ch== 0 ){ MError("Macro was not found."); RETURN(0) }
 		if(ch==' ') continue;
 		if(ch== 9 ) continue;
 		if(ch!=cch) RETURN(0)
@@ -2489,13 +2487,13 @@ char *FindMacro2(char *str,int Set, int *shift)
 	i+=1;
 	for(j=0;;i++,j++){
 		ch=str[i];
-		if(ch==0){ WL_MError("Macro was not found."); RETURN(0) }
+		if(ch==0){ MError("Macro was not found."); RETURN(0) }
 		if(ch==cch){
 			*shift=i+1;
 			for(;j<18;j++) FM_buf[j]=0;
 			RETURN(FM_buf)
 		}
-		if(j>16){ WL_MError("Macro is too long (>16 characters)."); *shift=i+1; RETURN(0) }
+		if(j>16){ MError("Macro is too long (>16 characters)."); *shift=i+1; RETURN(0) }
 		FM_buf[j]=ch;
 	}
 //  RETURN(0)
@@ -2566,38 +2564,38 @@ int ERM_Macro(char Cmd,int Num,_ToDo_*sp,Mes *Mp)
 	if(vnp2->Num==0 && vnp2->Type==0 && vnp2->IType==0 && vnp2->Check==0) vi=vnp->Num;
 	else vi=GetVarVal(vnp2);
 	str=FindMacro(Mp,1);
-	if(str==0){ WL_MError2("Macro defined incorrectly."); RETURN(0) }
+	if(str==0){ MError("Macro defined incorrectly."); RETURN(0) }
 	switch(Cmd){
 		case 'S': // установить
 			switch(vnp->Type){
 				case 0: // число
 					for (i = 0; (i < 1000) && (ERMMacroName[i][0] != 0) && CheckMacro(ERMMacroName[i], str); i++) ;
-					if (i == 1000) { WL_MError2("cannot declare more macros for numbers (1000)."); RETURN(0) }
+					if (i == 1000) { MError2("cannot declare more macros for numbers (1000)."); RETURN(0) }
 					SetMacro(str,ERMMacroName[i]);
 					ERMMacroVal[i] = vi;
 					break;
 				case 2: // f...t
-					if((vi<1)||(vi>15)){ WL_MError3("fast-var is out of set (f...t).\nIncorrect value: %d",vi); RETURN(0) }
+					if((vi<1)||(vi>15)){ MError("\"!!MC:S\"-var is out of set (f...t)."); RETURN(0) }
 					SetMacro(str,ERMVarMacro[vi-1]);
 					break;
 				case 3: // v1...1000
-					if(BAD_INDEX_V(vi)){ WL_MError3("v--var is out of set (v1...v10000).\nIncorrect value: %d",vi); RETURN(0) }
+					if(BAD_INDEX_V(vi)){ MError("\"!!MC:S\"-var is out of set (v1...v10000)."); RETURN(0) }
 					SetMacro(str,ERMVar2Macro[vi-1]);
 					break;
 				case 4: // w1...100
-					if((vi<1)||(vi>200)){ WL_MError3("w-var is out of set (w1...w200).\nIncorrect value: %d",vi); RETURN(0) }
+					if((vi<1)||(vi>200)){ MError("\"!!MC:S\"-var is out of set (w1...w200)."); RETURN(0) }
 					SetMacro(str,ERMVarHMacro[vi-1]);
 					break;
 //        case 5: // v1...1000
 //        case 6: // v1...1000
 				case 7: // z1...500
-					if((vi<1)||(vi>1000)){ WL_MError3("z-var is out of set (z1...z1000).\nIncorrect value: %d",vi); RETURN(0) }
+					if((vi<1)||(vi>1000)){ MError("\"!!MC:S\"-var is out of set (z1...z1000)."); RETURN(0) }
 					SetMacro(str,ERMStringMacro[vi-1]);
 					break;
-				default: WL_MError2("Wrong var type."); RETURN(0)
+				default: MError("\"!!MC:S\"-Wrong var type."); RETURN(0)
 			}
 			break;
-		default: WL_EWrongCommand() RETURN(0)
+		default: EWrongCommand(); RETURN(0)
 	}
 	RETURN(1)
 }
@@ -2610,7 +2608,7 @@ int ERM_Variable(char Cmd,int Num,_ToDo_*sp,Mes *Mp)
 	VarNum *vnp=&sp->Par[0];
 	switch(Cmd){
 		case 'S': // установить
-			if(Num!=1){ WL_MError2("wrong number of parameters."); RETURN(0) }
+			if(Num!=1){ MError("\"!!VR\"-wrong number of parameters."); RETURN(0) }
 			if(vnp->Type==7){  // строка
 				if(Mp->n[0]!=0){ // копируем одну в другую
 					vv=GetVarVal(vnp);
@@ -2618,12 +2616,12 @@ int ERM_Variable(char Cmd,int Num,_ToDo_*sp,Mes *Mp)
 					SetVarVal(vnp,vv);
 				}else{           // копируем сам текст
 					ind=GetVarVal(vnp);
-					if((ind<-VAR_COUNT_LZ)||(ind==0)||(ind>1000)){ WL_MError3("z-var is out of set (z-20...-1,1...z1000).\nIncorrect value: %d",ind); RETURN(0) }
+					if((ind<-VAR_COUNT_LZ)||(ind==0)||(ind>1000)){ MError("\"!!VR:S\"-var is out of set (z-20...-1,1...z1000)."); RETURN(0) }
 					StrCopy(GetPureErmString(ind),512,ERM2String(&Mp->m.s[Mp->i],0,&vv));
 					Mp->i+=vv;
 				}
 			}else if(vnp->Type==8){  // floating
-				if(Mp->VarI[0].Check!=0){ WL_MError2("you cannot use get or check syntax for float variable."); RETURN(0) }
+				if(Mp->VarI[0].Check!=0){ MError("\"!!VR:S\"-you cannot use get or check syntax for float variable."); RETURN(0) }
 				float vf=GetVarValF(&Mp->VarI[0]);
 				SetVarValF(vnp,vf);
 			}else{
@@ -2633,7 +2631,7 @@ int ERM_Variable(char Cmd,int Num,_ToDo_*sp,Mes *Mp)
 			}
 			break;
 		case 'R': // установить случ генератор
-			if(Num>2){ WL_MError2("wrong number of parameters."); RETURN(0) }
+			if(Num>2){ MError("\"!!VR\"-wrong number of parameters."); RETURN(0) }
 			if(Num==1){
 				Apply(&vv,4,Mp,0);
 				vv=GetVarVal(vnp)+Random(0,vv);
@@ -2645,21 +2643,21 @@ int ERM_Variable(char Cmd,int Num,_ToDo_*sp,Mes *Mp)
 			}
 			break;
 		case 'T': // случ генератор по времени
-			if(Num!=1){ WL_MError2("wrong number of parameters."); RETURN(0) }
+			if(Num!=1){ MError("\"!!VR\"-wrong number of parameters."); RETURN(0) }
 			Apply(&vv,4,Mp,0);
 			vv=GetVarVal(vnp)+TimeRandom(0,vv);
 			SetVarVal(vnp,vv);
 			break;
 		case '+': // добавить
-			if(Num!=1){ WL_MError2("wrong number of parameters."); RETURN(0) }
+			if(Num!=1){ MError("\"!!VR\"-wrong number of parameters."); RETURN(0) }
 			if(vnp->Type==7){  // строка
 				ind = GetVarVal(vnp);
-				if(BAD_INDEX_LZ(ind)||(ind>1000)){ WL_MError3("z-var is out of set (z-20...-1,1...z1000).\nIncorrect value: %d",ind); RETURN(0) }
+				if(BAD_INDEX_LZ(ind)||(ind>1000)){ MError("\"!!VR:+\"-var is out of set (z-20...-1,1...z1000)."); RETURN(0) }
 				txt = GetPureErmString(ind);
 				if(Mp->n[0]!=0){ // добавляем одну к другой
 					vv=ind;
 					if(Apply(&vv,4,Mp,0)) break;
-					if(BAD_INDEX_LZ(vv)){ WL_MError3("z var is out of set (z-20...-1,1...z1000+).\nIncorrect value: %d",vv); RETURN(0) }
+					if(BAD_INDEX_LZ(vv)){ MError("\"!!VR:+\"-var is out of set (z-20...-1,1...z1000+)."); RETURN(0) }
 					StrCanc(txt, 512, txt, GetPureErmString(vv));
 				}else{           // добавляем сам текст
 					StrCanc(txt, 512, txt, ERM2String(&Mp->m.s[Mp->i],0,&vv));
@@ -2676,7 +2674,7 @@ int ERM_Variable(char Cmd,int Num,_ToDo_*sp,Mes *Mp)
 			}
 			break;
 		case '-': // вычесть
-			if(Num!=1){ WL_MError2("wrong number of parameters."); RETURN(0) }
+			if(Num!=1){ MError("\"!!VR\"-wrong number of parameters."); RETURN(0) }
 			if(vnp->Type==8){  // floating
 				float vf=GetVarValF(&Mp->VarI[0]);
 				vf=GetVarValF(vnp)-vf;
@@ -2689,7 +2687,7 @@ int ERM_Variable(char Cmd,int Num,_ToDo_*sp,Mes *Mp)
 //      ERMVar[vi-1]-=vv;
 			break;
 		case '*': // умножить
-			if(Num!=1){ WL_MError2("wrong number of parameters."); RETURN(0) }
+			if(Num!=1){ MError("\"!!VR\"-wrong number of parameters."); RETURN(0) }
 			if(vnp->Type==8){  // floating
 				float vf=GetVarValF(&Mp->VarI[0]);
 				vf=GetVarValF(vnp)*vf;
@@ -2702,37 +2700,37 @@ int ERM_Variable(char Cmd,int Num,_ToDo_*sp,Mes *Mp)
 //      ERMVar[vi-1]*=vv;
 			break;
 		case ':': // делить
-			if(Num!=1){ WL_MError2("wrong number of parameters."); RETURN(0) }
+			if(Num!=1){ MError("\"!!VR\"-wrong number of parameters."); RETURN(0) }
 			if(vnp->Type==8){  // floating
 				float vf=GetVarValF(&Mp->VarI[0]);
-				if(vf==0.0){ WL_MError2("Division by zero") RETURN(0) }
+				if(vf==0.0){ Message("Sorry. Division by zero :-)",1); RETURN(0) }
 				vf=GetVarValF(vnp)/vf;
 				SetVarValF(vnp,vf);
 				break;
 			}
 			Apply(&vv,4,Mp,0);
-			if(vv==0){ WL_MError2("Division by zero") RETURN(0) }
+			if(vv==0){ Message("Sorry. Division by zero :-)",1); RETURN(0) }
 			vv=GetVarVal(vnp)/vv;
 			SetVarVal(vnp,vv);
 //      ERMVar[vi-1]/=vv;
 			break;
 		case '%': // остаток от деления
-			if(Num!=1){ WL_MError2("wrong number of parameters."); RETURN(0) }
+			if(Num!=1){ MError("\"!!VR\"-wrong number of parameters."); RETURN(0) }
 			Apply(&vv,4,Mp,0);
-			if(vv==0){ WL_MError2("Division by zero"); RETURN(0) }
+			if(vv==0){ Message("Sorry. Division by zero :-)",1); RETURN(0) }
 			vv=GetVarVal(vnp)%vv;
 			SetVarVal(vnp,vv);
 //      ERMVar[vi-1]%=vv;
 			break;
 		case '&': // логич и
-			if(Num!=1){ WL_MError2("wrong number of parameters."); RETURN(0) }
+			if(Num!=1){ MError("\"!!VR\"-wrong number of parameters."); RETURN(0) }
 			Apply(&vv,4,Mp,0);
 			vv=(Dword)GetVarVal(vnp)&*(Dword *)&vv;
 			SetVarVal(vnp,vv);
 //      *(Dword *)(&ERMVar[vi-1])&=*(Dword *)&vv;
 			break;
 		case '|': // логич или
-			if(Num!=1){ WL_MError2("wrong number of parameters."); RETURN(0) }
+			if(Num!=1){ MError("\"!!VR\"-wrong number of parameters."); RETURN(0) }
 			Apply(&vv,4,Mp,0);
 			vv=(Dword)GetVarVal(vnp)|*(Dword *)&vv;
 			SetVarVal(vnp,vv);
@@ -2741,20 +2739,20 @@ int ERM_Variable(char Cmd,int Num,_ToDo_*sp,Mes *Mp)
 		case '^': // логич искл. или
 			Message("WARNING!\n The \'!!VR:^$\' command should be changed to \'!!VR:X$\' command.",1);
 		case 'X': // логич искл. или
-			if(Num!=1){ WL_MError2("wrong number of parameters."); RETURN(0) }
+			if(Num!=1){ MError("\"!!VR\"-wrong number of parameters."); RETURN(0) }
 			if(Apply(&vv,4,Mp,0)) break;
 			vv=(Dword)GetVarVal(vnp)^*(Dword *)&vv;
 			SetVarVal(vnp,vv);
 //      *(Dword *)(&ERMVar[vi-1])^=*(Dword *)&vv;
 			break;
 		case 'H': // H# проверить строку на отсутствие текста во флаг #
-			if(Num!=1){ WL_MError2("wrong number of parameters."); RETURN(0) }
+			if(Num!=1){ MError("\"!!VR\"-wrong number of parameters."); RETURN(0) }
 			if(vnp->Type==7){  // строка
-				if((Mp->n[0]<1)||(Mp->n[0]>1000)){ WL_MError3("flag number out of range (1...1000).\nIncorrect value: %d",Mp->n[0]); RETURN(0) }
+				if((Mp->n[0]<1)||(Mp->n[0]>1000)){ MError("\"!!VR:H\"-flag number out of range (1...1000)."); RETURN(0) }
 				ind=GetVarVal(vnp);
 				ERMFlags[Mp->n[0]-1] = (HasText(GetPureErmString(ind)) ? 1 : 0);
 			}else{
-				WL_MError2("not a string variable (z#)."); RETURN(0)
+				MError("\"!!VR:H\"-not a string variable (z#)."); RETURN(0)
 			}
 			break;
 		case 'C': // C$/$/$/$/$.... установить
@@ -2771,18 +2769,18 @@ int ERM_Variable(char Cmd,int Num,_ToDo_*sp,Mes *Mp)
 				}
 			}
 			else{
-				WL_MError2("wrong variable type (must be integer)."); RETURN(0)
+				MError2("wrong variable type (must be integer)."); RETURN(0)
 			}
 			break;
 		case 'U': // search for
 		 { char *s,*d;
-			if(Num!=1){ WL_MError2("wrong number of parameters."); RETURN(0) }
+			if(Num!=1){ MError("\"!!VR\"-wrong number of parameters."); RETURN(0) }
 			if(vnp->Type==7){  // строка
 				ind=GetVarVal(vnp);
 				if(GetPureErmString(s, ind)) RETURN(0)
 				if(Mp->n[0]!=0){ // аргумент - z var
 					if(Apply(&vv,4,Mp,0)) break;
-					if(BAD_INDEX_LZ(vv)){ WL_MError3("z var out of range (-20...-1,1...)\nIncorrect value: %d",vv); RETURN(0) }
+					if(BAD_INDEX_LZ(vv)){ MError("\"!!VR:U\"- z var out of range (-20...-1,1...)."); RETURN(0) }
 					d=GetErmString(vv);
 				}else{ // аргумент - ^текст^
 					d=ERM2String(&Mp->m.s[Mp->i],0,&vv);
@@ -2790,22 +2788,22 @@ int ERM_Variable(char Cmd,int Num,_ToDo_*sp,Mes *Mp)
 				}
 				ERMFlags[0]=(char)Search4Substring(s,d);
 			}else{
-				WL_MError2("not Z var."); RETURN(0)
+				MError("\"!!VR:U\"-not Z var."); RETURN(0)
 			}
 			break;
 		 }
 		case 'M': // 3.58 string process
 		 { char *s,*d;
 			if(vnp->Type!=7){  // не строка
-				WL_MError2("-not Z var."); RETURN(0)
+				MError("\"!!VR:M\"-not Z var."); RETURN(0)
 			}
 			CHECK_ParamsMin(2);
 			ind=GetVarVal(vnp);
-			if(BAD_INDEX_LZ(ind)||ind>1000){ WL_MError3("\"!!VR:M\"- z var out of range (-20...-1,1...1000).\nIncorrect value: %d",ind); RETURN(0) }
+			if(BAD_INDEX_LZ(ind)||ind>1000){ MError("\"!!VR:M\"- z var out of range (-20...-1,1...1000)."); RETURN(0) }
 			if(GetPureErmString(d, ind)) RETURN(0)
 			switch(Mp->n[0]){
 				case 1: // взять подстроку из z2 с #3 длинной #4
-					if(Num<4){ WL_MError2("wrong number of parameters."); RETURN(0) }
+					if(Num<4){ MError("\"!!VR:M1\"-wrong number of parameters."); RETURN(0) }
 					if(Apply(&vv,4,Mp,1)) break; // z var source
 					if(GetPureErmString(s, vv)) RETURN(0)
 					vv=0;  if(Apply(&vv,4,Mp,2)) break; // start
@@ -2818,7 +2816,7 @@ int ERM_Variable(char Cmd,int Num,_ToDo_*sp,Mes *Mp)
 				case 2: // взять токен номер #3 из z2
 				 {
 					char *tmp,buf[512];
-					if(Num<3){ WL_MError2("wrong number of parameters."); RETURN(0) }
+					if(Num<3){ MError("\"!!VR:M2\"-wrong number of parameters."); RETURN(0) }
 					if(Apply(&vv,4,Mp,1)) break; // z var source
 					if(GetPureErmString(s, vv)) RETURN(0)
 					StrCopy(buf,512,s);
@@ -2834,26 +2832,26 @@ int ERM_Variable(char Cmd,int Num,_ToDo_*sp,Mes *Mp)
 					break;
 				 }
 				case 3: // преобразовать число из #2 по основанию #3 в строку
-					if(Num<2){ WL_MError2("wrong number of parameters."); RETURN(0) }
+					if(Num<2){ MError("\"!!VR:M3\"-wrong number of parameters."); RETURN(0) }
 					vv=0; Apply(&vv,4,Mp,1);
 					i=10;
 					if(Num>2) Apply(&i,4,Mp,2);
 					Itoa(vv,d,i);
 					break;
 				case 4: // VRxxx:M4/$ посчитать длину строки в символах
-					if(Num<2){ WL_MError2("wrong number of parameters."); RETURN(0) }
+					if(Num<2){ MError("\"!!VR:M4\"-wrong number of parameters."); RETURN(0) }
 					vv=strlen(d); Apply(&vv,4,Mp,1);
 					break;
 				case 5: // VRxxx:M5/$ первый значимый символ в строке
-					if(Num<2){ WL_MError2("wrong number of parameters."); RETURN(0) }
+					if(Num<2){ MError("\"!!VR:M5\"-wrong number of parameters."); RETURN(0) }
 					vv=StrSkipLead(d,0); Apply(&vv,4,Mp,1);
 					break;
 				case 6: // VRxxx:M6/$ последний значимый символ в строке
-					if(Num<2){ WL_MError2("wrong number of parameters."); RETURN(0) }
+					if(Num<2){ MError("\"!!VR:M6\"-wrong number of parameters."); RETURN(0) }
 					vv=StrSkipTrailer(d,strlen(d)); Apply(&vv,4,Mp,1);
 					break;
 				default:
-					WL_MError2("wrong first parameter."); RETURN(0)
+					MError("\"!!VR:M\"-wrong first parameter."); RETURN(0)
 			}
 			break;
 		 }
@@ -2861,7 +2859,7 @@ int ERM_Variable(char Cmd,int Num,_ToDo_*sp,Mes *Mp)
 		 {
 			float vf;
 			char *s;
-			if(Num!=1){ WL_MError3("wrong number of parameters: %d",Num); RETURN(0) }
+			if(Num!=1){ MError("\"!!VR\"-wrong number of parameters."); RETURN(0) }
 			if(Apply(&vv,4,Mp,0)) break; // z var source
 			if(GetPureErmString(s, vv)) RETURN(0)
 			switch(vnp->Type){
@@ -2878,12 +2876,12 @@ int ERM_Variable(char Cmd,int Num,_ToDo_*sp,Mes *Mp)
 					vv=Atoi(s); SetVarVal(vnp,vv);
 					break;
 				default:
-					WL_MError2("wrong type of var (fl or int only)."); RETURN(0)
+					MError("\"!!VR:V\"-wrong type of var (fl or int only)."); RETURN(0)
 			}
 			break;
 		 }
 		default:
-			WL_EWrongCommand()
+			EWrongCommand();
 			RETURN(0)
 	}
 	RETURN(1)
@@ -2898,7 +2896,7 @@ int ERM_Timer(char Cmd,int Num,_ToDo_*sp,Mes *Mp)
 		case 'S': // установить Sfirst/last/period/owner
 			CHECK_ParamsMin(4);
 			ti=GetVarVal(vnp);
-			if((ti<1)||(ti>100)){ WL_MError3("timer number is out of range (1...100).\nIncorrect value: %d",ti); RETURN(0) }
+			if((ti<1)||(ti>100)){ MError("\"!!TM:S\"-timer number is out of range (1...100)."); RETURN(0) }
 			vv=ERMTimer[ti-1].FirstDay; Apply(&vv,4,Mp,0); ERMTimer[ti-1].FirstDay=(Word)vv;
 			vv=ERMTimer[ti-1].LastDay;  Apply(&vv,4,Mp,1); ERMTimer[ti-1].LastDay=(Word)vv;
 			vv=ERMTimer[ti-1].Period;   Apply(&vv,4,Mp,2); ERMTimer[ti-1].Period=(Word)vv;
@@ -2907,17 +2905,17 @@ int ERM_Timer(char Cmd,int Num,_ToDo_*sp,Mes *Mp)
 		case 'E': // разрешить игроку Eowner
 			CHECK_ParamsNum(1);
 			ti=GetVarVal(vnp);
-			if((ti<1)||(ti>100)){ WL_MError3("timer number is out of range (1...100).\nIncorrect value: %d",ti); RETURN(0) }
+			if((ti<1)||(ti>100)){ MError("\"!!TM:E\"-timer number is out of range (1...100)."); RETURN(0) }
 			ERMTimer[ti-1].Owners|=(Word)(1<<Mp->n[0]);
 			break;
 		case 'D': // запретить игроку Downer
 			CHECK_ParamsNum(1);
 			ti=GetVarVal(vnp);
-			if((ti<1)||(ti>100)){ WL_MError3("timer index is out of range (1...100).\nIncorrect value: %d",ti); RETURN(0) }
+			if((ti<1)||(ti>100)){ MError("\"!!TM:S\"-timer index is out of range (1...100)."); RETURN(0) }
 			ERMTimer[ti-1].Owners&=(Word)~(1<<Mp->n[0]);
 			break;
 		default:
-			WL_EWrongCommand()
+			EWrongCommand();
 			RETURN(0)
 	}
 	RETURN(1)
@@ -2932,7 +2930,7 @@ int AddTimer(Word fd, Word ld, Word p, Word o)
 			break;
 	if (i > LastAutoTimer)
 	{
-		if (i == 200) { WL_MError("too many timers"); return -1; }
+		if (i == 200) { MError2("too many timers"); return -1; }
 		LastAutoTimer = i;
 		ERMTimer[i].FirstDay = fd;
 		ERMTimer[i].LastDay = ld;
@@ -3007,7 +3005,7 @@ _ERM_Object_ *FindObjExt(_MapItem_ *Mp,int x,int y,int l)
 				case 0x40000000: // w (0...99) = (0...32)
 					if(alltype!=(int)(op->PosMix&0x0000FFFF)) continue; // другой
 					wnum=(op->PosMix&0x007F0000)>>16;
-					if(wnum>99){ WL_MError1("Hint W variable out of range (>100)\nIncorrect value: %d",wnum); RETURN(0)}
+					if(wnum>99){ MError("Hint W variable out of range (>100)"); RETURN(0)}
 					wval=(op->PosMix&0x0F800000)>>23;
 //          asm{ mov eax,0x698B70; mov eax,[eax]; }
 //          hp=(_Hero_ *)_EAX;
@@ -3028,7 +3026,7 @@ _ERM_Object_ *FindObjExt(_MapItem_ *Mp,int x,int y,int l)
 				case 0x80000000: // v  (1...1000) = (0...3)
 					if(alltype!=(int)(op->PosMix&0x0000FFFF)) continue; // другой
 					vnum=(op->PosMix&0x03FF0000)>>16;
-					if(vnum>=VAR_COUNT_V){ WL_MError1("Hint V variable out of range (>10000)\nIncorrect value: %d",vnum); RETURN(0)}
+					if(vnum>=VAR_COUNT_V){ MError("Hint V variable out of range (>10000)"); RETURN(0)}
 					vval=(op->PosMix&0x0C000000)>>26;
 					if(ERMVar2[vnum]==vval) RETURN(op)
 					break;
@@ -3072,7 +3070,7 @@ _ERM_Object_ *AddObj(Dword MixPos)
 		ERM_Object[i].Used=1;
 		RETURN(&ERM_Object[i])
 	}
-	WL_MError("Cannot add more objects.");
+	MError("Cannot add more objects.");
 	RETURN(0)
 }
 
@@ -3146,7 +3144,7 @@ Dword GetDinMixPos(_ToDo_ *sp)
 		case 1: // косвенная ссылка
 //      VarNum *vnp=&sp->Par[0];
 			ind=GetVarVal(&sp->Par[0]);
-			if((ind<1)||(ind>(VAR_COUNT_V-2))){ WL_MError1("Index of var for Dinamic position is out of range (1...9998).\nIncorrect value: %d",ind); RETURN(0) }
+			if((ind<1)||(ind>(VAR_COUNT_V-2))){ MError("Index of var for Dinamic position is out of range (1...9998)."); RETURN(0) }
 			x=ERMVar2[ind-1]; y=ERMVar2[ind]; l=ERMVar2[ind+1];
 			MixPos=PosMixed(x,y,l);
 			break;
@@ -3157,7 +3155,7 @@ Dword GetDinMixPos(_ToDo_ *sp)
 			MixPos=PosMixed(x,y,l);
 			break;
 		default: // t/st
-			WL_MError("GetDinMixPos: wrong syntax"); RETURN(0)
+			EWrongParamsNum(); RETURN(0)
 /*
 		VarNum *vnp=(VarNum *)&sp->Par[0];
 		ind=GetVarVal(vnp);
@@ -3178,7 +3176,7 @@ int ObjChangeHint(int MixPos, Mes *Mp, int ind) // 1 = ok, 0 = failed
 		obj = AddObj(MixPos);
 	else
 		obj = GetObj(MixPos);
-	if(obj==0){ WL_MError("Cannot add more objects"); RETURN(0) }
+	if(obj==0){ MError("Cannot add more objects"); RETURN(0) }
 	char *tmpStr = 0;
 	int var = obj->HintVar;
 	StrMan::Apply(tmpStr, 0, var, Mp, ind);
@@ -3192,7 +3190,7 @@ int ERM_HintType(char Cmd,int Num,_ToDo_*sp,Mes *Mp)
 	STARTNA(__LINE__,&Mp->m.s[Mp->i])
 	Dword alltype;
 	int ind,val;
-	if (sp->ParSet != 2) { WL_MError2("wrong syntax (the command requires 2 parameters)."); RETURN(0) }
+	if (sp->ParSet != 2) { MError("\"!!HT:\"-wrong syntax (the command requires 2 parameters)."); RETURN(0) }
 	VarNum *vnp=&sp->Par[0];
 	int type=GetVarVal(vnp);
 	type&=0xFF;
@@ -3208,28 +3206,28 @@ int ERM_HintType(char Cmd,int Num,_ToDo_*sp,Mes *Mp)
 		case 'P': // Pval/z (z=0-delete) position->number (0...15)
 			CHECK_ParamsMin(2);
 			if(Apply(&val,4,Mp,0)) RETURN(0)
-				if((val<0)||(val>15)){ WL_MError3("Number value out of range (0...15).\nIncorrect value: %d",val); RETURN(0) }
+			if((val<0)||(val>15)){ MError("\"!!HT:P\"-Number value out of range (0...15)."); RETURN(0) }
 			alltype=(type<<8)+subtype+0x20000000+((val&0x0F)<<16);
 			RETURN(ObjChangeHint(alltype, Mp, 1))
 		case 'W': // Wind/val/z (z=0-delete) w (0...99) = (0...32)
 			CHECK_ParamsMin(3);
 			if(Apply(&ind,4,Mp,0)) RETURN(0)
-				if((ind<1)||(ind>100)){ WL_MError3("W index value out of range (1...100).\nIncorrect value: %d",ind); RETURN(0) }
+			if((ind<1)||(ind>100)){ MError("\"!!HT:W\"- W index value out of range (1...100)."); RETURN(0) }
 			if(Apply(&val,4,Mp,1)) RETURN(0)
-				if((val<0)||(val>32)){ WL_MError3("W value out of range (0...32).\nIncorrect value: %d",val); RETURN(0) }
+			if((val<0)||(val>32)){ MError("\"!!HT:W\"- W value out of range (0...32)."); RETURN(0) }
 			alltype=(type<<8)+subtype+0x40000000+(((ind-1)&0x7F)<<16)+((val&0x1F)<<23);
 			RETURN(ObjChangeHint(alltype, Mp, 2))
 		case 'V': // Vind/val/z (z=0-delete) v  (1...1000) = (0...3)
 			CHECK_ParamsMin(3);
 			if(Apply(&ind,4,Mp,0)) RETURN(0)
-				if((ind<1)||(ind>1000)){ WL_MError3("V index value out of range (1...1000).\nIncorrect value: %d",ind); RETURN(0) }
+			if((ind<1)||(ind>1000)){ MError("\"!!HT:V\"- V index value out of range (1...1000)."); RETURN(0) }
 			if(Apply(&val,4,Mp,1)) RETURN(0)
-				if((val<0)||(val>3)){ WL_MError3("V value out of range (0...3).\nIncorrect value: %d",val); RETURN(0) }
+			if((val<0)||(val>3)){ MError("\"!!HT:V\"- V value out of range (0...3)."); RETURN(0) }
 			alltype=(type<<8)+subtype+((((ind-1)&0x3FF)<<16)&0x3FF0000)+(((val&0x3)<<26)&0x0C000000);
 			alltype|=0x80000000;
 			RETURN(ObjChangeHint(alltype, Mp, 2))
 		default:
-			WL_EWrongCommand()
+			EWrongCommand();
 			RETURN(0)
 	}
 }
@@ -3266,7 +3264,7 @@ int ERM_SetObject(char Cmd,int Num,_ToDo_*sp,Mes *Mp)
 				case 'M': // Mowner/auto/next
 					CHECK_ParamsMin(3);
 					owner=Mp->n[0];
-					if((owner<-1)||(owner>7)){ WL_MError3("owner out of range (-1...7).\nIncorrect value: %d", owner); RETURN(0) }
+					if((owner<-1)||(owner>7)){ MError("\"!!OB:M\"-owner out of range (-1...7)."); RETURN(0) }
 					char ames[8][2]; FillMem(ames,sizeof(ames),0);
 					fl=0;
 					if(owner==-1){ // для всех
@@ -3297,7 +3295,7 @@ int ERM_SetObject(char Cmd,int Num,_ToDo_*sp,Mes *Mp)
 					CHECK_ParamsNum(1);
 					owner=Mp->n[0];
 					if(owner==-1) owner=CurrentUser();
-					if((owner<0)||(owner>7)){ WL_MError3("owner out of range (-1...7).\nIncorrect value: %d",owner); RETURN(0) }
+					if((owner<0)||(owner>7)){ MError("\"!!OB:E\" or \"!!OB:D\"-owner out of range (-1...7)."); RETURN(0) }
 					obj=AddObj(MixPos); if(obj==0) RETURN(0)
 					obj->Disabled[owner]=en;
 					break;
@@ -3318,7 +3316,7 @@ int ERM_SetObject(char Cmd,int Num,_ToDo_*sp,Mes *Mp)
 //          DelObj(obj);
 					break;
 				default:
-					WL_EWrongCommand()
+					EWrongCommand();
 					RETURN(0)
 			}
 	}
@@ -3337,16 +3335,16 @@ int ERM_SetHero(char Cmd,int Num,_ToDo_*sp,Mes *Mp)
 	int  i,owner;
 	int  ind=GetVarVal(&sp->Par[0]);
 
-	if((ind<0)||(ind>=HERNUM)){ WL_MError3("number of hero out of range.\nIncorrect value: %d",ind); RETURN(0) }
+	if((ind<0)||(ind>=HERNUM)){ MError("\"!!HO:\"-number of hero out of range."); RETURN(0) }
 	en=0;
 	switch(Cmd){
 		case 'D': // D# запретить
 			en=1;
 		case 'E': // E# разрешить
-			CHECK_ParamsNum(1);
+			if(Num!=1){ MError("\"!!HO:D\" or \"!!HO:E\"-insufficient parameters."); RETURN(0) }
 			owner=Mp->n[0];
 			if(owner==-1) owner=CurrentUser();
-			if((owner<0)||(owner>7)){ WL_MError3("owner out of range (-1...7).\nIncorrect value: %d",owner); RETURN(0) }
+			if((owner<0)||(owner>7)){ MError("\"!!HO:D\" or \"!!HO:E\"-owner out of range (-1...7)."); RETURN(0) }
 			ERM_Hero[ind].Disabled[owner]=en;
 			break;
 		case 'S': // S запретить всем
@@ -3364,7 +3362,7 @@ int ERM_SetHero(char Cmd,int Num,_ToDo_*sp,Mes *Mp)
 			break;
 		}
 		default:
-			WL_EWrongCommand()
+			EWrongCommand();
 			RETURN(0)
 	}
 	RETURN(1)
@@ -3384,8 +3382,8 @@ int ERM_Owner(char Cmd,int Num,_ToDo_* /*sp*/,Mes *Mp)
 			CHECK_ParamsMin(3);
 			owner=Mp->n[0]; res=Mp->n[1];
 			if(owner==-1) owner=CurrentUser();
-			if((owner<0)||(owner>7)){ WL_MError3("owner out of range (-1...7).\nIncorrect value: %d",owner); RETURN(0) }
-			if(res<0 || res>7){ WL_MError3("resourse out of range.\nIncorrect value: %d",res); RETURN(0) }
+			if((owner<0)||(owner>7)){ MError("\"!!OW:R\"-owner out of range (-1...7)."); RETURN(0) }
+			if(res<0 || res>7){ MError("\"!!OW:R\"-resourse out of range."); RETURN(0) }
 			if(res==7){ // Mithrill
 				Apply(&MithrillVal[owner],4,Mp,2);
 			}else{
@@ -3415,7 +3413,7 @@ int ERM_Owner(char Cmd,int Num,_ToDo_* /*sp*/,Mes *Mp)
 			CHECK_ParamsMin(2);
 			owner=Mp->n[0];
 			if(owner==-1) owner=CurrentUser();
-			if((owner<0)||(owner>7)){ WL_MError3("owner out of range (-1...7).\nIncorrect value: %d",owner); RETURN(0) }
+			if((owner<0)||(owner>7)){ MError("\"!!OW:I\"-owner out of range (-1...7)."); RETURN(0) }
 			val=IsAI(owner);
 			Apply(&val,4,Mp,1);
 			SetAI(owner,val);
@@ -3429,14 +3427,14 @@ int ERM_Owner(char Cmd,int Num,_ToDo_* /*sp*/,Mes *Mp)
 			CHECK_ParamsNum(2);
 			owner=Mp->n[0];
 			if(owner==-1) owner=CurrentUser();
-			if((owner<0)||(owner>7)){ WL_MError3("owner out of range (-1...7).\nIncorrect value: %d",owner); RETURN(0) }
+			if((owner<0)||(owner>7)){ MError("\"!!OW:G\"-owner out of range (-1...7)."); RETURN(0) }
 			val=IsThis(owner); Apply(&val,4,Mp,1); ThisIs(owner,val);
 			break;
 		case 'T': // Towner/team - команда
 			CHECK_ParamsNum(2);
 			owner=Mp->n[0];
 			if(owner==-1) owner=CurrentUser();
-			if((owner<0)||(owner>7)){ WL_MError3("owner out of range (-1...7).\nIncorrect value: %d",owner); RETURN(0) }
+			if((owner<0)||(owner>7)){ MError("\"!!OW:T\"-owner out of range (-1...7)."); RETURN(0) }
 			val=GetTeam(owner); Apply(&val,4,Mp,1); SetTeam(owner,(char)val);
 			break;
 		case 'H': // Howner/ind - посчитать и запомнить героев игрока
@@ -3444,11 +3442,11 @@ int ERM_Owner(char Cmd,int Num,_ToDo_* /*sp*/,Mes *Mp)
 			owner=Mp->n[0];
 			ind=Mp->n[1];
 			if(owner==-1) owner=CurrentUser();
-			if((owner<0)||(owner>7)){ WL_MError3("owner out of range (-1...7).\nIncorrect value: %d",owner); RETURN(0) }
-			if((ind<1)||(ind>VAR_COUNT_V)){ WL_MError3("var index out of range (1...10000).\nIncorrect value: %d",ind); RETURN(0) }
+			if((owner<0)||(owner>7)){ MError("\"!!OW:H\"-owner out of range (-1...7)."); RETURN(0) }
+			if((ind<1)||(ind>VAR_COUNT_V)){ MError("\"!!OW:H\"-var index out of range (1...10000)."); RETURN(0) }
 			if(Num==3){
 				j=Mp->n[2];
-				if(j<0){ WL_MError3("third parameter below zero.\nIncorrect value: %d",j); RETURN(0) }
+				if(j<0){ MError("\"!!OW:H\"-third parameter below zero."); RETURN(0) }
 				if(j==0){
 					for(i=val=0;i<HERNUM;i++){
 						hp=GetHeroStr(i); if(hp->Owner!=owner) continue;
@@ -3466,7 +3464,7 @@ int ERM_Owner(char Cmd,int Num,_ToDo_* /*sp*/,Mes *Mp)
 				for(i=val=0,j=ind+1;i<HERNUM;i++){
 					hp=GetHeroStr(i);
 					if(hp->Owner!=owner) continue;
-					if(j>VAR_COUNT_V){ WL_MError3("var index goes out of range (1...10000).\nIncorrect value: %d",j); RETURN(0) }
+					if(j>VAR_COUNT_V){ MError("\"!!OW:H\"-var index goes out of range (1...10000)."); RETURN(0) }
 					ERMVar2[j-1]=i; ++j;
 					++val;
 				}
@@ -3474,25 +3472,25 @@ int ERM_Owner(char Cmd,int Num,_ToDo_* /*sp*/,Mes *Mp)
 			}
 			break;
 		case 'C': // C?owner - текущий игрок
-			CHECK_ParamsMin(1);
+			if(Num!=1) { MError("\"!!OW:C\"-wrong parameters number."); RETURN(0) }
 			val=CurrentUser();
 			Apply(&val,4,Mp,0);
 			break;
 		case 'K': // Kowner/keymaster/state - посещение кеймастеров
-			CHECK_ParamsMin(3);
-			if(Apply(&owner,4,Mp,0)){ WL_MError2("cannot get or check owner."); RETURN(0) }
+			if(Num<3){ MError("\"!!OW:K\"-wrong parameters number."); RETURN(0) }
+			if(Apply(&owner,4,Mp,0)){ MError("\"!!OW:K\"-cannot get or check owner."); RETURN(0) }
 			if(owner==-1) owner=CurrentUser();
-			if((owner<0)||(owner>7)){ WL_MError3("owner out of range (-1...7).\nIncorrect value: %d",owner); RETURN(0) }
-			if(Apply(&ind,4,Mp,1)){ WL_MError2("cannot get or check keymaster number."); RETURN(0) }
-			if((ind<0)||(ind>7)){ WL_MError3("keymaster out of range (-1...7).\nIncorrect value: %d",ind); RETURN(0) }
+			if((owner<0)||(owner>7)){ MError("\"!!OW:K\"-owner out of range (-1...7)."); RETURN(0) }
+			if(Apply(&ind,4,Mp,1)){ MError("\"!!OW:K\"-cannot get or check keymaster number."); RETURN(0) }
+			if((ind<0)||(ind>7)){ MError("\"!!OW:K\"-keymaster out of range (-1...7)."); RETURN(0) }
 			val=GetKeyMaster(owner,ind); Apply(&val,4,Mp,2); SetKeyMaster(owner,ind,val);
 			break;
 		case 'O': // Oowner/number/#1/#2/#3/#4/#5/#6/#7/#8
-			if(Apply(&owner,4,Mp,0)){ WL_MError2("cannot get or check owner."); RETURN(0) }
+			if(Apply(&owner,4,Mp,0)){ MError("\"!!OW:O\"-cannot get or check owner."); RETURN(0) }
 			if(owner==-1) owner=CurrentUser();
-			if((owner<0)||(owner>7)){ WL_MError3("owner out of range (-1...7).\nIncorrect value: %d",owner); RETURN(0) }
+			if((owner<0)||(owner>7)){ MError("\"!!OW:O\"-owner out of range (-1...7)."); RETURN(0) }
 			ps=GetPlayerSetup(owner);
-			if(ps==0){ WL_MError2("cannot get PlayerSetup structure."); RETURN(0) }
+			if(ps==0){ MError("\"!!OW:O\"-cannot get PlayerSetup structure."); RETURN(0) }
 			if(Num==4){ // O#owner/#action/#hero_ind_to be/#dummy first
 				if(Apply(&act,4,Mp,1)) break; // action
 				if(Apply(&ind,4,Mp,2)) break; // index
@@ -3556,7 +3554,7 @@ int ERM_Owner(char Cmd,int Num,_ToDo_* /*sp*/,Mes *Mp)
 			CHECK_ParamsNum(3);
 			owner=Mp->n[0];
 			if(owner==-1) owner=CurrentUser();
-			if((owner<0)||(owner>7)){ WL_MError3("owner out of range (-1...7).\nPermission value: %d",owner); RETURN(0) }
+			if((owner<0)||(owner>7)){ MError("\"!!OW:V\"-owner out of range (-1...7)."); RETURN(0) }
 			ps=GetPlayerSetup(owner);
 			i=ps->THeroL; j=ps->THeroR;
 			if(i!=-1) pho[i]=-1; if(j!=-1) pho[j]=-1;
@@ -3566,19 +3564,19 @@ int ERM_Owner(char Cmd,int Num,_ToDo_* /*sp*/,Mes *Mp)
 			break;
 		case 'A': // A#/$ (0...N,-1) Hero number
 			CHECK_ParamsMin(2);
-			if(Apply(&owner,4,Mp,0)){ WL_MError2("cannot get or check owner."); RETURN(0) }
+			if(Apply(&owner,4,Mp,0)){ MError("\"!!OW:A\"-cannot get or check owner."); RETURN(0) }
 			if(owner==-1) owner=CurrentUser();
-			if((owner<0)||(owner>7)){ WL_MError3("owner out of range (-1...7).\nIncorrect value: %d",owner); RETURN(0) }
+			if((owner<0)||(owner>7)){ MError("\"!!OW:A\"-owner out of range (-1...7)."); RETURN(0) }
 			ps=GetPlayerSetup(owner);
-			if(ps==0){ WL_MError2("cannot get PlayerSetup structure."); RETURN(0) }
+			if(ps==0){ MError("\"!!OW:A\"-cannot get PlayerSetup structure."); RETURN(0) }
 			Apply(&ps->CurHero,4,Mp,1);
 			break;
 		case 'N': // N#/$ (0...N,-1) Town number
-			if(Apply(&owner,4,Mp,0)){ WL_MError2("cannot get or check owner."); RETURN(0) }
+			if(Apply(&owner,4,Mp,0)){ MError("\"!!OW:N\"-cannot get or check owner."); RETURN(0) }
 			if(owner==-1) owner=CurrentUser();
-			if((owner<0)||(owner>7)){ WL_MError3("owner out of range (-1...7).\nIncorrect value: %d",owner); RETURN(0) }
+			if((owner<0)||(owner>7)){ MError("\"!!OW:N\"-owner out of range (-1...7)."); RETURN(0) }
 			ps=GetPlayerSetup(owner);
-			if(ps==0){ WL_MError2("cannot get PlayerSetup structure."); RETURN(0) }
+			if(ps==0){ MError("\"!!OW:N\"-cannot get PlayerSetup structure."); RETURN(0) }
 			if(Num==4){ // N#owner/#action/#town_ind_to be first/dummy
 				if(Apply(&act,4,Mp,1)) break; // action
 				if(Apply(&ind,4,Mp,2)) break; // index
@@ -3637,16 +3635,16 @@ int ERM_Owner(char Cmd,int Num,_ToDo_* /*sp*/,Mes *Mp)
 			break;
 		case 'W': // W#/$(/$) Town number by position and full towns number
 			CHECK_ParamsMin(2);
-			if(Apply(&owner,4,Mp,0)){ WL_MError2("cannot get or check owner."); RETURN(0) }
+			if(Apply(&owner,4,Mp,0)){ MError("\"!!OW:W\"-cannot get or check owner."); RETURN(0) }
 			if(owner==-1) owner=CurrentUser();
-			if((owner<0)||(owner>7)){ WL_MError3("owner out of range (-1...7).\nIncorrect value: %d",owner); RETURN(0) }
+			if((owner<0)||(owner>7)){ MError("\"!!OW:W\"-owner out of range (-1...7)."); RETURN(0) }
 			ps=GetPlayerSetup(owner);
-			if(ps==0){ WL_MError2("cannot get PlayerSetup structure."); RETURN(0) }
+			if(ps==0){ MError("\"!!OW:W\"-cannot get PlayerSetup structure."); RETURN(0) }
 			if(Num==2){ // полное количество городов
 				Apply(&ps->HasTowns,1,Mp,1);
 			}else{ // >2 номер конкретного города (по порядку)
-				if(Apply(&i,4,Mp,1)){ WL_MError2("cannot get or check town list number."); RETURN(0) }
-				if((i<0)||(i>=48)){ WL_MError3("town list number out of range (0...47).\nIncorrect value: %d",i); RETURN(0) }
+				if(Apply(&i,4,Mp,1)){ MError("\"!!OW:W\"-cannot get or check town list number."); RETURN(0) }
+				if((i<0)||(i>=48)){ MError("\"!!OW:W\"-town list number out of range (0...47)."); RETURN(0) }
 				Apply(&ps->Towns[i],1,Mp,2);
 			}
 			break;
@@ -3663,7 +3661,7 @@ int ERM_Owner(char Cmd,int Num,_ToDo_* /*sp*/,Mes *Mp)
 			}
 			break;
 		default:
-			WL_EWrongCommand()
+			EWrongCommand();
 			RETURN(0)
 	}
 	RETURN(1)
@@ -3679,14 +3677,14 @@ int ERM_Mine(char Cmd,int Num,_ToDo_*sp,Mes *Mp)
 	_Mine_  *mp;
 
 	int tp=CheckPlace4Hero(mip,(Dword **)&msp);
-	if((tp!=53)&&(tp!=42)){ WL_MError2("not a mine."); RETURN(0) }
+	if((tp!=53)&&(tp!=42)){ MError("\"!!MN:\"-not a mine."); RETURN(0) }
 	mp=GetMineStr(msp->Num);
-	if(mp==0){ WL_MError2("mine is not found in internal structures."); RETURN(0) }
+	if(mp==0){ MError("\"!!MN:\"-mine is not found in internal structures."); RETURN(0) }
 	switch(Cmd){
 		case 'O': // O$ Owner O$/1 no redraw
 			if(Mp->VarI[0].Check==0){ // установка
 				owner=Mp->n[0]; if(owner==-2) owner=CurrentUser();
-				if((owner<-1)||(owner>7)){ WL_MError3("Owner out of range (-1...7).\nIncorrect value: %d",owner); RETURN(0) }
+				if((owner<-1)||(owner>7)){ MError("\"!!MN:O\"-Owner out of range (-1...7)."); RETURN(0) }
 				Mp->n[0]=owner;
 			}
 			Apply(&mp->Owner,1,Mp,0);
@@ -3694,19 +3692,19 @@ int ERM_Mine(char Cmd,int Num,_ToDo_*sp,Mes *Mp)
 			break;
 		case 'R': // R$ Resource type R$/1
 			if(Mp->VarI[0].Check==0){ // установка
-				if(((Mp->n[0]<0)||(Mp->n[0]>6))&&(Mp->n[0]!=100)){ WL_MError3("Resource type out of range (0...6,100).\nIncorrect value: %d",Mp->n[0]); RETURN(0) }
+				if(((Mp->n[0]<0)||(Mp->n[0]>6))&&(Mp->n[0]!=100)){ MError("\"!!MN:R\"-Resource type out of range (0...6,100)."); RETURN(0) }
 			}
 			Apply(&mp->ResNum,1,Mp,0);
 			if(Num<2) RedrawMap();
 			break;
 		case 'M': // M#/$/$ Monsters
 			CHECK_ParamsMin(3);
-			if((Mp->n[0]<0)||(Mp->n[0]>7)){ WL_MError3("wrong slot number (0...7).\nIncorrect value: %d",Mp->n[0]); RETURN(0) }
+			if((Mp->n[0]<0)||(Mp->n[0]>7)){ MError("\"!!MN:M\"-wrong slot number (0...7)."); RETURN(0) }
 			Apply(&mp->GType[Mp->n[0]],4,Mp,1);
 			Apply(&mp->GNumb[Mp->n[0]],4,Mp,2);
 			break;
 		default:
-			WL_EWrongCommand()
+			EWrongCommand();
 			RETURN(0)
 	}
 	RETURN(1)
@@ -3718,7 +3716,7 @@ int ERM_SetScoolar(char Cmd,int/* Num*/,_ToDo_*sp,Mes *Mp)
 	Dword MixPos=GetDinMixPos(sp);
 	_MapItem_ *mip=GetMapItem2(MixPos);
 	_CSchoolar_ *stp=(_CSchoolar_ *)mip;
-	if(mip->OType!=0x51/*)||(mip->OType!=0x22)*/){ WL_MError2("not a schoolar."); RETURN(0) }
+	if(mip->OType!=0x51/*)||(mip->OType!=0x22)*/){ MError("\"!!SC:\"-not a schoolar."); RETURN(0) }
 	switch(Cmd){
 		case 'T': // T# - тип 1,2,3 (3)
 			v=stp->Type; Apply(&v,4,Mp,0); stp->Type=(Word)v; break;
@@ -3728,7 +3726,7 @@ int ERM_SetScoolar(char Cmd,int/* Num*/,_ToDo_*sp,Mes *Mp)
 			v=stp->SSkill; Apply(&v,4,Mp,0); stp->SSkill=(Word)v; break;
 		case 'L': // L# - заклинание (11)
 			v=stp->Spell;  Apply(&v,4,Mp,0); stp->Spell=(Word)v;  break;
-		default: WL_EWrongCommand() RETURN(0)
+		default: EWrongCommand(); RETURN(0)
 	}
 	RETURN(1)
 }
@@ -3739,7 +3737,7 @@ int ERM_SetChest(char Cmd,int/* Num*/,_ToDo_*sp,Mes *Mp)
 	Dword MixPos=GetDinMixPos(sp);
 	_MapItem_ *mip=GetMapItem2(MixPos);
 	_CChest_ *stp=(_CChest_ *)mip;
-	if(mip->OType!=101){ WL_MError2("not a chest."); RETURN(0) }
+	if(mip->OType!=101){ MError("\"!!CH:\"-not a chest."); RETURN(0) }
 	switch(Cmd){
 		case 'S': // S# артефакт=1 или ресурс=0
 			v=stp->HasArt; Apply(&v,4,Mp,0); stp->HasArt=(Word)v; break;
@@ -3747,7 +3745,7 @@ int ERM_SetChest(char Cmd,int/* Num*/,_ToDo_*sp,Mes *Mp)
 			v=stp->ArtNum; Apply(&v,4,Mp,0); stp->ArtNum=(Word)v; break;
 		case 'B': // B# кол-во бонуса
 			v=stp->Bonus; Apply(&v,4,Mp,0);  stp->Bonus=(Word)v; break;
-		default: WL_EWrongCommand() RETURN(0)
+		default: EWrongCommand(); RETURN(0)
 	}
 	RETURN(1)
 }
@@ -3759,13 +3757,13 @@ int ERM_SetWTomb(char Cmd,int/* Num*/,_ToDo_*sp,Mes *Mp)
 	_MapItem_ *mip=GetMapItem2(MixPos);
 	_CWTomb_ *stp=(_CWTomb_ *)mip;
 	int tp=CheckPlace4Hero(mip,(Dword **)&stp);
-	if(tp!=0x6C){ WL_MError2("not a warrior tomb."); RETURN(0) }
+	if(tp!=0x6C){ MError("\"!!WT:\"-not a warrior tomb."); RETURN(0) }
 	switch(Cmd){
 		case 'A': // A# номер арт. (10)
 			v=stp->ArtNum; Apply(&v,4,Mp,0); stp->ArtNum=(Word)v; break;
 		case 'S': // S# арт. есть=1 или нет=0 (1)
 			v=stp->HasArt; if(Apply(&v,4,Mp,0)) break; stp->HasArt=(Word)v; stp->Whom=0; break;
-		default: WL_EWrongCommand() RETURN(0)
+		default: EWrongCommand(); RETURN(0)
 	}
 	RETURN(1)
 }
@@ -3777,13 +3775,13 @@ int ERM_SetKTree(char Cmd,int/* Num*/,_ToDo_*sp,Mes *Mp)
 	_MapItem_ *mip=GetMapItem2(MixPos);
 	_CKTree_ *stp=(_CKTree_ *)mip;
 	int tp=CheckPlace4Hero(mip,(Dword **)&stp);
-	if(tp!=0x66){ WL_MError2("not a knowledge tree."); RETURN(0) }
+	if(tp!=0x66){ MError("\"!!KT:\"-not a knowledge tree."); RETURN(0) }
 	switch(Cmd){
 		case 'S': // S# 0,1,2 (2)
 			v=stp->Type; if(Apply(&v,4,Mp,0)) break; stp->Type=(Word)v; stp->Whom=0; break;
 		case 'N': // N# номер (5)
 			v=stp->Number; Apply(&v,4,Mp,0); stp->Number=(Word)v; break;
-		default: WL_EWrongCommand() RETURN(0)
+		default: EWrongCommand(); RETURN(0)
 	}
 	RETURN(1)
 }
@@ -3794,14 +3792,14 @@ int ERM_SetFire(char Cmd,int Num,_ToDo_*sp,Mes *Mp)
 	Dword MixPos=GetDinMixPos(sp);
 	_MapItem_ *mip=GetMapItem2(MixPos);
 	_CFire_ *stp=(_CFire_ *)mip;
-	if(mip->OType!=0xC){ WL_MError2("not a campfire."); RETURN(0) }
+	if(mip->OType!=0xC){ MError("\"!!FR:\"-not a campfire."); RETURN(0) }
 	switch(Cmd){
 		case 'B': // B#1/#2 (4)(>5)
 			CHECK_ParamsMin(2);
 			v=stp->ResType; Apply(&v,4,Mp,0); stp->ResType=(Word)v;
 			v=stp->ResVal;  Apply(&v,4,Mp,1); stp->ResVal=(Word)v;
 			break;
-		default: WL_EWrongCommand() RETURN(0)
+		default: EWrongCommand(); RETURN(0)
 	}
 	RETURN(1)
 }
@@ -3813,7 +3811,7 @@ int ERM_SetLean(char Cmd,int Num,_ToDo_*sp,Mes *Mp)
 	_MapItem_ *mip=GetMapItem2(MixPos);
 	_CLean_ *stp=(_CLean_ *)mip;
 	int tp=CheckPlace4Hero(mip,(Dword **)&stp);
-	if(tp!=0x27){ WL_MError2("-not a lean."); RETURN(0) }
+	if(tp!=0x27){ MError("\"!!LN:\"-not a lean."); RETURN(0) }
 	switch(Cmd){
 		case 'B': // B#1/#2 (4)(4)
 			CHECK_ParamsMin(2);
@@ -3822,7 +3820,7 @@ int ERM_SetLean(char Cmd,int Num,_ToDo_*sp,Mes *Mp)
 			break;
 		case 'N': // N# номер (5)
 			v=stp->Number;  Apply(&v,4,Mp,0); stp->Number=(Word)v; break;
-		default: WL_EWrongCommand() RETURN(0)
+		default: EWrongCommand(); RETURN(0)
 	}
 	RETURN(1)
 }
@@ -3834,11 +3832,11 @@ int ERM_SetStone(char Cmd,int/* Num*/,_ToDo_*sp,Mes *Mp)
 	_MapItem_ *mip=GetMapItem2(MixPos);
 	_CLStone_ *stp=(_CLStone_ *)mip;
 	int tp=CheckPlace4Hero(mip,(Dword **)&stp);
-	if(tp!=0x64){ WL_MError2("not a stone."); RETURN(0) }
+	if(tp!=0x64){ MError("\"!!ST:\"-not a stone."); RETURN(0) }
 	switch(Cmd){
 		case 'N': // N# номер камня (5)
 			v=stp->Number; Apply(&v,4,Mp,0); stp->Number=(Word)v; break;
-		default: WL_EWrongCommand() RETURN(0)
+		default: EWrongCommand(); RETURN(0)
 	}
 	RETURN(1)
 }
@@ -3850,7 +3848,7 @@ int ERM_SetWagon(char Cmd,int Num,_ToDo_*sp,Mes *Mp)
 	_MapItem_ *mip=GetMapItem2(MixPos);
 	_CWagon_ *stp=(_CWagon_ *)mip;
 	int tp=CheckPlace4Hero(mip,(Dword **)&stp);
-	if(tp!=0x69){ WL_MError2("not a wagon."); RETURN(0) }
+	if(tp!=0x69){ MError("\"!!WG:\"-not a wagon."); RETURN(0) }
 	switch(Cmd){
 		case 'S': // S - есть что-то=1 или нет ничего=0 (1)
 			v=stp->HasBon; if(Apply(&v,4,Mp,0)) break; stp->HasBon=(Word)v; stp->Whom=0; break;
@@ -3863,7 +3861,7 @@ int ERM_SetWagon(char Cmd,int Num,_ToDo_*sp,Mes *Mp)
 			v=stp->ResType; Apply(&v,4,Mp,0); stp->ResType=(Word)v;
 			v=stp->ResVal;  Apply(&v,4,Mp,1); stp->ResVal=(Word)v;
 			break;
-		default: WL_EWrongCommand() RETURN(0)
+		default: EWrongCommand(); RETURN(0)
 	}
 	RETURN(1)
 }
@@ -3876,13 +3874,13 @@ int ERM_Pyramid(char Cmd,int Num,_ToDo_*sp,Mes *Mp)
 	_MapItem_ *mip=GetMapItem2(MixPos);
 	_CPyram_  *stp=(_CPyram_ *)mip;
 	int tp=CheckPlace4Hero(mip,(Dword **)&stp);
-	if(tp!=0x3F){ WL_MError2("not a Pyramid or New Object."); RETURN(0) }
+	if(tp!=0x3F){ MError("\"!!PM:\"-not a Pyramid or New Object."); RETURN(0) }
 	switch(Cmd){
 		case 'V': // V - непосещено=1 или посещено=0
 			v=stp->Visited; Apply(&v,4,Mp,0); stp->Visited=(Word)v; break;
 		case 'P': // P#/$ - кем посещено
 			CHECK_ParamsMin(2);
-			if((Mp->n[0]<0)||(Mp->n[0]>7)){ WL_MError3("wrong player number (0...7).\nIncorrect value: %d",Mp->n[0]); RETURN(0) }
+			if((Mp->n[0]<0)||(Mp->n[0]>7)){ MError("\"!!PM:P\"-wrong player number (0...7)."); RETURN(0) }
 			b=(Word)(1<<Mp->n[0]);
 			if(b&stp->Whom) v=1; else v=0;
 			if(Apply(&v,4,Mp,1)) break;
@@ -3890,7 +3888,7 @@ int ERM_Pyramid(char Cmd,int Num,_ToDo_*sp,Mes *Mp)
 			break;
 		case 'S': // S$ заклинание
 			v=stp->Spell; Apply(&v,4,Mp,0); stp->Spell=(Word)v; break;
-		default: WL_EWrongCommand() RETURN(0)
+		default: EWrongCommand(); RETURN(0)
 	}
 	RETURN(1)
 }
@@ -3902,7 +3900,7 @@ int ERM_SetSkelet(char Cmd,int/*Num*/,_ToDo_*sp,Mes *Mp)
 	_MapItem_ *mip=GetMapItem2(MixPos);
 	_CSkelet_ *stp=(_CSkelet_ *)mip;
 	int tp=CheckPlace4Hero(mip,(Dword **)&stp);
-	if(tp!=0x16){ WL_MError2("not a skeleton."); RETURN(0) }
+	if(tp!=0x16){ MError("\"!!SK:\"-not a skeleton."); RETURN(0) }
 	switch(Cmd){
 		case 'A': // A# артефакт (10)
 			v=stp->ArtNum; Apply(&v,4,Mp,0); stp->ArtNum=(Word)v; break;
@@ -3910,7 +3908,7 @@ int ERM_SetSkelet(char Cmd,int/*Num*/,_ToDo_*sp,Mes *Mp)
 			v=stp->Number; Apply(&v,4,Mp,0); stp->Number=(Word)v; break;
 		case 'S': // S# есть арт.=1 или нет=0 (1)
 			v=stp->HasArt; Apply(&v,4,Mp,0); stp->HasArt=(Word)v; break;
-		default: WL_EWrongCommand() RETURN(0)
+		default: EWrongCommand(); RETURN(0)
 	}
 	RETURN(1)
 }
@@ -3922,14 +3920,14 @@ int ERM_SetSpring(char Cmd,int/* Num*/,_ToDo_*sp,Mes *Mp)
 	_MapItem_ *mip=GetMapItem2(MixPos);
 	_CMSpring_ *stp=(_CMSpring_ *)mip;
 	int tp=CheckPlace4Hero(mip,(Dword **)&stp);
-	if(tp!=0x30){ WL_MError2("not a spring."); RETURN(0) }
+	if(tp!=0x30){ MError("\"!!SP:\"-not a spring."); RETURN(0) }
 // НАСТРОЙКА 2-х соседних клеток
 	switch(Cmd){
 		case 'S': // S# заряжен=1 или нет=0
 			v=stp->Power; Apply(&v,4,Mp,0); stp->Power=(Word)v; break;
 		case 'N': // N# установить номер (5)
 			v=stp->Number; Apply(&v,4,Mp,0); stp->Number=(Word)v; break;
-		default: WL_EWrongCommand() RETURN(0)
+		default: EWrongCommand(); RETURN(0)
 	}
 	RETURN(1)
 }
@@ -3941,11 +3939,11 @@ int ERM_SetWMill(char Cmd,int/* Num*/,_ToDo_*sp,Mes *Mp)
 	_MapItem_ *mip=GetMapItem2(MixPos);
 	_CWMill_ *stp=(_CWMill_ *)mip;
 	int tp=CheckPlace4Hero(mip,(Dword **)&stp);
-	if(tp!=0x6D){ WL_MError2("not a water weel."); RETURN(0) }
+	if(tp!=0x6D){ MError("\"!!WM:\"-not a water weel."); RETURN(0) }
 	switch(Cmd){
 		case 'B': // B# кол-во золота (5)
 			v=stp->Bonus; if(Apply(&v,4,Mp,0)) break; stp->Bonus=(Word)v; stp->Whom=0; break;
-		default: WL_EWrongCommand() RETURN(0)
+		default: EWrongCommand(); RETURN(0)
 	}
 	RETURN(1)
 }
@@ -3957,13 +3955,13 @@ int ERM_SetSwan(char Cmd,int/* Num*/,_ToDo_*sp,Mes *Mp)
 	_MapItem_ *mip=GetMapItem2(MixPos);
 	_CSSwan_ *stp=(_CSSwan_ *)mip;
 	int tp=CheckPlace4Hero(mip,(Dword **)&stp);
-	if(tp!=0x0E){ WL_MError2("not a swan pond."); RETURN(0) }
+	if(tp!=0x0E){ MError("\"!!SW:\"-not a swan pond."); RETURN(0) }
 	switch(Cmd){
 		case 'B': // B# кол-во удачи 1...3 (4)
 			v=stp->BonLuck; if(Apply(&v,4,Mp,0)) break; stp->BonLuck=(Word)v; stp->Whom=0; break;
 		case 'N': // N# установить номер (5)
 			v=stp->Number; Apply(&v,4,Mp,0); stp->Number=(Word)v; break;
-		default: WL_EWrongCommand() RETURN(0)
+		default: EWrongCommand(); RETURN(0)
 	}
 	RETURN(1)
 }
@@ -3975,11 +3973,11 @@ int ERM_SetMonolit(char Cmd,int/* Num*/,_ToDo_*sp,Mes *Mp)
 	_MapItem_ *mip=GetMapItem2(MixPos);
 	_CMonol_ *stp=(_CMonol_ *)mip;
 	int tp=CheckPlace4Hero(mip,(Dword **)&stp);
-	if(tp!=0x39){ WL_MError2("not a monolith."); RETURN(0) }
+	if(tp!=0x39){ MError("\"!!MT:\"-not a monolith."); RETURN(0) }
 	switch(Cmd){
 		case 'N': // N# установить номер (5)
 			v=stp->Number; Apply(&v,4,Mp,0); stp->Number=(Word)v; break;
-		default: WL_EWrongCommand() RETURN(0)
+		default: EWrongCommand(); RETURN(0)
 	}
 	RETURN(1)
 }
@@ -3991,7 +3989,7 @@ int ERM_SetGarden(char Cmd,int/* Num*/,_ToDo_*sp,Mes *Mp)
 	_MapItem_ *mip=GetMapItem2(MixPos);
 	_CMGarden_ *stp=(_CMGarden_ *)mip;
 	int tp=CheckPlace4Hero(mip,(Dword **)&stp);
-	if(tp!=0x37){ WL_MError2("not a garden."); RETURN(0) }
+	if(tp!=0x37){ MError("\"!!GD:\"-not a garden."); RETURN(0) }
 	switch(Cmd){
 		case 'B': // B# тип бонуса (4) [обычно = 5]
 			v=stp->ResType; Apply(&v,4,Mp,0); stp->ResType=(Word)v; break;
@@ -3999,7 +3997,7 @@ int ERM_SetGarden(char Cmd,int/* Num*/,_ToDo_*sp,Mes *Mp)
 			v=stp->HasRes; Apply(&v,4,Mp,0); stp->HasRes=(Word)v; break;
 		case 'N': // N# установить номер (5)
 			v=stp->Number; Apply(&v,4,Mp,0); stp->Number=(Word)v; break;
-		default: WL_EWrongCommand() RETURN(0)
+		default: EWrongCommand(); RETURN(0)
 	}
 	RETURN(1)
 }
@@ -4011,14 +4009,14 @@ int ERM_SetMill(char Cmd,int Num,_ToDo_*sp,Mes *Mp)
 	_MapItem_ *mip=GetMapItem2(MixPos);
 	_CMill_ *stp=(_CMill_ *)mip;
 	int tp=CheckPlace4Hero(mip,(Dword **)&stp);
-	if(tp!=0x70){ WL_MError2("not a mill."); RETURN(0) }
+	if(tp!=0x70){ MError("\"!!ML:\"-not a mill."); RETURN(0) }
 	switch(Cmd){
 		case 'B': // B#/# тип бонуса    (4)(4)
 			CHECK_ParamsMin(2);
 			v=stp->ResType; Apply(&v,4,Mp,0); stp->ResType=(Word)v;
 			v=stp->ResVal; Apply(&v,4,Mp,1); stp->ResVal=(Word)v;
 			break;
-		default: WL_EWrongCommand() RETURN(0)
+		default: EWrongCommand(); RETURN(0)
 	}
 	RETURN(1)
 }
@@ -4030,20 +4028,20 @@ int ERM_SetDwelling(char Cmd,int Num,_ToDo_*sp,Mes *Mp)
 	_MapItem_ *mip=GetMapItem2(MixPos);
 	int *stp=(int *)mip;
 	int tp=CheckPlace4Hero(mip,(Dword **)&stp);
-	if((tp!=17)&&(tp!=20)){ WL_MError2("not a Dwelling."); RETURN(0) }
-	if((*stp<0)||(*stp>=GetDwellingNum())){ WL_MError2("incorrect internal Dwelling number."); RETURN(0) }
-	_Dwelling_ *dp=GetDwellingBase(); if(dp==0){ WL_MError2("Dwelling is not found in internal structures."); RETURN(0) }
+	if((tp!=17)&&(tp!=20)){ MError("\"!!DW:\"-not a Dwelling."); RETURN(0) }
+	if((*stp<0)||(*stp>=GetDwellingNum())){ MError("\"!!DW\"-incorrect internal Dwelling number."); RETURN(0) }
+	_Dwelling_ *dp=GetDwellingBase(); if(dp==0){ MError("\"!!DW:\"-Dwelling is not found in internal structures."); RETURN(0) }
 	dp=&dp[*stp];
 	switch(Cmd){
 		case 'M': // M#1(0...3)/$2type/$3num монстр для наема
 			CHECK_ParamsMin(3);
-			i=Mp->n[0]; if((i<0)||(i>3)){ WL_MError3("wrong monster slot (0...3).\nIncorrect value: %d",i); RETURN(0) }
+			i=Mp->n[0]; if((i<0)||(i>3)){ MError("\"!!DW:M\"-wrong monster slot (0...3)."); RETURN(0) }
 			Apply(&dp->Mon2Hire[i],4,Mp,1);
 			Apply(&dp->Num2Hire[i],2,Mp,2);
 			break;
 		case 'G': // M#1(0...7)/$2type/$3num монстр для охраны
 			CHECK_ParamsMin(3);
-			i=Mp->n[0]; if((i<0)||(i>7)){ WL_MError3("wrong monster slot (0...7).\nIncorrect value: %d",i); RETURN(0) }
+			i=Mp->n[0]; if((i<0)||(i>7)){ MError("\"!!DW:G\"-wrong monster slot (0...7)."); RETURN(0) }
 			Apply(&dp->GType[i],4,Mp,1);
 			Apply(&dp->GNum[i],4,Mp,2);
 			break;
@@ -4057,7 +4055,7 @@ int ERM_SetDwelling(char Cmd,int Num,_ToDo_*sp,Mes *Mp)
 //        if(Apply(&dp->Owner,1,Mp,0)) break;
 			}
 			break;
-		default: WL_EWrongCommand() RETURN(0)
+		default: EWrongCommand(); RETURN(0)
 	}
 	RETURN(1)
 }
@@ -4072,10 +4070,10 @@ int ERM_SetCrBank(char Cmd,int Num,_ToDo_*sp,Mes *Mp)
 	_MapItem_ *mip=GetMapItem2(MixPos);
 	_CCrBank_ *stp=(_CCrBank_ *)mip;
 	int tp=CheckPlace4Hero(mip,(Dword **)&stp);
-	if(tp!=16 && tp!=25 && tp!=24 && tp!=84 && tp!=85){ WL_MError2("-not a CrBank."); RETURN(0) }
+	if(tp!=16 && tp!=25 && tp!=24 && tp!=84 && tp!=85){ MError("\"!!CB:\"-not a CrBank."); RETURN(0) }
 	ind=stp->Ind;
-	if((ind<0)||(ind>=GetCrBankNum())){ WL_MError2("incorrect internal CrBank number."); RETURN(0) }
-	_CrBankMap_ *dp=GetCrBankBase(); if(dp==0){ WL_MError2("Dwelling is not found in internal structures."); RETURN(0) }
+	if((ind<0)||(ind>=GetCrBankNum())){ MError("\"!!CB\"-incorrect internal CrBank number."); RETURN(0) }
+	_CrBankMap_ *dp=GetCrBankBase(); if(dp==0){ MError("\"!!CB:\"-Dwelling is not found in internal structures."); RETURN(0) }
 	dp=&dp[ind];
 	switch(Cmd){
 		case 'M': // M$1type/$2num монстр для наема
@@ -4088,25 +4086,25 @@ int ERM_SetCrBank(char Cmd,int Num,_ToDo_*sp,Mes *Mp)
 			break;
 		case 'G': // M#1(0...7)/$2type/$3num монстр для охраны
 			CHECK_ParamsMin(3);
-			i=Mp->n[0]; if((i<0)||(i>7)){ WL_MError3("wrong monster slot (0...7).\nIncorrect value: %d",i); RETURN(0) }
+			i=Mp->n[0]; if((i<0)||(i>7)){ MError("\"!!CB:G\"-wrong monster slot (0...7)."); RETURN(0) }
 			Apply(&dp->DMonsterType[i],4,Mp,1);
 			Apply(&dp->DMonsterNum[i],4,Mp,2);
 			break;
 		case 'R': // R#1(0...7)/$2num ресурсный бонус
 			CHECK_ParamsMin(2);
-			i=Mp->n[0]; if((i<0)||(i>7)){ WL_MError3("wrong resource index (0...7).\nIncorrect value: %d",i); RETURN(0) }
+			i=Mp->n[0]; if((i<0)||(i>7)){ MError("\"!!CB:R\"-wrong resource index (0...7)."); RETURN(0) }
 			Apply(&dp->Res[i],4,Mp,1);
 			break;
 		case 'A': // A#ind/...
-			i=Mp->n[0]; if((i<1)||(i>5)){ WL_MError3("wrong subcommand (1...5).\nIncorrect value: %d",i); RETURN(0) }
+			i=Mp->n[0]; if((i<1)||(i>5)){ MError("\"!!CB:A\"-wrong subcommand (1...5)."); RETURN(0) }
 			switch(i){
 				case 1: // A1/?var - number of arts
-					CHECK_ParamsMin(2);
+					if(Num<2){ MError("\"!!CB:A1\"-wrong syntax."); RETURN(0) }
 					val=dp->Arts.GetNum();
 					Apply(&val,4,Mp,1);
 					break;
 				case 2: // A2/#/$ - get/set art and subart at position #
-					CHECK_ParamsMin(3);
+					if(Num<3){ MError("\"!!CB:A2\"-wrong syntax."); RETURN(0) }
 					retfl=0;
 					if(Apply(&val,4,Mp,1)) break;
 					ar=dp->Arts.Get(val);
@@ -4115,17 +4113,17 @@ int ERM_SetCrBank(char Cmd,int Num,_ToDo_*sp,Mes *Mp)
 					dp->Arts.Set(val,ar);
 					break;
 				case 3: // A3/$ - add artifact
-					CHECK_ParamsMin(2);
+					if(Num<2){ MError("\"!!CB:A3\"-wrong syntax."); RETURN(0) }
 					if(Apply(&val,4,Mp,1)) break;
 					dp->Arts.Add(val);
 					break;
 				case 4: // A4/$ - del art
-					CHECK_ParamsMin(2);
+					if(Num<2){ MError("\"!!CB:A4\"-wrong syntax."); RETURN(0) }
 					if(Apply(&val,4,Mp,1)) break;
 					dp->Arts.Del(val);
 					break;
 				default:
-					WL_EWrongSyntax() RETURN(0) 
+					EWrongSyntax(); RETURN(0) 
 			}
 			break;
 		case 'T': // T$ взят уже (1) или нет (0)
@@ -4138,7 +4136,7 @@ int ERM_SetCrBank(char Cmd,int Num,_ToDo_*sp,Mes *Mp)
 			if(Apply(&i,4,Mp,0)) break;
 			stp->Whom=i;
 			break;
-		default: WL_EWrongCommand() RETURN(0)
+		default: EWrongCommand(); RETURN(0)
 	}
 	RETURN(1)
 }
@@ -4150,13 +4148,13 @@ int ERM_SetWHat(char Cmd,int/* Num*/,_ToDo_*sp,Mes *Mp)
 	_MapItem_ *mip=GetMapItem2(MixPos);
 	_CWHat_ *stp=(_CWHat_ *)mip;
 	int tp=CheckPlace4Hero(mip,(Dword **)&stp);
-	if(tp!=113){ WL_MError2("not a witch hut."); RETURN(0) }
+	if(tp!=113){ MError("\"!!WH:\"-not a witch hut."); RETURN(0) }
 	switch(Cmd){
 		case 'S': // S$ втор.навык
 //      if((Mp->n[0]<0)||(Mp->n[0]>=28)){ MError("\"!!WH:S\"-wrong skill index (0...27)."); return 0; }
 			v=stp->SSkill; Apply(&v,4,Mp,0); stp->SSkill=v;
 			break;
-		default: WL_EWrongCommand() RETURN(0)
+		default: EWrongCommand(); RETURN(0)
 	}
 	RETURN(1)
 }
@@ -4168,7 +4166,7 @@ int ERM_Shipyard(char Cmd,int Num,_ToDo_*sp,Mes *Mp)
 	_MapItem_ *mip=GetMapItem2(MixPos);
 	_CShipyard_ *stp=(_CShipyard_ *)mip;
 	int tp=CheckPlace4Hero(mip,(Dword **)&stp);
-	if(tp!=87){ WL_MError2("not a shipyard."); RETURN(0) }
+	if(tp!=87){ MError("\"!!SY:\"-not a shipyard."); RETURN(0) }
 	switch(Cmd){
 		case 'O': // O$ хозяин
 //      if((Mp->n[0]<-1)||(Mp->n[0]>7)){ MError("\"!!SY:O\"-wrong owner (-1...7)."); return 0; }
@@ -4179,7 +4177,7 @@ int ERM_Shipyard(char Cmd,int Num,_ToDo_*sp,Mes *Mp)
 			v=stp->xs; Apply(&v,4,Mp,0); stp->xs=(Word)v;
 			v=stp->ys; Apply(&v,4,Mp,1); stp->ys=(Word)v;
 			break;
-		default: WL_EWrongCommand() RETURN(0)
+		default: EWrongCommand(); RETURN(0)
 	}
 	RETURN(1)
 }
@@ -4191,9 +4189,9 @@ int ERM_Garrison(char Cmd,int Num,_ToDo_*sp,Mes *Mp)
 	_MapItem_ *mip=GetMapItem2(MixPos);
 	int *stp=(int *)mip;
 	int tp=CheckPlace4Hero(mip,(Dword **)&stp);
-	if(tp!=33){ WL_MError2("not a garrison."); RETURN(0) }
-	if((*stp<0)||(*stp>=GetHornNum())){ WL_MError2("wrong internal Garrison index."); RETURN(0) }
-	_Horn_ *dp=GetHornBase(); if(dp==0){ WL_MError2("Garrison is not found in internal structures."); RETURN(0) }
+	if(tp!=33){ MError("\"!!GR:\"-not a garrison."); RETURN(0) }
+	if((*stp<0)||(*stp>=GetHornNum())){ MError("\"!!GR\"-wrong internal Garrison index."); RETURN(0) }
+	_Horn_ *dp=GetHornBase(); if(dp==0){ MError("\"!!GR:\"-Garrison is not found in internal structures."); RETURN(0) }
 	dp=&dp[*stp];
 	switch(Cmd){
 		case 'O': // O$ хозяин
@@ -4202,7 +4200,7 @@ int ERM_Garrison(char Cmd,int Num,_ToDo_*sp,Mes *Mp)
 			break;
 		case 'G': // M#1(0...6)/$2type/$3num монстр для охраны
 			CHECK_ParamsMin(3);
-			i=Mp->n[0]; if((i<0)||(i>=7)){ WL_MError3("wrong slot number (0...6).\nIncorrect value: %d", i); RETURN(0) }
+			i=Mp->n[0]; if((i<0)||(i>=7)){ MError("\"!!GR:G\"-wrong slot number (0...6)."); RETURN(0) }
 			Apply(&dp->GType[i],4,Mp,1);
 			Apply(&dp->GNumb[i],4,Mp,2);
 			break;
@@ -4212,7 +4210,7 @@ int ERM_Garrison(char Cmd,int Num,_ToDo_*sp,Mes *Mp)
 //    case 'N': // 3.58 N$ номер гарнизона в списке - только проверка
 //      v=*stp; Apply(&v,4,Mp,0);
 //      break;
-		default: WL_EWrongCommand() RETURN(0)
+		default: EWrongCommand(); RETURN(0)
 	}
 	RETURN(1)
 }
@@ -4224,11 +4222,11 @@ int ERM_Shrine(char Cmd,int/* Num*/,_ToDo_*sp,Mes *Mp)
 	_MapItem_ *mip=GetMapItem2(MixPos);
 	_CShrine_ *stp=(_CShrine_ *)mip;
 	int tp=CheckPlace4Hero(mip,(Dword **)&stp);
-	if((tp!=88)&&(tp!=89)&&(tp!=90)){ WL_MError2("-not a shrine."); RETURN(0) }
+	if((tp!=88)&&(tp!=89)&&(tp!=90)){ MError("\"!!SR:\"-not a shrine."); RETURN(0) }
 	switch(Cmd){
 		case 'S': // S$ заклинание
 			v=stp->Spell; Apply(&v,4,Mp,0); stp->Spell=(Word)v; break;
-		default: WL_EWrongCommand() RETURN(0)
+		default: EWrongCommand(); RETURN(0)
 	}
 	RETURN(1)
 }
@@ -4239,9 +4237,9 @@ int ERM_Sign(char Cmd,int Num,_ToDo_*sp,Mes *Mp)
 	_MapItem_ *mip=GetMapItem2(MixPos);
 	int *stp=(int *)mip;
 	int tp=CheckPlace4Hero(mip,(Dword **)&stp);
-	if((tp!=59)&&(tp!=91)){ WL_MError2("not a sign or bottle."); RETURN(0) }
-	if((*stp<0)||(*stp>=GetSignNum())){ WL_MError2("wrong internal sign or bottle index."); RETURN(0) }
-	_Sign_ *dp=GetSignBase(); if(dp==0){ WL_MError2("Sign or Bottle is not found in internal structures."); RETURN(0) }
+	if((tp!=59)&&(tp!=91)){ MError("\"!!SG:\"-not a sign or bottle."); RETURN(0) }
+	if((*stp<0)||(*stp>=GetSignNum())){ MError("\"!!SG:\"-wrong internal sign or bottle index."); RETURN(0) }
+	_Sign_ *dp=GetSignBase(); if(dp==0){ MError("\"!!SG:\"-Sign or Bottle is not found in internal structures."); RETURN(0) }
 	dp=&dp[*stp];
 	switch(Cmd){
 		case 'M': // M^text^ , M1/$
@@ -4253,14 +4251,14 @@ int ERM_Sign(char Cmd,int Num,_ToDo_*sp,Mes *Mp)
 					}else{ // M1/$
 						ApplyString(Mp,1,&dp->Mes);
 					}
-				}else{ WL_EWrongSyntax() RETURN(0) }
+				}else{ EWrongSyntax(); RETURN(0) }
 			}else{
-				if(NewMesMan(Mp,&dp->Mes,0)){ WL_MError2("cannot set message."); RETURN(0) }
+				if(NewMesMan(Mp,&dp->Mes,0)){ MError("\"!!SG:M\"-cannot set message."); RETURN(0) }
 				if(dp->Mes.m.s!=0) dp->HasMess=1; // есть сообщение
 				else dp->HasMess=0; // нет сообщения
 			}
 			break;
-		default: WL_EWrongCommand() RETURN(0)
+		default: EWrongCommand(); RETURN(0)
 	}
 	RETURN(1)
 }
@@ -4272,16 +4270,16 @@ int ERM_Univer(char Cmd,int Num,_ToDo_*sp,Mes *Mp)
 	_MapItem_ *mip=GetMapItem2(MixPos);
 	_CUniver_ *stp=(_CUniver_ *)mip;
 	int tp=CheckPlace4Hero(mip,(Dword **)&stp);
-	if(tp!=104){ WL_MError2("not a univercity."); RETURN(0) }
-	if((int)stp->Num>=GetUniverNum()){ WL_MError2("wrong internal univercity index."); RETURN(0) }
-	_Univer_ *dp=GetUniverBase(); if(dp==0){ WL_MError2("University is not found in internal structures."); RETURN(0) }
+	if(tp!=104){ MError("\"!!UR:\"-not a univercity."); RETURN(0) }
+	if((int)stp->Num>=GetUniverNum()){ MError("\"!!UR:\"-wrong internal univercity index."); RETURN(0) }
+	_Univer_ *dp=GetUniverBase(); if(dp==0){ MError("\"!!UR:\"-University is not found in internal structures."); RETURN(0) }
 	dp=&dp[stp->Num];
 	switch(Cmd){
 		case 'S': // S$/$/$/$
 			CHECK_ParamsNum(4);
 			for(i=0;i<4;i++){ Apply(&dp->SSkill[i],4,Mp,(char)i); }
 			break;
-		default: WL_EWrongCommand() RETURN(0)
+		default: EWrongCommand(); RETURN(0)
 	}
 	RETURN(1)
 }
@@ -4340,7 +4338,7 @@ int ERM_Terrain(char Cmd,int Num,_ToDo_*sp,Mes *Mp)
 			if(Apply(&v,4,Mp,0)) break;
 			SetVisability(x,y,l,v);
 			break;
-		default: WL_EWrongCommand() RETURN(0)
+		default: EWrongCommand(); RETURN(0)
 	}
 	RETURN(1)
 }
@@ -4352,9 +4350,9 @@ int ERM_Position(char Cmd,int Num,_ToDo_*sp,Mes *Mp)
 	Dword MixPos=GetDinMixPos(sp);
 	MixedPos(&x,&y,&l,MixPos);
 	sz=GetMapSize(); lv=GetMapLevels();
-	if((x<0)||(x>=sz)){ WL_MError3("wrong position (x = %d)",x); RETURN(0) }
-	if((y<0)||(y>=sz)){ WL_MError3("wrong position (y = %d)",y); RETURN(0) }
-	if((l<0)||(l>lv)) { WL_MError3("wrong position (l = %d)",l); RETURN(0) }
+	if((x<0)||(x>=sz)){ MError("\"!!PO\"-wrong position (x)."); RETURN(0) }
+	if((y<0)||(y>=sz)){ MError("\"!!PO\"-wrong position (y)."); RETURN(0) }
+	if((l<0)||(l>lv)) { MError("\"!!PO\"-wrong position (l)."); RETURN(0) }
 	_Square_ *sqp=&Square[x][y][l];
 	_Square2_ *sqp2=&Square2[x][y][l];
 	switch(Cmd){
@@ -4398,17 +4396,111 @@ int ERM_Position(char Cmd,int Num,_ToDo_*sp,Mes *Mp)
 			break;
 		case 'V': // V#/$ число short -32000...32000
 			CHECK_ParamsNum(2);
-			if(Apply(&i,4,Mp,0)){ WL_MError2("you cannot use get or check syntax for the first argument."); RETURN(0) }
-			if((i<0)||(i>3)){ WL_MError3("wrong index (0...3).\nIncorrect value: %d",i); RETURN(0) }
+			if(Apply(&i,4,Mp,0)){ MError("\"!!PO:V\"-you cannot use get or check syntax for the first argument."); RETURN(0) }
+			if((i<0)||(i>3)){ MError("\"!!PO:V\"-wrong index (0...3)."); RETURN(0) }
 			v=sqp2->S[i]; Apply(&v,4,Mp,1); sqp2->S[i]=(short)v;
 			break;
 		case 'B': // B#/$ число long -4g...4g
 			CHECK_ParamsNum(2);
-			if(Apply(&i,4,Mp,0)){ WL_MError2("you cannot use get or check syntax for the first argument."); RETURN(0) }
-			if((i<0)||(i>1)){ WL_MError3("wrong index (0...1).\nIncorrect value: %d",i); RETURN(0) }
+			if(Apply(&i,4,Mp,0)){ MError("\"!!PO:B\"-you cannot use get or check syntax for the first argument."); RETURN(0) }
+			if((i<0)||(i>1)){ MError("\"!!PO:B\"-wrong index (0...1)."); RETURN(0) }
 			v=sqp2->L[i]; Apply(&v,4,Mp,1); sqp2->L[i]=v;
 			break;
-		default: WL_EWrongCommand() RETURN(0)
+		default: EWrongCommand(); RETURN(0)
+	}
+	RETURN(1)
+}
+
+#define QWESTLOGNUM 1000
+struct _QuestLog_{
+	int  num; //0-free
+	int  z;
+	int  hero;
+	int  owner;
+}QuestLog[QWESTLOGNUM];
+
+_QuestLog_ *FindQuest(int num,int hero,int owner)
+{
+	STARTNA(__LINE__, 0)
+	int i;
+	for(i=0;i<QWESTLOGNUM;i++){
+		if(QuestLog[i].num!=num) continue;
+		if(QuestLog[i].hero!=hero) continue;
+		if(QuestLog[i].owner!=owner) continue;
+		RETURN(&QuestLog[i])
+	}
+	RETURN(0)
+}
+
+_QuestLog_ *AddQuest(int num,int hero,int owner)
+{
+	STARTNA(__LINE__, 0)
+	int i;
+	for(i=0;i<QWESTLOGNUM;i++){
+		if(QuestLog[i].num!=0) continue;
+		QuestLog[i].num=num;
+		QuestLog[i].hero=hero;
+		QuestLog[i].owner=owner;
+		RETURN(&QuestLog[i])
+	}
+	RETURN(0)
+}
+
+void DelQuest(_QuestLog_ *qlp)
+{
+	STARTNA(__LINE__, 0)
+	qlp->num=0;
+	qlp->hero=0;
+	qlp->owner=0;
+	qlp->z=0;
+	RETURNV
+}
+_QuestLog_ *GetQuest(int hero,int owner,int *ind)
+{
+	STARTNA(__LINE__, 0)
+	int i;
+	for(i=*ind;i<QWESTLOGNUM;i++){
+		if(QuestLog[i].num==0) continue;
+		if((QuestLog[i].hero!=hero)&&(QuestLog[i].hero!=-2)) continue;
+		if((QuestLog[i].owner!=owner)&&(QuestLog[i].owner!=-2)) continue;
+		*ind=i+1;
+		RETURN(&QuestLog[i])
+	}
+	RETURN(0)
+}
+
+int ERM_Qwest(char Cmd,int Num,_ToDo_* /*sp*/,Mes *Mp)
+{
+	STARTNA(__LINE__,&Mp->m.s[Mp->i])
+	int num,hero,owner;
+	_QuestLog_ *qlp;
+	switch(Cmd){
+		case 'A': // Anum/hero/owner/zvar;
+		{
+			CHECK_ParamsNum(4);
+			if(Apply(&num,4,Mp,0)) { MError("\"!!QW:A\"-cannot get or check num."); RETURN(0) }
+			if(Apply(&hero,4,Mp,1)) { MError("\"!!QW:A\"-cannot get or check hero number."); RETURN(0) }
+			if(Apply(&owner,4,Mp,2)) { MError("\"!!QW:A\"-cannot get or check owner."); RETURN(0) }
+			if(num<1){ MError("\"!!QW:A\"-Qwest number is incorrect (>0)."); RETURN(0) }
+			if((hero<-2)||(hero>=HERNUM)){ MError("\"!!QW:A\"-hero number is incorrect."); RETURN(0) }
+			if(hero==-1){
+				hero=ERM_HeroStr->Number;
+				if((hero<0)||(hero>=HERNUM)){ MError("\"!!QW:A\"-no current hero."); RETURN(0) }
+			}
+			if((owner<-2)||(owner>7)){ MError("\"!!QW:A\"-owner is incorrect (<-2 or >7)."); RETURN(0) }
+			if(owner==-1) owner=CurrentUser();
+			qlp=FindQuest(num,hero,owner);
+			if(qlp==0) qlp=AddQuest(num,hero,owner);
+			if(qlp==0){ MError("\"!!QW:A\"-cannot add one more quest."); RETURN(0) }
+			if (Mp->VarI[3].Type != 7 && GetVarVal(&Mp->VarI[3]) == -1) // StrMan::Apply treats 0 as "restore original", not -1
+				Mp->VarI[3].IType = Mp->VarI[3].Type = Mp->VarI[3].Num = Mp->n[3] = 0;
+
+			char * str = StrMan::GetStoredStr(qlp->z);
+			StrMan::Apply(str, 0, qlp->z, Mp, 3);
+			if(qlp->z==0) DelQuest(qlp);
+			break;
+		}
+		default: EWrongCommand(); RETURN(0)
 	}
 	RETURN(1)
 }
@@ -4429,18 +4521,18 @@ int ERM_StackExperience(char Cmd,int Num,_ToDo_*sp,Mes *Mp)
 //      break;
 		case 2: // герой/стэк
 			hind=GetVarVal(&sp->Par[0]);
-			if(hind<-1 || hind>=HERNUM){ WL_MError3("incorrect hero index\nIncorrect value: %d",hind); RETURN(0) }
+			if(hind<-1 || hind>=HERNUM){ MError("\"!!EX\"- incorrect hero index"); RETURN(0) }
 			if(hind==-1){
-				if(ERM_HeroStr==0){ WL_MError2("default hero is not available here"); RETURN(0) }
+				if(ERM_HeroStr==0){ MError("\"!!EX\"- default hero is not available here"); RETURN(0) }
 				else hind=ERM_HeroStr->Number;
 			}
 			Slot=GetVarVal(&sp->Par[1]);
-			if(Slot<0 || Slot>=7){ WL_MError3("incorrect index\nIncorrect value: %d",Slot); RETURN(0) }
+			if(Slot<0 || Slot>=7){ MError("\"!!EX\"- incorrect index"); RETURN(0) }
 			Type=CE_HERO; Crloc=MAKEHS(hind,Slot);
 			MType=GetHeroStr(hind)->Ct[Slot];
 			MNum =GetHeroStr(hind)->Cn[Slot];
 //      Ind=CrExpoSet::FindIt(Type,Crloc);
-//      if(Ind<0){ WL_MError("\"!!EX\"- incorrect index"); RETURN(0) }
+//      if(Ind<0){ MError("\"!!EX\"- incorrect index"); RETURN(0) }
 			break;
 		case 4: // something at x/y/l/n(/type)
 		case 5: 
@@ -4461,18 +4553,18 @@ int ERM_StackExperience(char Cmd,int Num,_ToDo_*sp,Mes *Mp)
 			l=GetVarVal(&sp->Par[2]);
 			Slot=GetVarVal(&sp->Par[3]);
 			if(Slot<0 || Slot>=7){ ERMFlags[0]=1; RETURN(0) }
-			if(CrExpoSet::FindType(x,y,l,Slot,&Type,&Crloc,&MType,&MNum)==0){ WL_MError2("cannot find object at location"); RETURN(0) }
+			if(CrExpoSet::FindType(x,y,l,Slot,&Type,&Crloc,&MType,&MNum)==0){ MError("\"!!EX\"- cannot find object at location"); RETURN(0) }
 			break;
 		case 0:
 		case 1: // индекс стэка в структуре опыта
 		case 3: // type/index/slot
-			WL_MError2("unsupported syntax."); RETURN(0)
+			MError("\"!!EX\"-unsupported syntax."); RETURN(0)
 	}
 	Cr=CrExpoSet::Find(Type,Crloc);
 	// Cr may be 0 !!!!
 	if(Cr==0){
 		Cr2=CrExpoSet::FindEmpty();
-		if(Cr2==0){ WL_MError2("no more room in experience story."); RETURN(0) }
+		if(Cr2==0){ MError("\"!!EX\"-no more room in experience story."); RETURN(0) }
 		CrV.Clear();
 		CrV.SetN(Type,Crloc,MType,MNum,0);
 	}else{
@@ -4554,9 +4646,9 @@ int ERM_StackExperience(char Cmd,int Num,_ToDo_*sp,Mes *Mp)
 					case 0: // 0/герой/стэк(/nomes)
 					CHECK_ParamsMin(3);
 					 if(Apply(&lhind,4,Mp,1)) RETURN(1)
-					 if(lhind<-1 || lhind>=HERNUM){ WL_MError2("incorrect hero index"); RETURN(0) }
+					 if(lhind<-1 || lhind>=HERNUM){ MError("\"!!EX:C\"- incorrect hero index"); RETURN(0) }
 					 if(lhind==-1){
-							if(ERM_HeroStr==0){ WL_MError2("default hero is not available here"); RETURN(0) }
+							if(ERM_HeroStr==0){ MError("\"!!EX:C\"- default hero is not available here"); RETURN(0) }
 							else lhind=ERM_HeroStr->Number;
 					 } 
 					 if(Apply(&lslot,4,Mp,2)) RETURN(1)
@@ -4574,7 +4666,7 @@ int ERM_StackExperience(char Cmd,int Num,_ToDo_*sp,Mes *Mp)
 						 if(nomes){ 
 							 RETURN(1)
 						 }else{
-							 WL_MError2("stacks have a different creatures"); RETURN(0) 
+							 MError("\"!!EX:C\"- stacks have a different creatures"); RETURN(0) 
 						 }
 					 }
 					 break;
@@ -4587,7 +4679,7 @@ int ERM_StackExperience(char Cmd,int Num,_ToDo_*sp,Mes *Mp)
 					 if(Apply(&ly,4,Mp,2)) RETURN(1)
 					 if(Apply(&ll,4,Mp,3)) RETURN(1)
 					 if(Apply(&lslot,4,Mp,4)) RETURN(1)
-					 if(lslot<0 || lslot>=7){ WL_MError3("incorrect slot index\nIncorrect value: %d", lslot); RETURN(0) }
+					 if(lslot<0 || lslot>=7){ MError("\"!!EX:C\"- incorrect slot index"); RETURN(0) }
 					 switch(lt){
 						 case 1:  ltype=CE_HERO; break;
 						 case 2:  ltype=CE_TOWN; break;
@@ -4606,18 +4698,18 @@ int ERM_StackExperience(char Cmd,int Num,_ToDo_*sp,Mes *Mp)
 						 if(nomes){ 
 							 RETURN(1)
 						 }else{
-							 WL_MError2("stacks have a different creatures"); RETURN(0) 
+							 MError("\"!!EX:C\"- stacks have a different creatures"); RETURN(0) 
 						 }
 					 }
 					 break;
 				 default:
-					 WL_MError2("unsupported syntax."); RETURN(0)
+					 MError("\"!!EX:C\"-unsupported syntax."); RETURN(0)
 				}
 				// add this stack to main
 				ERMVar2[0]=CrExpoSet::HCombReal(ltype,Type,lcrloc,Crloc,lmtype,MType,lmnum,MNum);
 			}
 			break;
-		default: WL_EWrongCommand() RETURN(0)
+		default: EWrongCommand(); RETURN(0)
 	}
 	RETURN(1)
 }
@@ -4639,48 +4731,46 @@ struct _ERM_Trigger_{ // triggers with 1 or no parameters
 	Byte post;
 } ERM_Triggers[]=
 {
-	{'IP',WL_FUNC_COUNT+330,0,3},          // IP#;
-	{'BA',WL_FUNC_COUNT+300,0,1},          // BA#;
-	{'BA',WL_FUNC_COUNT+350,50,54},        // BA#;
-	{'BF',WL_FUNC_COUNT+800,0,1},          // BF#;
-	{'BR',WL_FUNC_COUNT+302},              // BR;
-	{'MM',WL_FUNC_COUNT+317,0,1},          // MM; перем мауса (0-битва,1-город)
-	{'AE',WL_FUNC_COUNT+315,0,1},          // AE; одевание артифакта (0-снять,1-одеть)
-	{'BG',WL_FUNC_COUNT+303,0,1},          // BG;
-	{'CM',WL_FUNC_COUNT+310,0,4},          // CM;
-	{'CM',WL_FUNC_COUNT+319,5,5},          // CM;
-	{'MW',WL_FUNC_COUNT+305,0,1},          // MW#;
-	{'TH',WL_FUNC_COUNT+324,0,1},          // TH#;
-	{'HE',WL_POINTER_HE,0,HERNUM-1},   // HE#;
-	{'HM',WL_POINTER_HM,-1,HERNUM-1},  // HM#; -1 - every hero moves
-	{'HL',WL_POINTER_HL,-1,HERNUM-1},  // HL#; -1 - every hero gains level
-	{'CO',WL_FUNC_COUNT+340,0,3},          // CO
-	{'MP',WL_FUNC_COUNT+320},              // MP; переключение MP3
-	{'MG',WL_FUNC_COUNT+322,0,1},          // MG; magic casting on adv. map
-	{'SN',WL_FUNC_COUNT+321},              // SN; переключение Sound
+	{'IP',30330,0,3},          // IP#;
+	{'BA',30300,0,1},          // BA#;
+	{'BA',30350,50,54},        // BA#;
+	{'BF',30800,0,1},          // BF#;
+	{'BR',30302},              // BR;
+	{'MM',30317,0,1},          // MM; перем мауса (0-битва,1-город)
+	{'AE',30315,0,1},          // AE; одевание артифакта (0-снять,1-одеть)
+	{'BG',30303,0,1},          // BG;
+	{'CM',30310,0,4},          // CM;
+	{'CM',30319,5,5},          // CM;
+	{'MW',30305,0,1},          // MW#;
+	{'TH',30324,0,1},          // TH#;
+	{'HE',30100,0,HERNUM-1},   // HE#;
+	{'HM',30400,-1,HERNUM-1},  // HM#; -1 - every hero moves
+	{'HL',30600,-1,HERNUM-1},  // HL#; -1 - every hero gains level
+	{'CO',30340,0,3},          // CO
+	{'MP',30320},              // MP; переключение MP3
+	{'MG',30322,0,1},          // MG; magic casting on adv. map
+	{'SN',30321},              // SN; переключение Sound
 // 3.58
-	{'MR',WL_FUNC_COUNT+307,0,2},          // MR; Magic Resistance in Battle
-	{'MF',WL_FUNC_COUNT+801,0,1},          // MF; Monster abilities in a Battle
-	{'GM',WL_FUNC_COUNT+360,0,1},          // GM#; After Load(0), Before Save(1) game trigger
-	{'PI',WL_FUNC_COUNT+370},              // PI; post instruction call
+	{'MR',30307,0,2},          // MR; Magic Resistance in Battle
+	{'MF',30801,0,1},          // MF; Monster abilities in a Battle
+	{'GM',30360,0,1},          // GM#; After Load(0), Before Save(1) game trigger
+	{'PI',30370},              // PI; post instruction call
 // 3.59
-	{'TL',WL_FUNC_COUNT+900,0,4},          // TL#; timer # is number
-	{'DL',WL_FUNC_COUNT+371},              // DL; dialog call back
-	{'HD',WL_FUNC_COUNT+372},              // HD; Hint Display - Get Hint Text
-	{'CI',WL_FUNC_COUNT+373,0,1},          // CI; Castle Income
-	{'FC',WL_FUNC_COUNT+375},              // FC; Flag Color
-	{'DG',WL_FUNC_COUNT+376},              // DG; Dig Grail
-	{'HL',WL_POINTER_HP,-1,HERNUM-1,true},  // HL#; -1 - every hero gains level post-trigger
-	{'AI',WL_FUNC_COUNT+377},              // AI; Get Map Position Importance
+	{'TL',30900,0,4},          // TL#; timer # is number
+	{'DL',30371},              // DL; dialog call back
+	{'HD',30372},              // HD; Hint Display - Get Hint Text
+	{'CI',30373,0,1},          // CI; Castle Income
+	{'FC',30375},              // FC; Flag Color
+	{'DG',30376},              // DG; Dig Grail
+	{'HL',31200,-1,HERNUM-1,true},  // HL#; -1 - every hero gains level post-trigger
+	{'AI',30377},              // AI; Get Map Position Importance
 	{0,0}
 };
 
 //////////////////////////////
-// Wog Legacy introduced WL_FUNC_COUNT, so this list is outdated. But it still can give you general idea how ERM triggers works
-// Generally: 30100 -> WL_FUNC_COUNT+100
 // 0-30000 functions
 // 30000-30100 timers
-// 30100-30300 !!! empty
+// 30100-30300 heroes (!!! must change for new town)
 // 30300 to battle
 // 30301 from battle
 // 30302 next battle turn
@@ -4732,8 +4822,8 @@ struct _ERM_Trigger_{ // triggers with 1 or no parameters
 // 30376 Dig Grail (!?DG)
 // 30377 Get Map Position Importance for AI (!?AI)
 // ...
-// 30400-30600 !!! empty
-// 30600-30800 !!! empty
+// 30400-30600 hero every movement (!!! must change for new town)
+// 30600-30800 hero gain level (!!! must change for new town)
 // 30800 setup battle field
 // 30801 MFCall(0); !?MF0; - Defence coefficient
 // 30802 MFCall(1); !?MF1; - Block ability
@@ -4742,13 +4832,7 @@ struct _ERM_Trigger_{ // triggers with 1 or no parameters
 // 30900-30904 ; TL - timer #-seconds to call
 // 31000-31099 - 100 local functions
 // 31100-31199 - autotimers (!?TM#1/#2/#3/#4)
-// 31200-31400 - !!! empty
-// ...
-// WL ADDITION 32000-... using old notation (for HERNUM=199)
-// 32000-32199 -- heroes
-// 32200-32399 -- hero every movement
-// 32400-32599 -- hero gain level pretrigger
-// 32600-32799 -- hero gain level posttrigger
+// 31200-31400 - hero gain level post-trigger (!!! must change for new town)
 // ...
 // 0x04000000 ... макс используемый тип - уровень
 // 0x10000000+ OB position enter
@@ -4921,7 +5005,7 @@ char *_Message2ERM(char *str)
 					case '$':
 						vnt=GetMacro(FindMacro2(&str[i],0,&k));
 						i+=k-1;
-						if(vnt==0){ WL_MError("\"String 2ERM\"-wrong macro $...$."); break; }
+						if(vnt==0){ MError("\"String 2ERM\"-wrong macro $...$."); break; }
 						if(vnt->Type==7){
 							j+=a2a(ERMString[vnt->Num-1],&/*ERMMesBuf*/stro[j])-1;
 							break;
@@ -4955,7 +5039,7 @@ char *_Message2ERM(char *str)
 							v=a2i(&str[i]); i+=SkipNumbers(&str[i])-1;
 							if((v>=1)&&(v<=VAR_COUNT_V)){ // переменная
 								j+=i2a(ERMVar2[v-1],&/*ERMMesBuf*/stro[j])-1;
-							}else{ WL_MError1("\"String 2ERM\"-wrong %V# number (1...10000).\nIncorrect value: %d",v); }
+							}else{ MError("\"String 2ERM\"-wrong %V# number (1...10000)."); }
 						}
 						break;
 					case 'W': // W#
@@ -4963,14 +5047,14 @@ char *_Message2ERM(char *str)
 						v=a2i(&str[i]); i+=SkipNumbers(&str[i])-1;
 						if((v>=1)&&(v<=200)){ // w#
 							j+=i2a(ERMVarH[ERMW][v-1],&/*ERMMesBuf*/stro[j])-1;
-						}else{ WL_MError1("\"String 2ERM\"-wrong %W# number (1...200).\nIncorrect value: %d",v); }
+						}else{ MError("\"String 2ERM\"-wrong %W# number (1...200)."); }
 						break;
 					case 'X': // X#
 						++i;
 						v=a2i(&str[i]); i+=SkipNumbers(&str[i])-1;
 						if((v>=1)&&(v<=16)){ // x#
 							j+=i2a(ERMVarX[v-1],&/*ERMMesBuf*/stro[j])-1;
-						}else{ WL_MError3("\"String 2ERM\"-wrong %X# number (1...16).\nIncorrect value: %d",v); }
+						}else{ MError("\"String 2ERM\"-wrong %X# number (1...16)."); }
 						break;
 					case 'Y': // Y#
 						++i;
@@ -4979,7 +5063,7 @@ char *_Message2ERM(char *str)
 							j+=i2a(ERMVarY[v-1],&/*ERMMesBuf*/stro[j])-1;
 						}else if((v<=-1)&&(v>=-100)){ // y#
 							j+=i2a(ERMVarYT[-v-1],&/*ERMMesBuf*/stro[j])-1;
-						}else{ WL_MError3("\"String 2ERM\"-wrong %Y# number (-100...-1,1...100).\nIncorrect value: %d",v); }
+						}else{ MError("\"String 2ERM\"-wrong %Y# number (-100...-1,1...100)."); }
 						break;
 					case 'E': // E#
 						++i;
@@ -4988,12 +5072,12 @@ char *_Message2ERM(char *str)
 							j+=f2a(ERMVarF[v-1],&/*ERMMesBuf*/stro[j])-1;
 						}else if((v<=-1)&&(v>=-100)){ // e-#
 							j+=f2a(ERMVarFT[-v-1],&/*ERMMesBuf*/stro[j])-1;
-						}else{ WL_MError3("\"String 2ERM\"-wrong %E# number (-100...-1,1...100).\nIncorrect value: %d",v); }
+						}else{ MError("\"String 2ERM\"-wrong %E# number (-100...-1,1...100)."); }
 						break;
 					case 'Z': // Z#
 						++i;
 						v=a2i(&str[i]); i+=SkipNumbers(&str[i])-1;
-						if((v<-VAR_COUNT_LZ)||(v==0)){ WL_MError3("\"String 2ERM\"-wrong %Z# number (-20...-1,1...1000).\nIncorrect value: %d",v); }
+						if((v<-VAR_COUNT_LZ)||(v==0)){ MError("\"String 2ERM\"-wrong %Z# number (-20...-1,1...1000)."); }
 						if(v>1000)   j+=a2a(StringSet::GetText(v),&/*ERMMesBuf*/stro[j])-1;
 						else if(v>0) j+=a2a(ERMString[v-1],&/*ERMMesBuf*/stro[j])-1;
 						else         j+=a2a(ERMLString[-v-1],&/*ERMMesBuf*/stro[j])-1;
@@ -5004,7 +5088,7 @@ char *_Message2ERM(char *str)
 ////            v=a2i(&str[i]); i+=SkipNumbers(&str[i])-1;
 ////            if((v>=1)&&(v<=500)){ // z#
 ////              j+=a2a(ERMScope->String[v-1],&ERMMesBuf[j])-1;
-////            }else{ WL_MError("\"String 2ERM\"-wrong %B# number (1...500)."); }
+////            }else{ MError("\"String 2ERM\"-wrong %B# number (1...500)."); }
 ////            break;
 ////          case 'A': // A#
 ////            ++i;
@@ -5012,14 +5096,14 @@ char *_Message2ERM(char *str)
 ////            v=a2i(&str[i]); i+=SkipNumbers(&str[i])-1;
 ////            if((v>=1)&&(v<=1000)){ // x#
 ////                j+=i2a(ERMVar2[v-1],&ERMMesBuf[j])-1;
-////              }else{ WL_MError("\"String 2ERM\"-wrong %A# number (1...1000)."); }
+////              }else{ MError("\"String 2ERM\"-wrong %A# number (1...1000)."); }
 ////            break;
 					case 'F': // F# флаги
 						++i;
 						v=a2i(&str[i]); i+=SkipNumbers(&str[i])-1;
 						if((v>=1)&&(v<=1000)){ // z#
 							j+=i2a(ERMFlags[v-1],&/*ERMMesBuf*/stro[j])-1;
-						}else{ WL_MError3("\"String 2ERM\"-wrong %F# number (1...1000).\nIncorrect value: %d",v); }
+						}else{ MError("\"String 2ERM\"-wrong %F# number (1...1000)."); }
 						break;
 					case 'D': // Dd or Dw or Dm or Da
 						ch=str[++i];
@@ -5028,7 +5112,7 @@ char *_Message2ERM(char *str)
 							case 'w': j+=i2a(p->Week,&/*ERMMesBuf*/stro[j])-1; break;
 							case 'm': j+=i2a(p->Month,&/*ERMMesBuf*/stro[j])-1; break;
 							case 'a': j+=i2a(GetCurDate(),&/*ERMMesBuf*/stro[j])-1; break;
-							default : WL_MError("\"String 2ERM\"-wrong %D$ syntax.");
+							default : MError("\"String 2ERM\"-wrong %D$ syntax.");
 						}
 						break;
 					case 'G': // G# or Gc
@@ -5036,13 +5120,13 @@ char *_Message2ERM(char *str)
 						if(ch=='c') v=CurrentUser();
 //            else{ v=a2i(&str[i]); i+=SkipNumbers(&str[i]); }
 //            if((v<0)||(v>7)){ Error(); break; }
-						else{ WL_MError("\"String 2ERM\"-wrong %G# syntax."); break; }
+						else{ MError("\"String 2ERM\"-wrong %G# syntax."); break; }
 						s=ITxt(62+v,0,&Strings);
 						while((ch=*s++)!=0) /*ERMMesBuf*/stro[j++]=ch;
 						--j;
 						break;
 					default:
-//            WL_MError("\"String 2ERM\"-wrong %$ syntax."); return str;
+//            MError("\"String 2ERM\"-wrong %$ syntax."); return str;
 							/*ERMMesBuf*/stro[j++]='%'; /*ERMMesBuf*/stro[j]=ch;
 							break;
 				}
@@ -5110,13 +5194,13 @@ int ApplyString(Mes *Mp,int ind,_AMes_ *amp)
 	int sind;
 	if(Mp->VarI[ind].Check==1){ // ?
 		sind=GetVarVal(&Mp->VarI[ind]);
-		if(BAD_INDEX_LZ(sind)||(sind>1000)){ WL_MError3("wrong z (destination) index (-20...-1,1...1000) in ApplyString.\nIncorrect value: %d",sind); RETURN(0) }
+		if(BAD_INDEX_LZ(sind)||(sind>1000)){ MError2("wrong z (destination) index (-20...-1,1...1000) in ApplyString."); RETURN(0) }
 		if(sind>0) StrCopy(ERMString[sind-1],512,amp->m.s);
 		else       StrCopy(ERMLString[-sind-1],512,amp->m.s);
 		RETURN(1)
 	}else{
 		sind=Mp->n[ind];
-		if(BAD_INDEX_LZ(sind)){ WL_MError3("wrong z (sourse) index (-20...-1,1...1000) in ApplyString.\nIncorrect value: %d",sind); RETURN(0) }
+		if(BAD_INDEX_LZ(sind)){ MError2("wrong z (sourse) index (-20...-1,1...1000) in ApplyString."); RETURN(0) }
 		MesMan(amp, GetErmString(sind), 0);
 		RETURN(0)
 	}
@@ -5260,8 +5344,8 @@ _over: // пропустим завершающие пробелы
 void VNCopy(VarNum *src,VarNum *dst)
 {
 	STARTNA(__LINE__, 0)
-	if(src==0){ WL_MError("\"VNCopy\"-internal error (source=0). Possible reason is wrong macro syntax."); RETURNV }
-	if(dst==0){ WL_MError("\"VNCopy\"-internal error (destination=0). Possible reason is wrong macro syntax."); RETURNV }
+	if(src==0){ MError("\"VNCopy\"-internal error (source=0). Possible reason is wrong macro syntax."); RETURNV }
+	if(dst==0){ MError("\"VNCopy\"-internal error (destination=0). Possible reason is wrong macro syntax."); RETURNV }
 //  dst->SetNum(src->GetNum());
 	*dst=*src;
 //  dst->Num=src->Num;
@@ -5282,7 +5366,7 @@ int GetCmpCode(char cn)
 		case 5: RETURN(3) // <>
 		case 6: RETURN(6) // >=
 		case 7:
-		default: WL_MError("\"GetCmpCode\"-type of comparison is incorrect."); RETURN(0)
+		default: MError("\"GetCmpCode\"-type of comparison is incorrect."); RETURN(0)
 	}
 }
 
@@ -5349,7 +5433,7 @@ int GetNum(Mes *ms,int ind, int immed)
 				ms->i=i;
 				vnt=GetMacro(FindMacro(ms,0));
 				i=ms->i;
-				if(vnt==0){ WL_MError("\"GetNum\"-cannot find macro."); goto _over; }
+				if(vnt==0){ MError("\"GetNum\"-cannot find macro."); goto _over; }
 				if(vnt->Type)
 					if(vf) ivf=vnt->Type; else vf=vnt->Type;
 
@@ -5357,7 +5441,7 @@ int GetNum(Mes *ms,int ind, int immed)
 				mvi->Type=vf;
 				mvi->IType=ivf;
 				if(set){
-					if(cn!=0){ WL_MError("\"GetNum\"-cannot set and check both."); goto _over; }
+					if(cn!=0){ MError("\"GetNum\"-cannot set and check both."); goto _over; }
 					mvi->Check=1; //?
 					if(vnt->Type!=vtSimple) *n = mvi->Num;
 					goto _ok;
@@ -5394,7 +5478,7 @@ int GetNum(Mes *ms,int ind, int immed)
 						mvi->Type=2;  // f...t
 					}
 					if(set){ // запомнить
-						if(cn!=0){ WL_MError("\"GetNum\"-cannot set and check both (?f...t var)."); goto _over; }
+						if(cn!=0){ MError("\"GetNum\"-cannot set and check both (?f...t var)."); goto _over; }
 						mvi->Check=1; //?
 //            if(ivf!=0){ Error(); goto _over; }
 						goto _ok;
@@ -5423,7 +5507,7 @@ int GetNum(Mes *ms,int ind, int immed)
 					}
 				}else{
 					ms->i=i;
-					if(GetSubNum(ms,ind)){ WL_MError("\"GetNum\"-cannot parse a number."); goto _over; }
+					if(GetSubNum(ms,ind)){ MError("\"GetNum\"-cannot parse a number."); goto _over; }
 					i=ms->i;
 					if(vf){
 						vi=*n;
@@ -5431,7 +5515,7 @@ int GetNum(Mes *ms,int ind, int immed)
 						mvi->Type=vf;
 						mvi->IType=ivf;
 						if(set){
-							if(cn!=0){ WL_MError("\"GetNum\"-cannot set and check both."); goto _over; }
+							if(cn!=0){ MError("\"GetNum\"-cannot set and check both."); goto _over; }
 							mvi->Check=1; //?
 							goto _ok;
 						}else{
@@ -5467,7 +5551,7 @@ int GetNum(Mes *ms,int ind, int immed)
 						mvi->Type=0;
 						mvi->IType=0;
 						mvi->Check=(Word)GetCmpCode(cn);
-						if(set){ WL_MError("\"GetNum\"-cannot get flag."); goto _over;} // нельзя флаг запоминать
+						if(set){ MError("\"GetNum\"-cannot get flag."); goto _over;} // нельзя флаг запоминать
 					}
 					goto _ok;
 				}
@@ -5475,7 +5559,7 @@ int GetNum(Mes *ms,int ind, int immed)
 _ok:
 		SkipSpaces(s, &i);
 		if(c==1) goto _ok3;
-		if(ch==0){ WL_MError("\"GetNum\"-unexpected end of line."); goto _over; }
+		if(ch==0){ MError("\"GetNum\"-unexpected end of line."); goto _over; }
 		if((ch!=c)&&(i<l)) continue;
 		ms->i=i+1; // пропустим запрашиваемый символ
 		SkipSpaces(s, &ms->i);
@@ -5528,12 +5612,12 @@ int GetFlags(Mes *m)
 		for(i=0;i<16;i++){
 			M.n[i]=0; M.c[i]=1;
 			if(GetNum(&M,i,0)) RETURN(-1)
-			if(M.VarI[i].Check!=0){ WL_MError("\"GetFlags\"-cannot get or campare first argument in \"&...\" part."); RETURN(-1) }
+			if(M.VarI[i].Check!=0){ MError("\"GetFlags\"-cannot get or campare first argument in \"&...\" part."); RETURN(-1) }
 			if(M.VarI[i].Type!=0){ // проверяем на переменную
-				if(M.VarI[i].Num==0){ WL_MError("\"GetFlags\"-wrong var index or syntax in \"&...\" part."); RETURN(-1) }
+				if(M.VarI[i].Num==0){ MError("\"GetFlags\"-wrong var index or syntax in \"&...\" part."); RETURN(-1) }
 				VNCopy(&M.VarI[i],&m->Efl[0][i][0]);
-				if(GetNum(&M,i,0)){ WL_MError("\"GetFlags\"-cannot get number in \"&...\" part."); RETURN(-1) }
-				if(M.VarI[i].Check<2){ WL_MError("\"GetFlags\"-cannot set or get second argument in \"&...\" part (only check)."); RETURN(-1) }
+				if(GetNum(&M,i,0)){ MError("\"GetFlags\"-cannot get number in \"&...\" part."); RETURN(-1) }
+				if(M.VarI[i].Check<2){ MError("\"GetFlags\"-cannot set or get second argument in \"&...\" part (only check)."); RETURN(-1) }
 				if(M.VarI[i].Type==0){  // сравниваем с числом
 					M.VarI[i].Num=M.n[i]; // запомним его
 				}
@@ -5546,7 +5630,7 @@ int GetFlags(Mes *m)
 				}else{
 					M.VarI[i].Check=2;
 				}
-				if((ind<1)||(ind>1000)){ WL_MError1("\"GetFlags\"-wrong index of flag in \"&...\" part.\nIncorrect value: %d",ind); RETURN(-1) }
+				if((ind<1)||(ind>1000)){ MError("\"GetFlags\"-wrong index of flag in \"&...\" part."); RETURN(-1) }
 				M.VarI[i].Num=ind;
 				M.VarI[i].Type=1; // флаг
 				M.VarI[i].IType=0;
@@ -5562,12 +5646,12 @@ int GetFlags(Mes *m)
 		for(i=0;i<16;i++){
 			M.n[i]=0; M.c[i]=1;
 			if(GetNum(&M,i,0)) RETURN(-1)
-			if(M.VarI[i].Check!=0){ WL_MError("\"GetFlags\"-cannot get or campare first argument in \"|...\" part."); RETURN(-1) }
+			if(M.VarI[i].Check!=0){ MError("\"GetFlags\"-cannot get or campare first argument in \"|...\" part."); RETURN(-1) }
 			if(M.VarI[i].Type!=0){ // проверяем на переменную
-				if(M.VarI[i].Num==0){ WL_MError("\"GetFlags\"-wrong var index or syntax in \"|...\" part."); RETURN(-1) }
+				if(M.VarI[i].Num==0){ MError("\"GetFlags\"-wrong var index or syntax in \"|...\" part."); RETURN(-1) }
 				VNCopy(&M.VarI[i],&m->Efl[1][i][0]);
-				if(GetNum(&M,i,0)){ WL_MError("\"GetFlags\"-cannot get number in \"|...\" part."); RETURN(-1) }
-				if(M.VarI[i].Check<2){ WL_MError("\"GetFlags\"-cannot set or get second argument in \"|...\" part (only check)."); RETURN(-1) }
+				if(GetNum(&M,i,0)){ MError("\"GetFlags\"-cannot get number in \"|...\" part."); RETURN(-1) }
+				if(M.VarI[i].Check<2){ MError("\"GetFlags\"-cannot set or get second argument in \"|...\" part (only check)."); RETURN(-1) }
 				if(M.VarI[i].Type==0){  // сравниваем с числом
 					M.VarI[i].Num=M.n[i]; // запомним его
 				}
@@ -5580,7 +5664,7 @@ int GetFlags(Mes *m)
 				}else{
 					M.VarI[i].Check=2;
 				}
-				if((ind<1)||(ind>1000)){ WL_MError1("\"GetFlags\"-wrong index of flag in \"|...\" part.\nIncorrect value: %d",ind); RETURN(-1) }
+				if((ind<1)||(ind>1000)){ MError("\"GetFlags\"-wrong index of flag in \"|...\" part."); RETURN(-1) }
 				M.VarI[i].Num=ind;
 				M.VarI[i].Type=1; // флаг
 				M.VarI[i].IType=0;
@@ -5907,8 +5991,8 @@ int ProcessDisable(_ToDo_ *sp,int z)
 	Dword   event,object;
 	Byte    pr,cur;
 
-	if((z<0)||(z>7)){WL_MError1("Z command has a wrong parameter (Z4...Z7).\nIncorrect value: %d",z); RETURN(1) }
-	if((z>=0)&&(z<=3)){WL_MError("Z0...Z3 commands are obsolete and are not supported anymore."); RETURN(1) }
+	if((z<0)||(z>7)){MError2("Z command has a wrong parameter (Z4...Z7)."); RETURN(1) }
+	if((z>=0)&&(z<=3)){MError2("Z0...Z3 commands are obsolete and are not supported anymore."); RETURN(1) }
 	object=sp->Pointer;
 	cp=FirstTrigger;
 	while(cp!=0 && cp->Event!=0){
@@ -6015,7 +6099,7 @@ int CheckFlags(VarNum (*Efl)[16][2])
 ////          if(CheckScope()) return 1;
 ////          zind=-vi; n=zind;
 ////          break;
-				default: WL_MError("\"CheckFlags\"-wrong var index in first argument of \"&|...\" part (1...[1000])."); goto _ret1;
+				default: MError("\"CheckFlags\"-wrong var index in first argument of \"&|...\" part (1...[1000])."); goto _ret1;
 			}
 			vi = GetVarIndex(&Efl[j][i][1], true);
 			if (Efl[j][i][1].Type != 0 && vi == 0) goto _ret1;
@@ -6055,12 +6139,12 @@ int CheckFlags(VarNum (*Efl)[16][2])
 ////          if(CheckScope()) return 1;
 ////          zind2=-vi; n2=zind;
 ////          break;
-				default: WL_MError("\"CheckFlags\"-wrong var in second argument of \"&|...\" part (#,f...t,v,w,x,y)."); goto _ret1;
+				default: MError("\"CheckFlags\"-wrong var in second argument of \"&|...\" part (#,f...t,v,w,x,y)."); goto _ret1;
 			}
 			fl=0;
 			if((zind!=0)&&(zind2!=0)){ // сравниваем строковые переменные
 				if((zind<-VAR_COUNT_LZ)||(zind==0)||(zind2<-VAR_COUNT_LZ)||(zind2==0)){
-					WL_MError1("\"CheckFlags\"-wrong z var index in \"&|...\" part.\nIncorrect value: %d",zind);
+					MError("\"CheckFlags\"-wrong z var index in \"&|...\" part.");
 					goto _ret1;
 				}
 				if((txt1 = GetInternalErmString(zind)) == 0) goto _ret1;
@@ -6072,7 +6156,7 @@ int CheckFlags(VarNum (*Efl)[16][2])
 					case 3: // <>,>< (!=)
 						if(fl) fl=0; else fl=1;
 						break;
-					default: WL_MError("\"CheckFlags\"-Z vars may be compared for = or <> only in \"&|...\" part (<,=,<=,=<,>,<>,><,>=,=>)."); goto _ret1;
+					default: MError("\"CheckFlags\"-Z vars may be compared for = or <> only in \"&|...\" part (<,=,<=,=<,>,<>,><,>=,=>)."); goto _ret1;
 				}
 			}else{
 				if(evar!=0){
@@ -6097,7 +6181,7 @@ int CheckFlags(VarNum (*Efl)[16][2])
 						case 6: // >=,=>
 							if(v1>=v2) fl=1;
 							break;
-						default: WL_MError("\"CheckFlags\"-wrong comparison type in \"&|...\" part (<,=,<=,=<,>,<>,><,>=,=>)."); break;
+						default: MError("\"CheckFlags\"-wrong comparison type in \"&|...\" part (<,=,<=,=<,>,<>,><,>=,=>)."); break;
 					}
 				}else{
 					switch(Efl[j][i][1].Check){
@@ -6119,7 +6203,7 @@ int CheckFlags(VarNum (*Efl)[16][2])
 						case 6: // >=,=>
 							if(n>=n2) fl=1;
 							break;
-						default: WL_MError("\"CheckFlags\"-wrong comparison type in \"&|...\" part (<,=,<=,=<,>,<>,><,>=,=>)."); break;
+						default: MError("\"CheckFlags\"-wrong comparison type in \"&|...\" part (<,=,<=,=<,>,<>,><,>=,=>)."); break;
 					}
 				}
 			}
@@ -6243,7 +6327,7 @@ int Apply(void *dp,char size,Mes *mp,char ind)
 					break;
 				default:
 					p = GetVarAddress(vi, mp->VarI[ind].Type);
-					if (p == 0) { WL_MError("wrong var type (f...t,v,w,x,y,e)."); RETURN(-1) }
+					if (p == 0) { MError2("wrong var type (f...t,v,w,x,y,e)."); RETURN(-1) }
 					*p = v;
 					if (mp->f[ind])
 					{
@@ -6271,7 +6355,7 @@ static char ERMExtDBuf[40][1000];
 char *ERM2String2(int ind,char *mes){
 	STARTNA(__LINE__,mes)
 	ERMExtDBuf[0][0]=0;
-	if((ind<0)||(ind>39)){ WL_MError1("\"ERM2String2\"-wrong index (internal)\nIncorrect value: %d",ind); RETURN(ERMExtDBuf[0]) }
+	if((ind<0)||(ind>39)){ MError("\"ERM2String2\"-wrong index (internal)"); RETURN(ERMExtDBuf[0]) }
 	_Message2ERM(mes);
 	for(int i=0;i<1000;i++) ERMExtDBuf[ind][i]=ERMMesBuf[4][i];
 	ERMExtDBuf[ind][999]=0;
@@ -6309,9 +6393,9 @@ int ProcessMes(_ToDo_ *sp, Mes &M, char Cmd, int Num) // returns 1 in case of er
 							}else{ // M1/$
 								ApplyString(&M,1,&p->Mes);
 							}
-						}else{ WL_MError2("wrong syntax (M1/$)"); goto l_exit; }
+						}else{ MError("\"GE:M\"-wrong syntax (M1/$)"); goto l_exit; }
 					}else{ // старый стиль
-						 if(MesManOld(&M,&p->Mes.m)){ WL_MError2("cannot set message (M$)"); goto l_exit; }
+						 if(MesManOld(&M,&p->Mes.m)){ MError("\"GE:M\"-cannot set message (M$)"); goto l_exit; }
 					}
 					break;
 				}else if(Cmd=='F'){ // F$ день первого появления (с 1-го)
@@ -6319,8 +6403,8 @@ int ProcessMes(_ToDo_ *sp, Mes &M, char Cmd, int Num) // returns 1 in case of er
 				}else if(Cmd=='R'){ // R$ периодичность появления
 					Apply(&p->Repeater,2,&M,0);
 				}else if(Cmd=='B'){ // B#1/$2 ресурсы
-					if(Num<2){ WL_EWrongParamsNum(Num,"minimum",2); goto l_exit; }
-					if((M.n[0]<0)||(M.n[0]>6)){ WL_EWrongParam2("resource",M.n[0]); goto l_exit; }
+					if(Num<2){ EWrongParamsNum(); goto l_exit; }
+					if((M.n[0]<0)||(M.n[0]>6)){ EWrongParam(); goto l_exit; }
 					Apply(&p->Res[M.n[0]],4,&M,1);
 				}else if(Cmd=='E'){ // E$ разрешить игрокам цветов
 					if(M.f[0]) p->Colors|=(Byte)(M.n[0]&0x0FF);
@@ -6334,8 +6418,8 @@ int ProcessMes(_ToDo_ *sp, Mes &M, char Cmd, int Num) // returns 1 in case of er
 				}else if(Cmd=='Q'){ // H# разрешить человеку
 					Apply(&p->AIEnable,1,&M,0);
 				}else if(Cmd=='D'){ // D#1/#2
-					if(Num<2){ WL_MError2("wrong syntax (D$/$)"); goto l_exit; }
-					if((M.n[0]<0)||(M.n[0]>7)){ WL_MError3("wrong owner (0...7)\nIncorrect value: %d",M.n[0]); goto l_exit; }
+					if(Num<2){ MError("\"GE:D\"-wrong syntax (D$/$)"); goto l_exit; }
+					if((M.n[0]<0)||(M.n[0]>7)){ MError("\"GE:D\"-wrong owner (0...7)"); goto l_exit; }
 					if(M.n[1]){ // запретить
 						p->Colors&=(Byte)~((Byte)(((Byte)1)<<M.n[0]));
 					}else{ // разрешить
@@ -6343,7 +6427,7 @@ int ProcessMes(_ToDo_ *sp, Mes &M, char Cmd, int Num) // returns 1 in case of er
 					}
 				}else if(Cmd==' '){ // пробелы могут быть
 				}else{
-					WL_EWrongCommand() goto l_exit;
+					EWrongCommand(); goto l_exit;
 				}
 			}
 			break;
@@ -6365,9 +6449,9 @@ int ProcessMes(_ToDo_ *sp, Mes &M, char Cmd, int Num) // returns 1 in case of er
 					mov    eax,[eax]
 					mov    p,eax
 				}
-				if(p==0){ WL_MError2("cannot find event."); goto l_exit; }
+				if(p==0){ MError("\"LE\"-cannot find event."); goto l_exit; }
 				p=&p[pos->Number];
-				if(p==0){ WL_MError2("cannot find event."); goto l_exit; }
+				if(p==0){ MError("\"LE\"-cannot find event."); goto l_exit; }
 				if(Cmd=='M'){
 					if(Num==2){ // с переменной
 						if(M.n[0]==1){
@@ -6376,9 +6460,9 @@ int ProcessMes(_ToDo_ *sp, Mes &M, char Cmd, int Num) // returns 1 in case of er
 							}else{ // M1/$
 								ApplyString(&M,1,&p->Mes);
 							}
-						}else{ WL_MError2("wrong syntax (M1/$)."); goto l_exit; }
+						}else{ MError("\"LE:M\"-wrong syntax (M1/$)."); goto l_exit; }
 					}else{// старый стиль
-						if(NewMesMan(&M,&p->Mes,0)){ WL_MError2("cannot set message (M$)."); goto l_exit; }
+						if(NewMesMan(&M,&p->Mes,0)){ MError("\"LE:M\"-cannot set message (M$)."); goto l_exit; }
 					}
 				}else if(Cmd=='G'){ // G#1/$2/$3 охранник в поз #1 тип #2(-1 нет) кол-во #3
 					if(Num<3) goto l_exit;
@@ -6441,32 +6525,32 @@ int ProcessMes(_ToDo_ *sp, Mes &M, char Cmd, int Num) // returns 1 in case of er
 					}
 				}else if(Cmd=='B'){ // 3.58 alternative for A
 					int ar;
-					int st=M.n[0]; if((st<1)||(st>5)){ WL_MError3("wrong subcommand (1...5).\nIncorrect value: %d",st); goto l_exit; }
+					int st=M.n[0]; if((st<1)||(st>5)){ MError("\"!!LE:B\"-wrong subcommand (1...5)."); goto l_exit; }
 					switch(st){
 						case 1: // A1/?var - number of arts
-							if(Num<2){ WL_MError2("wrong syntax."); goto l_exit; }
+							if(Num<2){ MError("\"!!LE:B1\"-wrong syntax."); goto l_exit; }
 							val=p->Arts.GetNum();
 							Apply(&val,4,&M,1);
 							break;
 						case 2: // A2/#/$ - get/set art and subart at position #
-							if(Num<3){ WL_MError2("wrong syntax."); goto l_exit; }
+							if(Num<3){ MError("\"!!LE:B2\"-wrong syntax."); goto l_exit; }
 							if(Apply(&val,4,&M,1)) break;
 							ar=p->Arts.Get(val);
 							if(Apply(&ar,4,&M,2)) break;
 							p->Arts.Set(val,ar);
 							break;
 						case 3: // A3/$ - add artifact
-							if(Num<2){ WL_MError2("wrong syntax."); goto l_exit; }
+							if(Num<2){ MError("\"!!LE:B3\"-wrong syntax."); goto l_exit; }
 							if(Apply(&val,4,&M,1)) break;
 							p->Arts.Add(val);
 							break;
 						case 4: // A4/$ - del art
-							if(Num<2){ WL_MError2("wrong syntax."); goto l_exit; }
+							if(Num<2){ MError("\"!!LE:B4\"-wrong syntax."); goto l_exit; }
 							if(Apply(&val,4,&M,1)) break;
 							p->Arts.Del(val);
 							break;
 						default:
-							WL_EWrongSyntax() goto l_exit; 
+							EWrongSyntax(); goto l_exit; 
 					}
 				}else if(Cmd=='S'){ // S#1/$2 заменить в табл закл поз1 закл2
 					if(Num==1){ // 3.58
@@ -6484,8 +6568,8 @@ int ProcessMes(_ToDo_ *sp, Mes &M, char Cmd, int Num) // returns 1 in case of er
 					Apply(&p->Mon.Ct[M.n[0]],4,&M,1);
 					Apply(&p->Mon.Cn[M.n[0]],4,&M,2);
 				}else if(Cmd=='D'){ // D#1/#2
-					if(Num<2){ WL_MError2("wrong syntax (D$/$)."); goto l_exit; }
-					if((M.n[0]<0)||(M.n[0]>7)){ WL_MError3("wrong owner (0...7).\nIncorrect value: %d",M.n[0]); goto l_exit; }
+					if(Num<2){ MError("\"LE:D\"-wrong syntax (D$/$)."); goto l_exit; }
+					if((M.n[0]<0)||(M.n[0]>7)){ MError("\"LE:D\"-wrong owner (0...7)."); goto l_exit; }
 					if(M.n[1]){ // запретить
 						pos->Enabled4&=(Word)~((Word)(1<<M.n[0]));
 					}else{ // разрешить
@@ -6497,7 +6581,7 @@ int ProcessMes(_ToDo_ *sp, Mes &M, char Cmd, int Num) // returns 1 in case of er
 					pos->OneVisit=(Word)M.n[0];
 				}else if(Cmd==' '){
 				}else{
-					WL_EWrongCommand() goto l_exit;
+					EWrongCommand(); goto l_exit;
 				}
 			}
 			break;
@@ -6513,9 +6597,9 @@ int ProcessMes(_ToDo_ *sp, Mes &M, char Cmd, int Num) // returns 1 in case of er
 							}else{ // M1/$
 								ApplyString(&M,1,&p->Mes);
 							}
-						}else{ WL_MError2("wrong syntax (M1/$)."); goto l_exit; }
+						}else{ MError("\"CE:M\"-wrong syntax (M1/$)."); goto l_exit; }
 					}else{// старый стиль
-						 if(MesManOld(&M,&p->Mes.m)){ WL_MError2("cannot set message (M$)."); goto l_exit; }
+						 if(MesManOld(&M,&p->Mes.m)){ MError("\"CE:M\"-cannot set message (M$)."); goto l_exit; }
 					}
 				}else if(Cmd=='F'){ // F$ день первого появления (с 1-го)
 					Apply(&p->FirstDate,2,&M,0);
@@ -6548,7 +6632,7 @@ int ProcessMes(_ToDo_ *sp, Mes &M, char Cmd, int Num) // returns 1 in case of er
 					ns2=M.n[0]/8; p->BuildIt[ns2]&=(Byte)~(1<<(M.n[0]%8));
 				}else if(Cmd==' '){
 				}else{
-					WL_EWrongCommand() goto l_exit;
+					EWrongCommand(); goto l_exit;
 				}
 			}
 			break;
@@ -6561,8 +6645,8 @@ int ProcessMes(_ToDo_ *sp, Mes &M, char Cmd, int Num) // returns 1 in case of er
 				mp=(_CMonster_ *)MIp;
 				if((p==0)&&(mp->HasSetUp)){ // неопределен - поищем
 					mn=mp->SetUpInd;
-					if(mn>GetMonsterNum()){ WL_MError2("cannot find monster by num (internal)."); goto l_exit; }
-					p=GetMonsterBase(); if(p==0){ WL_MError2("cannot find monster base(internal)."); goto l_exit; }
+					if(mn>GetMonsterNum()){ MError("\"MO\"-cannot find monster by num (internal)."); goto l_exit; }
+					p=GetMonsterBase(); if(p==0){ MError("\"MO\"-cannot find monster base(internal)."); goto l_exit; }
 					p=&p[mn];
 				}
 				if(Cmd=='G'){ // G$ количество
@@ -6584,24 +6668,24 @@ int ProcessMes(_ToDo_ *sp, Mes &M, char Cmd, int Num) // returns 1 in case of er
 					}
 				}else{
 					if(Cmd=='M'){
-						if(p==0){ WL_MError2("monster has no setup."); goto l_exit; }
+						if(p==0){ MError("\"MO:M\"-monster has no setup."); goto l_exit; }
 						if(NewMesMan(&M,&p->Mes,0)) goto l_exit;
 						p->Set=1; // настройка опций
 					}else if(Cmd=='B'){ // R#1/$2 ресурсы
-						if(p==0){ WL_MError2("monster has no setup."); goto l_exit; }
-						if(Num<2){ WL_MError2("wrong syntax (R$/$)."); goto l_exit; }
-						if((M.n[0]<0)||(M.n[0]>6)){ WL_MError3("incorrect resource (0...7).\nIncorrect value: %d",M.n[0]); goto l_exit; }
+						if(p==0){ MError("\"MO:M\"-monster has no setup."); goto l_exit; }
+						if(Num<2){ MError("\"MO:B\"-wrong syntax (R$/$)."); goto l_exit; }
+						if((M.n[0]<0)||(M.n[0]>6)){ MError("\"MO:B\"-incorrect resource (0...7)."); goto l_exit; }
 						Apply(&p->Res[M.n[0]],4,&M,1);
 						p->Set=1; // настройка опций
 					}else if(Cmd=='A'){ // артифакт
-						if(p==0){ WL_MError2("monster has no setup."); goto l_exit; }
+						if(p==0){ MError("\"MO:A\"-monster has no setup."); goto l_exit; }
 						Apply(&p->Artefact,4,&M,0);
 						p->Set=1; // настройка опций
 //            }else if(Cmd=='W'){ // бродячий
 //              MakeWoMoPos(MIp,M.n[0]);
 					}else if(Cmd==' '){
 					}else{
-						WL_EWrongCommand() goto l_exit;
+						EWrongCommand(); goto l_exit;
 					}
 				}
 			}
@@ -6615,11 +6699,11 @@ int ProcessMes(_ToDo_ *sp, Mes &M, char Cmd, int Num) // returns 1 in case of er
 //          _ArtSetUp_ *artsetup;
 				int v/*,vi*/;
 				mp=GetMapItem2(MixPos);
-				if((mp->OType!=79)&&(mp->OType!=5)&&(mp->OType!=93)){ WL_MError2("not an artefact or resource."); goto l_exit; } // нет ресурса
+				if((mp->OType!=79)&&(mp->OType!=5)&&(mp->OType!=93)){ MError("\"AR\"-not an artefact or resource."); goto l_exit; } // нет ресурса
 				vp=(_CRes_ *)mp;
 				if(vp->HasSetUp){
 					v=vp->SetUpNum;
-					if(v>=GetArtResNum()){ WL_MError2("cannot find artefact or resource (internal)."); goto l_exit; }
+					if(v>=GetArtResNum()){ MError("\"AR\"-cannot find artefact or resource (internal)."); goto l_exit; }
 					p=GetArtResBase();
 					if(p!=0) p=&p[v];
 				}
@@ -6638,9 +6722,9 @@ int ProcessMes(_ToDo_ *sp, Mes &M, char Cmd, int Num) // returns 1 in case of er
 									}else{ // M1/$
 										ApplyString(&M,1,&p->Mes);
 									}
-								}else{ WL_MError2("wrong syntax (M1/$)."); goto l_exit; }
+								}else{ MError("\"AR:M\"-wrong syntax (M1/$)."); goto l_exit; }
 							}else{
-								if(NewMesMan(&M,&p->Mes,0)){ WL_MError2("cannot set message (M$)."); goto l_exit; }
+								if(NewMesMan(&M,&p->Mes,0)){ MError("\"AR:M\"-cannot set message (M$)."); goto l_exit; }
 							}
 						}
 					}else if(Cmd=='G'){ // G#1/$2/$3 охранник в поз #1 тип #2(-1 нет) кол-во #3
@@ -6651,10 +6735,10 @@ int ProcessMes(_ToDo_ *sp, Mes &M, char Cmd, int Num) // returns 1 in case of er
 					}else if(Cmd=='X'){
 						if(M.n[0]!=0) p->fl_G=1; else p->fl_G=0;
 					}else if(Cmd==' '){
-					}else{ WL_EWrongCommand() }
+					}else{ EWrongCommand(); }
 					break;
 				}
-				WL_MError2("cannot find artefact or resource (syntax error).");
+				MError("\"AR\"-cannot find artefact or resource (syntax error).");
 				goto l_exit;
 			}
 		case 0x4548: // 'HE' HE$ HE$/$/$
@@ -6668,33 +6752,33 @@ int ProcessMes(_ToDo_ *sp, Mes &M, char Cmd, int Num) // returns 1 in case of er
 						else if(n==-10) p=G2B_HrA;
 						else if(n==-20) p=G2B_HrD;
 						else p=GetHeroStr(n);
-						if(p==0){ WL_MError2("cannot find hero (out of range)."); goto l_exit; }
+						if(p==0){ MError("\"HE$\"-cannot find hero (out of range)."); goto l_exit; }
 						break;
 					case 3: // позиция
 						MixedPos(&x,&y,&l,GetDinMixPos(sp));
 						p=FindHeroNum(x,y,l);
-						if(p==0){ WL_MError2("cannot find hero at position."); goto l_exit; }
+						if(p==0){ MError("\"HE$/$/$\"-cannot find hero at position."); goto l_exit; }
 						break;
 					default: // ???
-						WL_MError2("\"HE???\"-incorrect syntax.");
+						MError("\"HE???\"-incorrect syntax.");
 						goto l_exit;
 				}
 				if(Cmd=='O'){ // O$(/#) сменить хозяина
 					_PlayerSetup_ *ps;
 					char *pho=GetHOTableBase();
 					if(M.VarI[0].Check==0){ // устанавливаем
-						if((M.n[0]<-1)||(M.n[0]>7)){ WL_MError3("owner out of range (-1...7).\nIncorrect value: %d",M.n[0]); goto l_exit; }
+						if((M.n[0]<-1)||(M.n[0]>7)){ MError("\"HE:O\"-owner out of range (-1...7)."); goto l_exit; }
 						if(Num>1){ // 3.58 change an owner without check
 							Apply(&p->Owner,1,&M,0); break;
 						}
 						if(M.n[0]!=-1){
-							ps=GetPlayerSetup(M.n[0]); if(ps==0){ WL_MError2("cannot get PlayerSetup structure."); goto l_exit; }
+							ps=GetPlayerSetup(M.n[0]); if(ps==0){ MError("\"!!HE:O\"-cannot get PlayerSetup structure."); goto l_exit; }
 							if(ps->HasHeroes>=8){ break;} // нельзя больше добавить
 						}
 						if(p->Owner!=-1){
-							ps=GetPlayerSetup(p->Owner); if(ps==0){ WL_MError2("cannot get PlayerSetup structure."); goto l_exit; }
+							ps=GetPlayerSetup(p->Owner); if(ps==0){ MError("\"!!HE:O\"-cannot get PlayerSetup structure."); goto l_exit; }
 							for(i=0;i<8;i++){ if(ps->Heroes[i]==p->Number) goto Ok_11; }
-							WL_MError2("cannot find hero (internal)."); goto l_exit;
+							MError("\"!!HE:O\"-cannot find hero (internal)."); goto l_exit;
 Ok_11:
 							++i; for(;i<8;i++){ ps->Heroes[i-1]=ps->Heroes[i]; }
 							ps->Heroes[7]=-1;
@@ -6704,7 +6788,7 @@ Ok_11:
 							}
 						}
 						if(M.n[0]!=-1){
-							ps=GetPlayerSetup(M.n[0]); if(ps==0){ WL_MError2("cannot get PlayerSetup structure."); goto l_exit; }
+							ps=GetPlayerSetup(M.n[0]); if(ps==0){ MError("\"!!HE:O\"-cannot get PlayerSetup structure."); goto l_exit; }
 							ps->Heroes[ps->HasHeroes]=p->Number;
 							ps->HasHeroes+=(char)1;
 						}
@@ -6752,7 +6836,7 @@ Ok_11:
 					Apply(&p->y0,1,&M,1);
 					Apply(&p->Run,1,&M,2);
 				}else if(Cmd=='C'){ // C модефикация существ
-					if(Num<4){ WL_EWrongParamsNum(Num,"minimum",4); goto l_exit; }
+					if(Num<4){ EWrongParamsNum(); goto l_exit; }
 					if(Num==14){
 						int check = 0;
 						int (*LeftCr)[7] = CrChangeDialogResult;
@@ -6778,7 +6862,7 @@ Ok_11:
 						if(Num>5) Apply(&Mod,4,&M,5);
 						if(M.n[0]==0){ // C0/#2/$3/$4{/$5{/$6}} модификация существ по позиции
 							{
-								if((M.n[1]<0)||(M.n[1]>7)){ WL_EWrongParam(M.n[1]); goto l_exit; }
+								if((M.n[1]<0)||(M.n[1]>7)){ EWrongParam(); goto l_exit; }
 								if(M.f[2]==0){
 									// 3.59 fix -1 only if a constant
 									if((M.n[2]==-1)&&(M.VarI[2].Type==0)){ // апгрейд
@@ -6839,13 +6923,13 @@ Ok_11:
 						int sind=0,skill=0;
 						if(Apply(&sind,4,&M,0)){ // ?/#
 							if(Apply(&skill,4,&M,1)){ // ?/? - wrong
-								WL_MError("\"HE:S?/?/1\"- is a wrong syntax."); goto l_exit;
+								MError("\"HE:S?/?/1\"- is a wrong syntax."); goto l_exit;
 							}
-							if((skill<0)||(skill>27)){ WL_MError3("skill number is out of range (0...27).\nIncorrect value: %d",skill); goto l_exit; }
+							if((skill<0)||(skill>27)){ MError("\"HE:S?/#/1\"- skill number is out of range (0...27)."); goto l_exit; }
 							sind=p->SShow[skill];
 							Apply(&sind,4,&M,0);
 						}else{ // #/? or #/#
-							if((sind<0)||(sind>8)){ WL_MError3("skill show index is out of range (0...8).\nIncorrect value: %d",sind); goto l_exit; }
+							if((sind<0)||(sind>8)){ MError("\"HE:S#/#/1\"- skill show index is out of range (0...8)."); goto l_exit; }
 							skill=-1;
 							if(Apply(&skill,4,&M,1)){ // #/?
 								for(i=0;i<28;i++){
@@ -6856,7 +6940,7 @@ Ok_11:
 									}
 								}
 							}else{ // #/#
-								if((skill<0)||(skill>27)){ WL_MError3("skill number is out of range (0...27).\nIncorrect value: %d",skill); goto l_exit; }
+								if((skill<0)||(skill>27)){ MError("\"HE:S#/#/1\"- skill number is out of range (0...27)."); goto l_exit; }
 								for(i=0;i<28;i++){
 									if(p->SShow[i]==sind) p->SShow[i]=0;
 								}
@@ -6900,14 +6984,14 @@ _ok101:;
 						if(M.n[0]!=5 && M.VarI[1].Check==0){
 							// check only if used SET syntax
 							art=M.n[1]; arts=-1;
-							if(art<0){ WL_MError3("wrong artifact number.\nIncorrect value: %d",art); goto l_exit; }
+							if(art<0){ MError("\"HE:A\"-wrong artifact number."); goto l_exit; }
 							if(art==1000) art=0;
 							if(art>1000){ arts=art-1001; art=1; }
 						}
 						switch(M.n[0]){
 							case 1: // A1/art/pos - поместить арт
-//                  if((M.n[2]<0)||(M.n[2]>18)){ WL_MError3("-wrong slot number.\nIncorrect value: %d",M.n[2]); goto l_exit; }
-								if((M.n[2]<0)||(M.n[2]>82)){ WL_MError3("wrong slot number.\nIncorrect value: %d",M.n[2]); goto l_exit; }
+//                  if((M.n[2]<0)||(M.n[2]>18)){ MError("\"HE:A1\"-wrong slot number."); goto l_exit; }
+								if((M.n[2]<0)||(M.n[2]>82)){ MError("\"HE:A1\"-wrong slot number."); goto l_exit; }
 								if(M.VarI[1].Check!=0){ // проверка на наличие
 									if(M.n[2]>18){ // 3.58 backpack
 										art=p->OArt[M.n[2]-19][0];
@@ -7005,7 +7089,7 @@ _ok101:;
 								EquipArtifact(p,art,arts);
 								break;
 							case 5: // A5/slot/locks_count/free_count/max_count - замки на слотах
-								if(M.n[1]<0 || M.n[1]>13){ WL_MError3("wrong slot lock index (0...13).\nIncorrect value: ",M.n[1]); goto l_exit; }
+								if(M.n[1]<0 || M.n[1]>13){ MError2("wrong slot lock index (0...13)."); goto l_exit; }
 								Apply(&p->LockedSlot[M.n[1]], 1, &M, 2);
 								if(Num>3){
 									i = k = 0;
@@ -7020,7 +7104,7 @@ _ok101:;
 										Apply(&k, 4, &M, 4);
 								}
 								break;
-							default: WL_EWrongSyntax() goto l_exit;
+							default: EWrongSyntax(); goto l_exit;
 						}
 					}else{
 						int art,arts;
@@ -7029,7 +7113,7 @@ _ok101:;
 							if(art==1000) art=0;
 							if(art>1000){ arts=art-1001; art=1; }
 							if(M.VarI[0].Check!=0){ // проверка на наличие
-								if(M.VarI[0].Check!=2){ WL_MError2("wrong syntax (second argument)."); goto l_exit; } // можно только сравнивать
+								if(M.VarI[0].Check!=2){ MError("\"HE:A\"-wrong syntax (second argument)."); goto l_exit; } // можно только сравнивать
 								ERMFlags[0]=0;
 								for(i=0;i<19;i++){
 									if((p->IArt[i][0]==art)&&(p->IArt[i][1]==arts)){
@@ -7097,9 +7181,9 @@ _ok101:;
 _ok103:;
 				}else if(Cmd=='M'){ // M#1/$2 заклинания
 					char  fl;
-					if(Num<2){ WL_EWrongParamsNum(Num,"minimum",2); goto l_exit; }
+					if(Num<2){ EWrongParamsNum(); goto l_exit; }
 					if(M.VarI[0].Check!=0){ // проверка на наличие
-						if(M.VarI[0].Check!=2){ WL_MError2("-wrong syntax (second argument)."); goto l_exit; } // можно только сравнивать
+						if(M.VarI[0].Check!=2){ MError("\"HE:M\"-wrong syntax (second argument)."); goto l_exit; } // можно только сравнивать
 						if(p->Spell[M.n[0]]==0) fl=0; else fl=1;
 						ERMFlags[0]=fl;
 					}else{
@@ -7113,7 +7197,7 @@ _ok103:;
 						}
 					}
 				}else if(Cmd=='F'){ // F$1/$2/$3/$4 первичные навыки
-					if(Num<4){ WL_EWrongParamsNum(Num,"minimum",4); goto l_exit; }
+					if(Num<4){ EWrongParamsNum(); goto l_exit; }
 					if(Num==4){
 						Apply(&p->PSkill[0],1,&M,0);
 						Apply(&p->PSkill[1],1,&M,1);
@@ -7155,14 +7239,14 @@ _ok103:;
 								Apply(&ps[3],4,&M,3);
 								break;
 							default:
-								WL_EWrongSyntax() goto l_exit;
+								EWrongSyntax(); goto l_exit;
 						}
-					}else{ WL_EWrongParamsNum(Num,"maximum",5); goto l_exit; }
+					}else{ EWrongParamsNum(); goto l_exit; }
 				}else if(Cmd=='N'){ // N# можно только прочитать
 					int v=p->Number;
 					Apply(&v,4,&M,0); // можно только прочитать
 				}else if(Cmd=='L'){ // L#^Name.pcx^
-					if((M.n[0]<0)||(M.n[0]>5)){ WL_EWrongSyntax() goto l_exit; }
+					if((M.n[0]<0)||(M.n[0]>5)){ EWrongSyntax(); goto l_exit; }
 					if(M.n[0]==3){ // сбросить ориг
 						ChangeHeroPic(p->Number,0,0);
 						RedrawMap();
@@ -7170,13 +7254,13 @@ _ok103:;
 						ChangeHeroPicN(p->Number,M.n[1]);
 						RedrawMap();
 					}else if(M.n[0]==0){ // установить оба в заранее заданный
-						if(Num<2){ WL_MError2("wrong syntax."); goto l_exit; }
+						if(Num<2){ MError("\"HE:L0\"-wrong syntax."); goto l_exit; }
 						CustomHPic(M.n[1],p->Number,0);
 						RedrawMap();
 					}else if(M.n[0]==5){ // установить оба в строковые переменные (0-не уст.)
-						if(Num<3){ WL_MError2("wrong syntax."); goto l_exit; }
-						if(BAD_INDEX_LZ_ALLOW_0(M.n[1])){ WL_MError3("wrong z var index (-20...-1,(0),1...1000).\nIncorrect value: %d",M.n[1]); goto l_exit; }
-						if(BAD_INDEX_LZ_ALLOW_0(M.n[2])){ WL_MError3("wrong z var index (-20...-1,(0),1...1000).\nIncorrect value: %d",M.n[2]); goto l_exit; }
+						if(Num<3){ MError("\"HE:L5\"-wrong syntax."); goto l_exit; }
+						if(BAD_INDEX_LZ_ALLOW_0(M.n[1])){ MError("\"HE:L5\"-wrong z var index (-20...-1,(0),1...1000)."); goto l_exit; }
+						if(BAD_INDEX_LZ_ALLOW_0(M.n[2])){ MError("\"HE:L5\"-wrong z var index (-20...-1,(0),1...1000)."); goto l_exit; }
 						char *s1=0,*s2=0;
 						if(M.n[1]!=0) s1 = GetInternalErmString(M.n[1]);
 						if(M.n[2]!=0) s2 = GetInternalErmString(M.n[2]);
@@ -7223,11 +7307,11 @@ _ok103:;
 				 {
 					Dword mask;
 					int v;
-					if((M.n[0]<0)||(M.n[0]>=10)){ WL_MError3("wrong object type index (0...10).\nIncorrect value: %d",M.n[0]); goto l_exit; }
+					if((M.n[0]<0)||(M.n[0]>=10)){ MError("\"HE:V\"-wrong object type index (0...10)."); goto l_exit; }
 					if(Num==2){       // V#/# посещенность объектов
 						Apply(&p->Visited[M.n[0]],4,&M,1);
 					}else if(Num==3){ // V#/#/# посещенность объектов
-						if((M.n[1]<0)||(M.n[1]>=32)){ WL_MError3("wrong object index (0...32).\nIncorrect value: %d",M.n[1]); goto l_exit; }
+						if((M.n[1]<0)||(M.n[1]>=32)){ MError("\"HE:V\"-wrong object index (0...32)."); goto l_exit; }
 						mask=1;
 						for(i=0;i<M.n[1];i++) mask<<=1;
 						if(p->Visited[M.n[0]]&mask) v=1; else v=0;
@@ -7237,7 +7321,7 @@ _ok103:;
 					}
 				 }
 				}else if(Cmd=='B'){ // имя или биос или класс
-					if(Num<2){ WL_EWrongParamsNum(Num,"minimum",2); goto l_exit; }
+					if(Num<2){ EWrongParamsNum(); goto l_exit; }
 					switch(M.n[0]){
 						case 0: // B0/$ - имя
 							StrMan::Apply(p->Name, &M, 1, 13);
@@ -7251,21 +7335,21 @@ _ok103:;
 							break;
 						case 3: // B3/$ - получить умолчательный биос
 							if(M.VarI[1].Check==1){ // ?
-								if(M.VarI[1].Type != 7){ WL_MError2("z var required."); goto l_exit; }
+								if(M.VarI[1].Type != 7){ MError("\"HE:B3\"-z var required."); goto l_exit; }
 								int sind = GetVarIndex(&M.VarI[1], false);
 								char * str = sind ? GetPureErmString(sind) : 0;
 								if (str == 0) goto l_exit;
 								StrCopy(str, 512, HBiosTable[p->Number].HBios);
 							}else{
-								WL_MError2("cannot use set syntax."); goto l_exit;
+								MError("\"HE:B3\"-cannot use set syntax."); goto l_exit;
 							}
 							break;
 						default:
-							WL_EWrongSyntax() goto l_exit;
+							EWrongSyntax(); goto l_exit;
 					}
 				}else if(Cmd=='R'){ //
 					int v,en,posred; char *pho=GetHOTableBase(); int *phh=GetHHTableBase();
-					if(Num<2){ WL_EWrongParamsNum(Num,"minimum",2); goto l_exit; }
+					if(Num<2){ EWrongParamsNum(); goto l_exit; }
 					posred=1;
 					switch(M.n[0]){
 						case 0: // R0/$ - мораль
@@ -7322,7 +7406,7 @@ _ok103:;
 							posred=0;
 							v=p->TempMod; if(Apply(&v,4,&M,1)) break; p->TempMod=v;
 							break;
-						default: WL_EWrongSyntax() goto l_exit;
+						default: EWrongSyntax(); goto l_exit;
 					}
 					if(Num>2){ // есть бит перерисовки
 						v=1; Apply(&v,4,&M,2);
@@ -7335,12 +7419,12 @@ _ok103:;
 					if(ERM_Curse(M, Num, p->Number)) goto l_exit;
 					RedrawMap();
 				}else if(Cmd=='T'){ // битва Tx/y/l/mtype/mnum
-					if(Num<5){ WL_EWrongParamsNum(Num,"minimum",5); goto l_exit; }
+					if(Num<5){ EWrongParamsNum(); goto l_exit; }
 						if(DoBattle(&M.n[4],p,M.n[3],PosMixed(M.n[0],M.n[1],M.n[2])))
 							ERMFlags[0]=1; else ERMFlags[0]=0;
 				}else if(Cmd=='H'){ // Hslot/type/min/max настройки начальной армии героя
-					if(Num<4){ WL_EWrongParamsNum(Num,"minimum",4); goto l_exit; }
-					if((M.n[0]<0)||(M.n[0]>2)){ WL_MError3("slot number out of range (0...2).\nIncorrect value: %d",M.n[0]); goto l_exit; }
+					if(Num<4){ EWrongParamsNum(); goto l_exit; }
+					if((M.n[0]<0)||(M.n[0]>2)){ MError("\"HE:H\"-slot number out of range (0...2)."); goto l_exit; }
 					Apply(&HTable[p->Number].ArmyType[M.n[0]],4,&M,1);
 					Apply(&HTable[p->Number].ArmyNum[M.n[0]][0],4,&M,2);
 					Apply(&HTable[p->Number].ArmyNum[M.n[0]][1],4,&M,3);
@@ -7383,7 +7467,7 @@ int 3
 */
 				}else if(Cmd==' '){
 				}else{
-					WL_EWrongCommand() goto l_exit;
+					EWrongCommand(); goto l_exit;
 				}
 			}
 			break;
@@ -7410,7 +7494,7 @@ int 3
 					
 
 				if(Cmd=='Q'){ // 1000 флагов
-					if((M.n[0]<1)||(M.n[0]>1000)){ WL_MError3("wrong flag number (1...1000).\nIncorrect value: %d",M.n[0]); goto l_exit; }
+					if((M.n[0]<1)||(M.n[0]>1000)){ MError("\"IF:Q\"-wrong flag number (1...1000)."); goto l_exit; }
 					if(Num==1){ // обычный вопрос
 						ERMFlags[M.n[0]-1]=(char)Request0(ERM2String(&M.m.s[M.i],0,&i),showtime);
 						M.i+=i;
@@ -7428,7 +7512,7 @@ int 3
 						}else if(Num<10){ // + 3 картинки
 							// Qfl/pic1t/pic1s/pic2t/pic2s/pic3t/pic3s/type^text^
 							type=M.n[7]; pt2=M.n[3]; ps2=M.n[4]; pt3=M.n[5];ps3=M.n[6]; sind=M.n[8];
-						}else{ WL_EWrongParamsNum(Num,"maximum",10); goto l_exit; }
+						}else{ EWrongParamsNum(); goto l_exit; }
 						if(Num&1){ // нечетный - переменная
 							char *str = GetErmString(sind);
 							if (str == 0) goto l_exit;
@@ -7461,7 +7545,7 @@ int 3
 							char *str = GetErmString(M.n[1]);
 							if (str == 0) goto l_exit;
 							Message(str, 1, showtime/*,x,y*/);
-						}else{ WL_MError2("wrong syntax (M1/$)."); goto l_exit; }
+						}else{ MError("\"IF:M\"-wrong syntax (M1/$)."); goto l_exit; }
 					}else{
 						if (M.VarI[0].Type == 7)
 						{
@@ -7485,7 +7569,7 @@ int 3
 						*/
 						case 'V': // 1000 флагов
 							if(Num<2) goto l_exit;
-							if((M.n[0]<1)||(M.n[0]>1000)){ WL_MError3("wrong flag index.\nIncorrect value: %d",M.n[0]); goto l_exit; }
+							if((M.n[0]<1)||(M.n[0]>1000)){ MError("\"IF:V\"-wrong flag index."); goto l_exit; }
 							if(M.n[1]) fl=1; else fl=0; // установлен бит
 							ERMFlags[M.n[0]-1]=(char)fl;
 							break;
@@ -7502,10 +7586,10 @@ int 3
 						case 'W': // установить индекс героя для переменных
 							if(M.n[0]==-1){ // текущий герой
 								struct _Hero_ *p=ERM_HeroStr;
-								if(p==0){ WL_MError2("cannot find hero."); goto l_exit; }
+								if(p==0){ MError("\"IF:W\"-cannot find hero."); goto l_exit; }
 								M.n[0]=p->Number;
 							}
-							if((M.n[0]<0)||(M.n[0]>=HERNUM)){ WL_MError3("hero number out of range.\nIncorrect value: %d",M.n[0]); goto l_exit; }
+							if((M.n[0]<0)||(M.n[0]>=HERNUM)){ MError("\"IF:W\"-hero number out of range."); goto l_exit; }
 							ERMW=M.n[0];
 							break;
 						case 'P': // картинка/видео
@@ -7514,7 +7598,7 @@ int 3
 						case 'E': // запрос
 							if(Num==2){
 								char *str;
-								if((M.n[0]<1)||(M.n[0]>VAR_COUNT_V)){ WL_MError3("wrong var index (1...10000).\nIncorrect value: %d",M.n[0]); goto l_exit; }
+								if((M.n[0]<1)||(M.n[0]>VAR_COUNT_V)){ MError("\"IF:E\"-wrong var index (1...10000)."); goto l_exit; }
 								ERMVar2[M.n[0]-1]=CustomReq(M.n[1],0,&str);
 								StrCopy(ERMString[0],512,str);
 							}else{
@@ -7526,8 +7610,8 @@ int 3
 							ERMFlags[0]=(char)SphinxReq(M.n[0]);
 							break;
 						case 'B': // B#/pic/rep установить картинку
-							if(Num<3){ WL_EWrongParamsNum(Num,"minimum",3); goto l_exit; }
-							if(BAD_INDEX_LZ(M.n[1])){ WL_MError3("wrong z var index (-20...-1,1...1000).\nIncorrect value: %d",M.n[1]); goto l_exit; }
+							if(Num<3){ EWrongParamsNum(); goto l_exit; }
+							if(BAD_INDEX_LZ(M.n[1])){ MError("\"IF:B\"-wrong z var index (-20...-1,1...1000)."); goto l_exit; }
 							if(M.n[1]>1000)                AddExtCMDPic(M.n[0],ERM2String2(0,StringSet::GetText(M.n[1])),M.n[2]);
 							else if(M.n[1]>0)              AddExtCMDPic(M.n[0],ERMString[M.n[1]-1],M.n[2]);
 							else if(M.n[1]>=-VAR_COUNT_LZ) AddExtCMDPic(M.n[0],ERMLString[-M.n[1]-1],M.n[2]);
@@ -7538,50 +7622,50 @@ int 3
 							 int   tv;
 							 char  HasCancel;
 							 char *bth1,*bth2,*bth3,*bth4;
-							 if(Num!=6){ WL_EWrongParamsNum(Num,"equal",6); goto l_exit; }
+							 if(Num!=6){ EWrongParamsNum(); goto l_exit; }
 							 tv=0;
-							 if(Apply(&tv,4,&M,5)){ WL_MError2("cannot get or check var."); goto l_exit; }
+							 if(Apply(&tv,4,&M,5)){ MError("\"IF:F\"-cannot get or check var."); goto l_exit; }
 							 if(tv!=0) HasCancel=1; else HasCancel=0;
 
-							 if(Apply(&tv,4,&M,4)){ WL_MError2("cannot get or check var."); goto l_exit; }
-							 if(BAD_INDEX_LZ_ALLOW_0(tv)){ WL_MError3("wrong z var index (-10,...-1,(0),1...1000).\nIncorrect value: %d",tv); goto l_exit; }
+							 if(Apply(&tv,4,&M,4)){ MError("\"IF:F\"-cannot get or check var."); goto l_exit; }
+							 if(BAD_INDEX_LZ_ALLOW_0(tv)){ MError("\"IF:F\"-wrong z var index (-10,...-1,(0),1...1000)."); goto l_exit; }
 							 bth4 = (tv ? ERM2String2(1,GetPureErmString(tv)) : 0);
 
-							 if(Apply(&tv,4,&M,3)){ WL_MError2("cannot get or check var."); goto l_exit; }
-							 if(BAD_INDEX_LZ_ALLOW_0(tv)){ WL_MError3("wrong z var index (-10,...-1,(0),1...1000).\nIncorrect value: %d",tv); goto l_exit; }
+							 if(Apply(&tv,4,&M,3)){ MError("\"IF:F\"-cannot get or check var."); goto l_exit; }
+							 if(BAD_INDEX_LZ_ALLOW_0(tv)){ MError("\"IF:F\"-wrong z var index (-10,...-1,(0),1...1000)."); goto l_exit; }
 							 bth3 = (tv ? ERM2String2(2,GetPureErmString(tv)) : 0);
 
-							 if(Apply(&tv,4,&M,2)){WL_MError2("cannot get or check var."); goto l_exit; }
-							 if(BAD_INDEX_LZ_ALLOW_0(tv)){ WL_MError3("wrong z var index (-10,...-1,(0),1...1000).\nIncorrect value: %d",tv); goto l_exit; }
+							 if(Apply(&tv,4,&M,2)){ MError("\"IF:F\"-cannot get or check var."); goto l_exit; }
+							 if(BAD_INDEX_LZ_ALLOW_0(tv)){ MError("\"IF:F\"-wrong z var index (-10,...-1,(0),1...1000)."); goto l_exit; }
 							 bth2 = (tv ? ERM2String2(3,GetPureErmString(tv)) : 0);
 
-							 if(Apply(&tv,4,&M,1)){ WL_MError2("cannot get or check var."); goto l_exit; }
-							 if(BAD_INDEX_LZ_ALLOW_0(tv)){ WL_MError3("wrong z var index (-10,...-1,(0),1...1000).\nIncorrect value: %d",tv); goto l_exit; }
+							 if(Apply(&tv,4,&M,1)){ MError("\"IF:F\"-cannot get or check var."); goto l_exit; }
+							 if(BAD_INDEX_LZ_ALLOW_0(tv)){ MError("\"IF:F\"-wrong z var index (-10,...-1,(0),1...1000)."); goto l_exit; }
 							 bth1 = (tv ? ERM2String2(4,GetPureErmString(tv)) : 0);
 
-							 if(Apply(&tv,4,&M,0)){ WL_MError2("cannot get or check var."); goto l_exit; }
+							 if(Apply(&tv,4,&M,0)){ MError("\"IF:F\"-cannot get or check var."); goto l_exit; }
 							 if(AddExtCMDRequest(tv,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-								 bth1,bth2,bth3,bth4,HasCancel)==0){ WL_MError2("cannot show dialog."); goto l_exit; }
+								 bth1,bth2,bth3,bth4,HasCancel)==0){ MError("\"IF:F\"-cannot show dialog."); goto l_exit; }
 							}
 							break;
 						case 'G': // GchRAD/var/state/header/txt1... диалог с ключиками
 						{
 							int   v,state,j,chRAD;
 							char *htxt,*txt[12];
-							if(Num<5){ WL_EWrongParamsNum(Num,"minimum",5); goto l_exit; }
+							if(Num<5){ EWrongParamsNum(); goto l_exit; }
 							if(!CheckVarIndex(M.n[1], 3, false)) break;
-							if(Apply(&chRAD,4,&M,0)){ WL_MError2("cannot get or check var."); goto l_exit; }
-							if(Apply(&state,4,&M,2)){ WL_MError2("cannot get or check var."); goto l_exit; }
-							if(Apply(&v,4,&M,3)){ WL_MError2("cannot get or check var."); goto l_exit; }
-							if(BAD_INDEX_LZ_ALLOW_0(v)){ WL_MError3("wrong z var index (-20...-1,(0),1...1000+).\nIncorrect value: %d",v); goto l_exit; }
+							if(Apply(&chRAD,4,&M,0)){ MError("\"IF:G\"-cannot get or check var."); goto l_exit; }
+							if(Apply(&state,4,&M,2)){ MError("\"IF:G\"-cannot get or check var."); goto l_exit; }
+							if(Apply(&v,4,&M,3)){ MError("\"IF:G\"-cannot get or check var."); goto l_exit; }
+							if(BAD_INDEX_LZ_ALLOW_0(v)){ MError("\"IF:G\"-wrong z var index (-20...-1,(0),1...1000+)."); goto l_exit; }
 							htxt = (v ? ERM2String2(5, GetPureErmString(v)) : "");
 							for(j=0;j<(Num-4);j++){
-								if(Apply(&v,4,&M,(char)(j+4))){ WL_MError2("cannot get or check var."); goto l_exit; }
+								if(Apply(&v,4,&M,(char)(j+4))){ MError("\"IF:G\"-cannot get or check var."); goto l_exit; }
 								// 3.57f check
-								if(j>11){ WL_MError2("too many items."); goto l_exit; }
+								if(j>11){ MError("\"IF:G\"-too many items."); goto l_exit; }
 								if(v==0) txt[j]=0;
 								else{
-									if(BAD_INDEX_LZ(v)){ WL_MError3("wrong z var index (-20...-1,1...1000+).\nIncorrect value: %d",v); goto l_exit; }
+									if(BAD_INDEX_LZ(v)){ MError("\"IF:G\"-wrong z var index (-20...-1,1...1000+)."); goto l_exit; }
 									txt[j] = ERM2String2(6+j,GetPureErmString(v));
 								}
 							}
@@ -7608,88 +7692,88 @@ int 3
 										*pch1,*pch2,*pch3,*pch4,
 										*but1,*but2,*but3,*but4,
 										*bth1,*bth2,*bth3,*bth4;
-							 if(Num<1){ WL_EWrongParamsNum(Num,"minimum",1); goto l_exit; }
+							 if(Num<1){ EWrongParamsNum(); goto l_exit; }
 							 tv=0;
 							 if(Num>15){
-								 if(Apply(&tv,4,&M,15)){ WL_MError2("cannot get or check var."); goto l_exit; }
-								 if(BAD_INDEX_LZ_ALLOW_0(tv)){ WL_MError3("wrong z var index1(-20...-1,(0),1...1000+).\nIncorrect value: %d",tv); goto l_exit; }
+								 if(Apply(&tv,4,&M,15)){ MError("\"IF:D\"-cannot get or check var."); goto l_exit; }
+								 if(BAD_INDEX_LZ_ALLOW_0(tv)){ MError("\"IF:D\"-wrong z var index1(-20...-1,(0),1...1000+)."); goto l_exit; }
 								 but4 = (tv ? ERM2String2(18,GetPureErmString(tv)) : 0);
 							 }else but4=0;
 							 if(Num>14){
-								 if(Apply(&tv,4,&M,14)){ WL_MError2("cannot get or check var."); goto l_exit; }
-								 if(BAD_INDEX_LZ_ALLOW_0(tv)){ WL_MError3("wrong z var index2(-20...-1,(0),1...1000+).\nIncorrect value: %d",tv); goto l_exit; }
+								 if(Apply(&tv,4,&M,14)){ MError("\"IF:D\"-cannot get or check var."); goto l_exit; }
+								 if(BAD_INDEX_LZ_ALLOW_0(tv)){ MError("\"IF:D\"-wrong z var index2(-20...-1,(0),1...1000+)."); goto l_exit; }
 								 but3 = (tv ? ERM2String2(19,GetPureErmString(tv)) : 0);
 							 }else but3=0;
 							 if(Num>13){
-								 if(Apply(&tv,4,&M,13)){ WL_MError2("cannot get or check var."); goto l_exit; }
-								 if(BAD_INDEX_LZ_ALLOW_0(tv)){ WL_MError3("wrong z var index3(-20...-1,(0),1...1000+).\nIncorrect value: %d",tv); goto l_exit; }
+								 if(Apply(&tv,4,&M,13)){ MError("\"IF:D\"-cannot get or check var."); goto l_exit; }
+								 if(BAD_INDEX_LZ_ALLOW_0(tv)){ MError("\"IF:D\"-wrong z var index3(-20...-1,(0),1...1000+)."); goto l_exit; }
 								 but2 = (tv ? ERM2String2(20,GetPureErmString(tv)) : 0);
 							 }else but2=0;
 							 if(Num>12){
-								 if(Apply(&tv,4,&M,12)){ WL_MError2("cannot get or check var."); goto l_exit; }
-								 if(BAD_INDEX_LZ_ALLOW_0(tv)){ WL_MError3("wrong z var index4(-20...-1,(0),1...1000+).\nIncorrect value: %d",tv); goto l_exit; }
+								 if(Apply(&tv,4,&M,12)){ MError("\"IF:D\"-cannot get or check var."); goto l_exit; }
+								 if(BAD_INDEX_LZ_ALLOW_0(tv)){ MError("\"IF:D\"-wrong z var index4(-20...-1,(0),1...1000+)."); goto l_exit; }
 								 but1 = (tv ? ERM2String2(21,GetPureErmString(tv)) : 0);
 							 }else but1=0;
 							 if(Num>11){
-								 if(Apply(&tv,4,&M,11)){ WL_MError2("cannot get or check var."); goto l_exit; }
-								 if(BAD_INDEX_LZ_ALLOW_0(tv)){ WL_MError3("wrong z var index5(-20...-1,(0),1...1000+).\nIncorrect value: %d",tv); goto l_exit; }
+								 if(Apply(&tv,4,&M,11)){ MError("\"IF:D\"-cannot get or check var."); goto l_exit; }
+								 if(BAD_INDEX_LZ_ALLOW_0(tv)){ MError("\"IF:D\"-wrong z var index5(-20...-1,(0),1...1000+)."); goto l_exit; }
 								 pch4 = (tv ? ERM2String2(22,GetPureErmString(tv)) : 0);
 							 }else pch4=0;
 							 if(Num>10){
-								 if(Apply(&tv,4,&M,10)){ WL_MError2("cannot get or check var."); goto l_exit; }
-								 if(BAD_INDEX_LZ_ALLOW_0(tv)){ WL_MError3("wrong z var index6(-20...-1,(0),1...1000+).\nIncorrect value: %d",tv); goto l_exit; }
+								 if(Apply(&tv,4,&M,10)){ MError("\"IF:D\"-cannot get or check var."); goto l_exit; }
+								 if(BAD_INDEX_LZ_ALLOW_0(tv)){ MError("\"IF:D\"-wrong z var index6(-20...-1,(0),1...1000+)."); goto l_exit; }
 								 pch3 = (tv ? ERM2String2(23,GetPureErmString(tv)) : 0);
 							 }else pch3=0;
 							 if(Num>9){
-								 if(Apply(&tv,4,&M,9)){ WL_MError2("cannot get or check var."); goto l_exit; }
-								 if(BAD_INDEX_LZ_ALLOW_0(tv)){ WL_MError3("wrong z var index7(-20...-1,(0),1...1000+).\nIncorrect value: %d",tv); goto l_exit; }
+								 if(Apply(&tv,4,&M,9)){ MError("\"IF:D\"-cannot get or check var."); goto l_exit; }
+								 if(BAD_INDEX_LZ_ALLOW_0(tv)){ MError("\"IF:D\"-wrong z var index7(-20...-1,(0),1...1000+)."); goto l_exit; }
 								 pch2 = (tv ? ERM2String2(24,GetPureErmString(tv)) : 0);
 							 }else pch2=0;
 							 if(Num>8){
-								 if(Apply(&tv,4,&M,8)){ WL_MError2("cannot get or check var."); goto l_exit; }
-								 if(BAD_INDEX_LZ_ALLOW_0(tv)){ WL_MError3("wrong z var index8(-20...-1,(0),1...1000+).\nIncorrect value: %d",tv); goto l_exit; }
+								 if(Apply(&tv,4,&M,8)){ MError("\"IF:D\"-cannot get or check var."); goto l_exit; }
+								 if(BAD_INDEX_LZ_ALLOW_0(tv)){ MError("\"IF:D\"-wrong z var index8(-20...-1,(0),1...1000+)."); goto l_exit; }
 								 pch1 = (tv ? ERM2String2(25,GetPureErmString(tv)) : 0);
 							 }else pch1=0;
 							 if(Num>7){
-								 if(Apply(&tv,4,&M,7)){ WL_MError2("cannot get or check var."); goto l_exit; }
-								 if(BAD_INDEX_LZ_ALLOW_0(tv)){ WL_MError3("wrong z var index9(-20...-1,(0),1...1000+).\nIncorrect value: %d",tv); goto l_exit; }
+								 if(Apply(&tv,4,&M,7)){ MError("\"IF:D\"-cannot get or check var."); goto l_exit; }
+								 if(BAD_INDEX_LZ_ALLOW_0(tv)){ MError("\"IF:D\"-wrong z var index9(-20...-1,(0),1...1000+)."); goto l_exit; }
 								 pic4 = (tv ? ERM2String2(26,GetPureErmString(tv)) : 0);
 							 }else pic4=0;
 							 if(Num>6){
-								 if(Apply(&tv,4,&M,6)){ WL_MError2("cannot get or check var."); goto l_exit; }
-								 if(BAD_INDEX_LZ_ALLOW_0(tv)){ WL_MError3("wrong z var indexA(-20...-1,(0),1...1000+).\nIncorrect value: %d",tv); goto l_exit; }
+								 if(Apply(&tv,4,&M,6)){ MError("\"IF:D\"-cannot get or check var."); goto l_exit; }
+								 if(BAD_INDEX_LZ_ALLOW_0(tv)){ MError("\"IF:D\"-wrong z var indexA(-20...-1,(0),1...1000+)."); goto l_exit; }
 								 pic3 = (tv ? ERM2String2(27,GetPureErmString(tv)) : 0);
 							 }else pic3=0;
 							 if(Num>5){
-								 if(Apply(&tv,4,&M,5)){ WL_MError2("cannot get or check var."); goto l_exit; }
-								 if(BAD_INDEX_LZ_ALLOW_0(tv)){ WL_MError3("wrong z var indexB(-20...-1,(0),1...1000+).\nIncorrect value: %d",tv); goto l_exit; }
+								 if(Apply(&tv,4,&M,5)){ MError("\"IF:D\"-cannot get or check var."); goto l_exit; }
+								 if(BAD_INDEX_LZ_ALLOW_0(tv)){ MError("\"IF:D\"-wrong z var indexB(-20...-1,(0),1...1000+)."); goto l_exit; }
 								 pic2 = (tv ? ERM2String2(28,GetPureErmString(tv)) : 0);
 							 }else pic2=0;
 							 if(Num>4){
-								 if(Apply(&tv,4,&M,4)){ WL_MError2("cannot get or check var."); goto l_exit; }
-								 if(BAD_INDEX_LZ_ALLOW_0(tv)){ WL_MError3("wrong z var indexC(-20...-1,(0),1...1000+).\nIncorrect value: %d",tv); goto l_exit; }
+								 if(Apply(&tv,4,&M,4)){ MError("\"IF:D\"-cannot get or check var."); goto l_exit; }
+								 if(BAD_INDEX_LZ_ALLOW_0(tv)){ MError("\"IF:D\"-wrong z var indexC(-20...-1,(0),1...1000+)."); goto l_exit; }
 								 pic1 = (tv ? ERM2String2(29,GetPureErmString(tv)) : 0);
 							 }else pic1=0;
 							 if(Num>3){
-								 if(Apply(&tv,4,&M,3)){ WL_MError2("cannot get or check var."); goto l_exit; }
-								 if(BAD_INDEX_LZ_ALLOW_0(tv)){ WL_MError3("wrong z var indexD(-20...-1,(0),1...1000+).\nIncorrect value: %d",tv); goto l_exit; }
+								 if(Apply(&tv,4,&M,3)){ MError("\"IF:D\"-cannot get or check var."); goto l_exit; }
+								 if(BAD_INDEX_LZ_ALLOW_0(tv)){ MError("\"IF:D\"-wrong z var indexD(-20...-1,(0),1...1000+)."); goto l_exit; }
 								 txt3 = (tv ? ERM2String2(30,GetPureErmString(tv)) : 0);
 							 }else txt3=0;
 							 if(Num>2){
-								 if(Apply(&tv,4,&M,2)){ WL_MError2("cannot get or check var."); goto l_exit; }
-								 if(BAD_INDEX_LZ_ALLOW_0(tv)){ WL_MError3("wrong z var indexE(-20...-1,(0),1...1000+).\nIncorrect value: %d",tv); goto l_exit; }
+								 if(Apply(&tv,4,&M,2)){ MError("\"IF:D\"-cannot get or check var."); goto l_exit; }
+								 if(BAD_INDEX_LZ_ALLOW_0(tv)){ MError("\"IF:D\"-wrong z var indexE(-20...-1,(0),1...1000+)."); goto l_exit; }
 								 txt2 = (tv ? ERM2String2(31,GetPureErmString(tv)) : 0);
 							 }else txt2=0;
 							 if(Num>1){
-								 if(Apply(&tv,4,&M,1)){ WL_MError2("cannot get or check var."); goto l_exit; }
-								 if(BAD_INDEX_LZ_ALLOW_0(tv)){ WL_MError3("wrong z var indexF(-20...-1,(0),1...1000+).\nIncorrect value: %d",tv); goto l_exit; }
+								 if(Apply(&tv,4,&M,1)){ MError("\"IF:D\"-cannot get or check var."); goto l_exit; }
+								 if(BAD_INDEX_LZ_ALLOW_0(tv)){ MError("\"IF:D\"-wrong z var indexF(-20...-1,(0),1...1000+)."); goto l_exit; }
 								 txt1 = (tv ? ERM2String2(32,GetPureErmString(tv)) : 0);
 							 }else txt1=0;
-							 if(Apply(&tv,4,&M,0)){ WL_MError2("cannot get or check var."); goto l_exit; }
+							 if(Apply(&tv,4,&M,0)){ MError("\"IF:D\"-cannot get or check var."); goto l_exit; }
 							 bth1=but1;bth2=but2;bth3=but3;bth4=but4;HasCancel=1;
 							 if(AddExtCMDRequest(tv,txt1,txt2,txt3,pic1,pic2,pic3,pic4,
 								 pch1,pch2,pch3,pch4,but1,but2,but3,but4,
-								 bth1,bth2,bth3,bth4,HasCancel)==0){ WL_MError2("cannot show dialog."); goto l_exit; }
+								 bth1,bth2,bth3,bth4,HasCancel)==0){ MError("\"IF:D\"-cannot show dialog."); goto l_exit; }
 							}
 							break;
 						case 'N':{ // 3.58
@@ -7700,7 +7784,7 @@ int 3
 									if(M.n[0]==1){
 										if (GetPureErmString(txt, M.n[0])) goto l_exit;
 										txt = ERM2String2(32,txt);
-									}else{ WL_MError2("wrong syntax (M1/$)."); goto l_exit; }
+									}else{ MError("\"IF:N\"-wrong syntax (M1/$)."); goto l_exit; }
 								}else{
 									txt=ERM2String(&M.m.s[M.i],0,&i);
 									M.i+=i;
@@ -7710,15 +7794,15 @@ int 3
 							 // Np1t/p1s/p2t/p2s/p3t/p3s/p4t/p4s/p5t/p5s/p6t/p6s/p7t/p7s/p8t/p8s
 								for(i=0;i<9;i++){ IF_N_Ar[i][0]=-1; IF_N_Ar[i][1]=0; }
 								for(i=0;i<Num/2;i++){
-									if(Apply(&IF_N_Ar[i][0],4,&M,(char)(i*2))){ WL_MError2("cannot get or check var."); goto l_exit; }
-									if(Apply(&IF_N_Ar[i][1],4,&M,(char)(i*2+1))){ IF_N_Ar[i][0] = -1; WL_MError2("cannot get or check var."); goto l_exit; }
+									if(Apply(&IF_N_Ar[i][0],4,&M,(char)(i*2))){ MError("\"IF:N\"-cannot get or check var."); goto l_exit; }
+									if(Apply(&IF_N_Ar[i][1],4,&M,(char)(i*2+1))){ IF_N_Ar[i][0] = -1; MError("\"IF:N\"-cannot get or check var."); goto l_exit; }
 								}
 							}
 						}
 						break;
 						case 'L':{ // L#   3.59 - put message to log
 							char *lcstr="";
-							if(BAD_INDEX_LZ_ALLOW_0(M.n[0])){ WL_MError3 ("wrong z var index (-20...-1,1...1000).\nIncorrect value: %d",M.n[0]); goto l_exit; }
+							if(BAD_INDEX_LZ_ALLOW_0(M.n[0])){ MError("\"IF:L\"-wrong z var index (-20...-1,1...1000)."); goto l_exit; }
 							if(M.n[0]!=0)   lcstr=GetErmString(M.n[0]);
 							else{ lcstr=ERM2String(&M.m.s[M.i],0,&i); M.i+=i; }
 							_asm{
@@ -7733,7 +7817,7 @@ int 3
 						}
 						break;
 						default:
-							WL_EWrongCommand() goto l_exit;
+							EWrongCommand(); goto l_exit;
 					}
 				}
 			}
@@ -7781,7 +7865,7 @@ void ProcessCmd(_ToDo_ *sp)
 		if((Num=GetNumAuto(&M))==0) goto l_exit;
 		if(Cmd=='Z' && (sp->Type == 'UF' || sp->Type == 'EG' || sp->Type == 'EL')){
 			SetErrorCmd(sp->Type, Cmd);
-			if(Num!=1){ WL_EWrongParamsNum(Num,"equal",1); goto l_exit; }
+			if(Num!=1){ EWrongParamsNum(); goto l_exit; }
 			if(ProcessDisable(sp,M.n[0])) goto l_exit;
 			continue;
 		}
@@ -7911,7 +7995,7 @@ int InitTrigger(Mes &M, Word Id, int Num, Byte PostFlag, int InsertIndex)
 	switch(id1)
 	{
 		case 'LE': // LE##/##/#;
-			if(Num!=3){ WL_EWrongParamsNum(Num,"equal",3); goto l_exit; }
+			if(Num!=3){ EWrongParamsNum(); goto l_exit; }
 			cp->Event=0x20000000|PosMixed(M.n[0],M.n[1],M.n[2]);
 			if(PostFlag) cp->Event|=0x08000000;
 //              cp->Par[0]=M.VarI[0];
@@ -7921,14 +8005,14 @@ int InitTrigger(Mes &M, Word Id, int Num, Byte PostFlag, int InsertIndex)
 			break;
 		case 'GE': // GE#;
 		{
-			if(Num!=1){ WL_EWrongParamsNum(Num,"equal",1); goto l_exit; }
-			if(M.n[0]<0){ WL_MError3("wrong event index: %d",M.n[0]); goto l_exit; }
+			if(Num!=1){ EWrongParamsNum(); goto l_exit; }
+			if(M.n[0]<0){ MError2("wrong event index"); goto l_exit; }
 			_GlbEvent_ *GEp1 = Main->GEp1;
 			_GlbEvent_ *GEp = Main->GEp0;
 			for(;GEp<GEp1;GEp++){
 				if(MakeSpec(&GEp->Mes.m,M.n[0])) goto _found5;
 			}
-			WL_MError3("wrong event index: %d",M.n[0]); goto l_exit;
+			MError2("wrong event index"); goto l_exit;
 _found5:
 			cp->Event=(Dword)GEp; // адр. структуры события-генератора
 //              cp->ParSet=0;
@@ -7951,14 +8035,14 @@ _found5:
 					if(PostFlag) cp->Event|=0x08000000;
 //                  cp->Par[0]=M.VarI[0]; cp->Par[1]=M.VarI[1]; cp->Par[2]=M.VarI[2]; cp->ParSet=3;
 					break;
-				default: WL_EWrongSyntax(); goto l_exit;
+				default: EWrongParamsNum(); goto l_exit;
 			}
 			break;
 		case 'FU':{ // FU#;
-			if(Num!=1){ WL_EWrongParamsNum(Num,"equal",1); goto l_exit; }
-			if((M.n[0]<-100)||(M.n[0]==0)||(M.n[0]>WL_FUNC_COUNT)){ WL_MError3("wrong function index (-100...30000).\nIncorrect value: %d",M.n[0]); goto l_exit; }
+			if(Num!=1){ EWrongParamsNum(); goto l_exit; }
+			if((M.n[0]<-100)||(M.n[0]==0)||(M.n[0]>30000)){ MError2("wrong function index (-100...30000)."); goto l_exit; }
 			int funind=M.n[0];
-			if(funind<0) funind=-funind+WL_FUNC_COUNT+1000-1; // local functions
+			if(funind<0) funind=-funind+31000-1; // local functions
 			cp->Event=funind;
 //              cp->Par[0]=M.VarI[0]; cp->ParSet=1;
 			if(ERMVarUsedStore==1) LogERMFunctionTrigger(M.n[0],&M.m.s[M.i]);
@@ -7968,12 +8052,12 @@ _found5:
 			{
 				int i = AddTimer(M.n[0], M.n[1], M.n[2], M.n[3]);
 				if (i<0) goto l_exit;
-				cp->Event = i + WL_FUNC_COUNT+1000;
+				cp->Event = i + 31000;
 				break;
 			}
-			if(Num!=1){ WL_EWrongParamsNum(Num,"equal",1); goto l_exit; }
-			if((M.n[0]<1)||(M.n[0]>100)){ WL_MError3("wrong timer index (1...100).\nIncorrect value: %d",M.n[0]); goto l_exit; }
-			cp->Event=M.n[0]-1+WL_FUNC_COUNT; // сдвигаем
+			if(Num!=1){ EWrongParamsNum(); goto l_exit; }
+			if((M.n[0]<1)||(M.n[0]>100)){ MError2("wrong timer index (1...100)."); goto l_exit; }
+			cp->Event=M.n[0]-1+30000; // сдвигаем
 //              cp->Par[0]=M.VarI[0]; cp->ParSet=1;
 			if(ERMVarUsedStore==1) LogERMTimerTrigger(M.n[0],&M.m.s[M.i]);
 			break;
@@ -7990,12 +8074,12 @@ _found5:
 					if (found)
 					{
 						foundRange = Format((foundMax == foundMin? "%s%d" : "%s%d...%d"), foundRange, foundMin, foundMax);
-						WL_MError2(Format("wrong index (%s).", foundRange));
+						MError2(Format("wrong index (%s).", foundRange));
 						goto l_exit;
 					}
 					else
 					{
-						WL_MError2("wrong or not yet implemented trigger type.");
+						MError2("wrong or not yet implemented trigger type.");
 						goto _cont;
 					}
 				}
@@ -8018,7 +8102,7 @@ _found5:
 					}
 				}
 			}
-			if(Num!=1){ WL_EWrongParamsNum(Num,"equal",1); goto l_exit; }
+			if(Num!=1){ EWrongParamsNum(); goto l_exit; }
 			cp->Event = ERM_Triggers[i].Event - ERM_Triggers[i].paramMin + M.n[0];
 	}
 
@@ -8083,14 +8167,14 @@ int InitReciever(Mes &M, Word Id, int Num, Dword &ToDoPo, int &ParSet, VarNum *P
 	switch(id1){
 		case 'GE': // GE#:
 		{
-			if(Num!=1) { WL_MError2("wrong syntax."); goto l_exit; }
-			if(M.n[0]<0) { WL_MError2("wrong syntax."); goto l_exit; }
+			if(Num!=1) { MError2("wrong syntax."); goto l_exit; }
+			if(M.n[0]<0) { MError2("wrong syntax."); goto l_exit; }
 			_GlbEvent_ *GEp1 = Main->GEp1;
 			_GlbEvent_ *GEp = Main->GEp0;
 			for(;GEp<GEp1;GEp++){
 				if(MakeSpec(&GEp->Mes.m,M.n[0])) goto _found;
 			}
-			{ WL_MError3("global event with this index doesn't exist.\nIncorrect value: %d",M.n[0]); goto l_exit; }
+			{ MError2("global event with this index doesn't exist."); goto l_exit; }
 _found:
 			ToDoPo=(Dword)GEp;
 			ParSet=0;
@@ -8103,7 +8187,7 @@ _found:
 			}else if(Num==1){
 				ToDoPo=*(Dword *)&M.VarI[0];
 				Par[0]=M.VarI[0]; ParSet=1;
-			}else{ WL_MError2("wrong syntax (LE$/$/$,LE$)."); goto l_exit; }
+			}else{ MError("\"!!LE:\"-wrong syntax (LE$/$/$,LE$)."); goto l_exit; }
 			break;
 		case 'MO': // MO$ MO##/##/#: or MOx/y/l/1 -dynamic
 			if(Num>=3){ // может быть 4
@@ -8112,11 +8196,11 @@ _found:
 			}else if(Num==1){
 				ToDoPo=*(Dword *)&M.VarI[0];
 				Par[0]=M.VarI[0]; ParSet=1;
-			}else{ WL_MError2("wrong syntax (MO$/$/$(/$),MO$)."); goto l_exit; }
-			break; 
+			}else{ MError("\"!!MO:\"-wrong syntax (MO$/$/$(/$),MO$)."); goto l_exit; }
+			break;
 		case 'CE': // CE##:
 		{
-			if(Num!=1) { WL_MError2("wrong syntax."); goto l_exit; }
+			if(Num!=1) { MError2("wrong syntax."); goto l_exit; }
 			if(M.n[0]<0) goto l_exit;
 			_CastleEvent_ *CEp = Main->CEp0;
 			_CastleEvent_ *CEp1 = Main->CEp1;
@@ -8131,7 +8215,7 @@ _found1:
 		}
 		case 'AR': // AR#:
 			if(Num==1){
-//                WL_MError2("-disabled old style syntax."); goto l_exit;
+//                MError("\"!!AR$:\"-disabled old style syntax."); goto l_exit;
 /*
 				if(M.n[0]<0) goto l_exit;
 				for(Ap=Ap0;Ap<Ap1;Ap++){
@@ -8148,7 +8232,7 @@ _found3:
 				ToDoPo=0;
 //                ToDoPo2=PosMixed(M.n[0],M.n[1],M.n[2]);
 				Par[0]=M.VarI[0]; Par[1]=M.VarI[1]; Par[2]=M.VarI[2]; ParSet=3;
-			}else{ WL_MError2("wrong syntax."); goto l_exit; }
+			}else{ MError2("wrong syntax."); goto l_exit; }
 			break;
 		case 'HE': // HE#: или HE#1/#2/#3: или HE-1: или HEv:
 			switch(Num){
@@ -8175,11 +8259,11 @@ _found3:
 					Par[0]=M.VarI[0]; Par[1]=M.VarI[1]; Par[2]=M.VarI[2]; ParSet=3;
 					break;
 				default:
-					WL_MError2("wrong syntax."); goto l_exit;
+					MError2("wrong syntax."); goto l_exit;
 			}
 			break;
 		case 'IF': // IF:
-			if(Num!=1) { WL_MError2("wrong syntax."); goto l_exit; }
+			if(Num!=1) { MError2("wrong syntax."); goto l_exit; }
 			ParSet=0;
 			break;
 		default:
@@ -8203,11 +8287,11 @@ _addfound:
 			ToDoPo=0;
 			switch(ERM_Addition[i].Type){
 				case 6: // переменная.переменная, либо без переменных
-					if(Num>2){ WL_MError2("wrong syntax (t=6)."); goto l_exit; }
+					if(Num>2){ MError2("wrong syntax (t=6)."); goto l_exit; }
 					Par[0]=M.VarI[0]; Par[1]=M.VarI[1]; ParSet=Num;
 					break;
 				case 5: // переменная.переменная
-					if(Num!=2){ WL_MError2("wrong syntax (t=5)."); goto l_exit; }
+					if(Num!=2){ MError2("wrong syntax (t=5)."); goto l_exit; }
 //                  ToDoPo=*(Dword *)&M.VarI[0];
 //                  ToDoPo2=*(Dword *)&M.VarI[1];
 					Par[0]=M.VarI[0]; Par[1]=M.VarI[1]; ParSet=2;
@@ -8215,7 +8299,7 @@ _addfound:
 				case 4: // цикл
 				 {
 //                  Cycle *cp;
-					 if(Num!=4){ WL_MError3("wrong syntax for receiver (loop).\nInsufficent number of arguments: %d",Num); goto l_exit; }
+					if(Num!=4){ MError2("wrong syntax for receiver (loop)."); goto l_exit; }
 //                  if((M.n[1]<-1000)||(M.n[1]>1000)){ MError("\"!!$$:\"-wrong value (cycle from -1000...1000)."); goto l_exit; }
 //                  if((M.n[2]<-1000)||(M.n[2]>1000)){ MError("\"!!$$:\"-wrong value (cycle to -1000...1000)."); goto l_exit; }
 //                  if((M.n[3]<-500)||(M.n[3]>500)){ MError("\"!!$$:\"-wrong value (cycle step -500...500)."); goto l_exit; }
@@ -8230,7 +8314,7 @@ _addfound:
 					break;
 				 }
 				case 3: // скопируем число
-					if(Num!=1){ WL_MError2("wrong syntax (t=3)."); goto l_exit; }
+					if(Num!=1){ MError2("wrong syntax (t=3)."); goto l_exit; }
 					ToDoPo=M.n[0];
 					Par[0]=M.VarI[0]; ParSet=1;
 					break;
@@ -8252,12 +8336,12 @@ _addfound:
 							Par[0]=M.VarI[0]; Par[1]=M.VarI[1]; Par[2]=M.VarI[2]; Par[3]=M.VarI[3]; Par[4]=M.VarI[4]; ParSet=5;
 							break;
 						default:
-							WL_MError2("wrong syntax (t=2)."); goto l_exit;
+							MError2("wrong syntax (t=2)."); goto l_exit;
 					}
 					break;
 				case 1: // скопируем число/переменную   ...$
 //                  ToDoPo=(Dword)M.m.s[M.i++];
-					if(Num!=1){ WL_MError2("wrong syntax (t=1)."); goto l_exit; }
+					if(Num!=1){ MError2("wrong syntax (t=1)."); goto l_exit; }
 //                  ToDoPo=*(Dword *)&M.VarI[0];
 //                  ToDoPo2=0;
 					Par[0]=M.VarI[0]; ParSet=1;
@@ -8268,7 +8352,7 @@ _addfound:
 //                  ToDoPo2=0;
 					Par[0]=M.VarI[0]; ParSet=1;
 					break;
-				default: WL_MError2("wrong syntax (t=unknown)."); goto l_exit;
+				default: MError2("wrong syntax (t=unknown)."); goto l_exit;
 			}
 			if(ERMVarUsedStore==1){ LogERMAnyReceiver(Id,Par[0],&M.m.s[Ind]); }
 	}
@@ -8305,7 +8389,7 @@ int CheckConditions(_ToDo_ *dp, _IfStruct_ *a)
 		if (!a->Ghost)
 			if (!a->IsFalse) // previous section was true - no more processing - move the if into ghost mode
 			{
-				if (!a->Total) { WL_MError("\"el\" - no IF for ELSE"); return 1; }
+				if (!a->Total) { MError("\"el\" - no IF for ELSE"); return 1; }
 				a->Ghost++;
 				a->IsFalse = 0;
 			}else
@@ -8313,7 +8397,7 @@ int CheckConditions(_ToDo_ *dp, _IfStruct_ *a)
 		return 1;
 	}
 	if(cmd=='ne'){ // endif
-		if (--a->Total < 0) { WL_MError("\"en\" - no IF for ENDIF"); return 1; }
+		if (--a->Total < 0) { MError("\"en\" - no IF for ENDIF"); return 1; }
 		if (a->Ghost)
 			a->Ghost--;
 		else
@@ -8354,7 +8438,7 @@ int ParseERM(Mes &M)
 		// 3.58 correction to skip ^ in comments
 		if(SkipUntil2(&M) || M.i>=(M.m.l-4)) // нет генератора или нет места для команды - к след событию
 		{
-			if (TrigIf.Total)  WL_MError("no ENDIF for IF");
+			if (TrigIf.Total)  MError("no ENDIF for IF");
 			break;
 		}
 
@@ -8626,7 +8710,7 @@ void FindERMl()
 int GetGoToId(_ToDo_ *a, int *j)
 {
 	*j = a->Par[0].Num;
-	if(*j < 0 || *j > 49)  { WL_MError3("wrong goto label (0...49)\nIncorrect value: %d",*j); return 1; }
+	if(*j < 0 || *j > 49)  { MError2("wrong goto label (0...49)"); return 1; }
 	return 0;
 }
 
@@ -8662,7 +8746,7 @@ void ProcessERM(bool needLocals)
 	while(cp!=0 && cp->Event!=0){
 		if(cp->Event==ev) // нашли тригер
 		{
-			if((ev>=(WL_FUNC_COUNT+1000))&&(ev<(WL_FUNC_COUNT+1100))) // local function should be in the same scope
+			if((ev>=31000)&&(ev<31100)) // local function should be in the same scope
 				if(cp->Scope!=GlobalCurrentScope) goto _Cont;
 
 			if(--TriggerGoTo >= 0) goto _Cont;
@@ -8687,7 +8771,7 @@ void ProcessERM(bool needLocals)
 				if(!LocalsStored && needLocals)
 				{
 					LocalsStored = true;
-					StoreVars((cp->Event<WL_FUNC_COUNT)||((cp->Event>=(WL_FUNC_COUNT+1000))&&(cp->Event<(WL_FUNC_COUNT+1100))));
+					StoreVars((cp->Event<30000)||((cp->Event>=31000)&&(cp->Event<31100)));
 				}
 
 				if(cp->Efl[0][0][0].Type == 255) // Lua trigger
@@ -8703,7 +8787,7 @@ void ProcessERM(bool needLocals)
 					GlobalCurrentScope=cp->Scope;
 
 					// backward compatibility - zero out y-1..y-100, f-1..f-100
-					if(cp->Event >= WL_FUNC_COUNT && (cp->Event < (WL_FUNC_COUNT+1000) || cp->Event >= (WL_FUNC_COUNT+1100)))
+					if(cp->Event >= 30000 && (cp->Event < 31000 || cp->Event >= 31100))
 					{
 						for(i=0;i<100;i++){ ERMVarYT[i]=0; }
 						for(i=0;i<100;i++){ ERMVarFT[i]=0; }
@@ -8746,7 +8830,7 @@ void ProcessERM(bool needLocals)
 						if(TriggerBreak) goto _Cont2;
 					}
 
-					if (TrigIf.Total)  WL_MError("no ENDIF for IF");
+					if (TrigIf.Total)  MError("no ENDIF for IF");
 _Cont2:;
 					GlobalCurrentScope=OldScope;
 				}
@@ -8768,7 +8852,7 @@ _Cont:;
 
 	if (LocalsStored)
 	{
-		StoreVars((ev<WL_FUNC_COUNT)||((ev>=(WL_FUNC_COUNT+1000))&&(ev<(WL_FUNC_COUNT+1100))), true);
+		StoreVars((ev<30000)||((ev>=31000)&&(ev<31100)), true);
 	}
 	IsLuaCall = WasLuaCall;
 	ErrString = LastErrString;
@@ -8786,10 +8870,10 @@ void FUCall(int n, Mes *Mp, int Num, bool needLocals)
 	int lastNum = LastFUNum;
 	LastFUMes = Mp;
 	LastFUNum = Num;
-	if(n>WL_FUNC_COUNT){ WL_MError3("Function Index out of range (1...30000)\nIncorrect value: %d",n); RETURNV }
+	if(n>30000){ MError("Function Index out of range (1...30000)"); RETURNV }
 	if(n<0){ // 3.59
-		if(n<-100){ WL_MError3("Local Function Index out of range (-100...-1)\nIncorrect value: %d",n); RETURNV }
-		n=-n+(WL_FUNC_COUNT+1000)-1;
+		if(n<-100){ MError("Local Function Index out of range (-100...-1)"); RETURNV }
+		n=-n+31000-1;
 	}
 	pointer=n;
 	ProcessERM(needLocals);
@@ -8802,7 +8886,7 @@ void FUCall(int n, Mes *Mp, int Num, bool needLocals)
 void _PostInstrCall(void){
 	STARTNA(__LINE__, 0)
 	if(GameWasLoaded==0){ // если только новая игра
-		pointer=WL_FUNC_COUNT+370;
+		pointer=30370;
 		ProcessERM();
 	}
 	RETURNV
@@ -8819,7 +8903,7 @@ void PostInstrCall(void){
 void COCall(Dword n,_Hero_ *hp)
 {
 	STARTNA(__LINE__, 0)
-	pointer=n+WL_FUNC_COUNT+340;
+	pointer=n+30340;
 	ERM_GM_ai=IsThis(hp->Owner);
 	ERM_HeroStr=hp;
 	ERM_PosX=hp->x; ERM_PosY=hp->y; ERM_PosL=hp->l;
@@ -8827,10 +8911,10 @@ void COCall(Dword n,_Hero_ *hp)
 	RETURNV
 }
 // battle
-void BACall(Dword n,_Hero_ *hp) // BA0,1,50,51, 52,53
+void BACall(Dword n,_Hero_ *hp)
 {
 	STARTNA(__LINE__, 0)
-	pointer=n+(WL_FUNC_COUNT+300);
+	pointer=n+30300;
 	ERM_GM_ai=!G2B_CompleteAI;
 //  ERM_PosX=0;ERM_PosY=0;ERM_PosL=0;
 	ERM_HeroStr=hp; // 3.57f 29.01.03
@@ -8841,18 +8925,18 @@ void BACall(Dword n,_Hero_ *hp) // BA0,1,50,51, 52,53
 void TLCall(Dword timesec)
 {
 	STARTNA(__LINE__, 0)
-	if(timesec%60 == 0){ pointer=WL_FUNC_COUNT+904; ProcessERM(); }
-	if(timesec%10 == 0){ pointer=WL_FUNC_COUNT+903; ProcessERM(); }
-	if(timesec%5 == 0){ pointer=WL_FUNC_COUNT+902; ProcessERM(); }
-	if(timesec%2 == 0){ pointer=WL_FUNC_COUNT+901; ProcessERM(); }
-	pointer=WL_FUNC_COUNT+900; ProcessERM();
+	if(timesec%60 == 0){ pointer=30904; ProcessERM(); }
+	if(timesec%10 == 0){ pointer=30903; ProcessERM(); }
+	if(timesec%5 == 0){ pointer=30902; ProcessERM(); }
+	if(timesec%2 == 0){ pointer=30901; ProcessERM(); }
+	pointer=30900; ProcessERM();
 	RETURNV
 }
 
 void DlgCallBack(int dlg,int item,int action)
 {
 	STARTNA(__LINE__, 0)
-	pointer=WL_FUNC_COUNT+371; 
+	pointer=30371; 
 	ERM_PosX=dlg; ERM_PosY=item; ERM_PosL=action;
 	ProcessERM();
 	RETURNV
@@ -8861,7 +8945,7 @@ void DlgCallBack(int dlg,int item,int action)
 void DlgSpellCallBack(int dlg,int x,int y,int action)
 {
 	STARTNA(__LINE__, 0)
-	pointer=WL_FUNC_COUNT+372; 
+	pointer=30372; 
 	ERM_PosX=x; ERM_PosY=y; ERM_PosL=action;
 	ProcessERM();
 	RETURNV
@@ -8871,16 +8955,16 @@ void DlgSpellCallBack(int dlg,int x,int y,int action)
 void TriggerIP(Dword n)
 {
 	STARTNA(__LINE__, 0)
-	pointer=n+WL_FUNC_COUNT+330;
+	pointer=n+30330;
 	ProcessERM();
 	RETURNV
 }
 // battle каждый раунд
-void BACall2(Dword /*n*/,int Day) // BR trigger actually
+void BACall2(Dword /*n*/,int Day)
 {
 	STARTNA(__LINE__, 0)
-//  pointer=n+(WL_FUNC_COUNT+300);
-	pointer=WL_FUNC_COUNT+302;
+//  pointer=n+30300;
+	pointer=30302;
 //  ERM_PosX=0;ERM_PosY=0;ERM_PosL=0;
 	ERMVar2[996]=Day;
 	ProcessERM();
@@ -8890,7 +8974,7 @@ void BACall2(Dword /*n*/,int Day) // BR trigger actually
 void MP3Call(void)
 {
 	STARTNA(__LINE__, 0)
-	pointer=WL_FUNC_COUNT+320;
+	pointer=30320;
 	ProcessERM();
 	RETURNV
 }
@@ -8898,7 +8982,7 @@ void MP3Call(void)
 void SoundCall(void)
 {
 	STARTNA(__LINE__, 0)
-	pointer=WL_FUNC_COUNT+321;
+	pointer=30321;
 	ProcessERM();
 	RETURNV
 }
@@ -8906,7 +8990,7 @@ void SoundCall(void)
 void AdvMagicCastCall(int beforeAFTER)
 {
 	STARTNA(__LINE__, 0)
-	pointer=WL_FUNC_COUNT+322+beforeAFTER;
+	pointer=30322+beforeAFTER;
 	ProcessERM();
 	RETURNV
 }
@@ -8943,11 +9027,11 @@ void AdvMagicManager(void)
 	__asm   popa
 }
 
-void BACall3(int beforeAFTER,int Day) // BG trigger actually
+void BACall3(int beforeAFTER,int Day)
 {
 	STARTNA(__LINE__, 0)
-//  pointer=n+(WL_FUNC_COUNT+300);
-	pointer=WL_FUNC_COUNT+303+beforeAFTER;
+//  pointer=n+30300;
+	pointer=30303+beforeAFTER;
 //  ERM_PosX=0;ERM_PosY=0;ERM_PosL=0;
 	ERMVar2[996]=Day;
 	ProcessERM();
@@ -8957,7 +9041,7 @@ void BACall3(int beforeAFTER,int Day) // BG trigger actually
 void MRCall(int beforeAFTER)
 {
 	STARTNA(__LINE__, 0)
-	pointer=WL_FUNC_COUNT+307+beforeAFTER;
+	pointer=30307+beforeAFTER;
 	ERM_GM_ai=!G2B_CompleteAI;
 	ProcessERM();
 	RETURNV
@@ -8965,7 +9049,7 @@ void MRCall(int beforeAFTER)
 void MFCall(int CallType)
 {
 	STARTNA(__LINE__, 0)
-	pointer=WL_FUNC_COUNT+801+CallType;
+	pointer=30801+CallType;
 	ERM_GM_ai=!G2B_CompleteAI;
 	ProcessERM();
 	RETURNV
@@ -8974,7 +9058,7 @@ void MFCall(int CallType)
 void BFCall(void)
 {
 	STARTNA(__LINE__, 0)
-	pointer=WL_FUNC_COUNT+800;
+	pointer=30800;
 	ProcessERM();
 	RETURNV
 }
@@ -8985,7 +9069,7 @@ int IsDisabled(Dword MixPos,int Owner)
 	_ERM_Object_ *obj;
 	if((Owner<0)||(Owner>8)) RETURN(1)
 	if((MixPos&0x10000000)==0){ // герой
-		RETURN(ERM_Hero[MixPos-(WL_POINTER_HE)].Disabled[Owner])
+		RETURN(ERM_Hero[MixPos-30100].Disabled[Owner])
 	}else{
 		MixPos&=0x0FFFFFFF; // восстановим нормальный вид
 		obj=FindObj(MixPos);
@@ -9010,7 +9094,7 @@ int ERM2Object(int GM_ai,Dword MixPos,_MapItem_ *Mi,_Hero_ *Hr)
 		dpointer=MixPos&0x07FF03FF;
 		dpointer|=0x10000000;
 	}else{ // герой
-		dpointer=Mi->SetUp+(WL_POINTER_HE);
+		dpointer=Mi->SetUp+30100;
 	}
 //  IsDisabled(dpointer,Hr->Owner);
 	if(Mi->OType!=0x22){ // объект
@@ -9059,7 +9143,7 @@ int ERM2Object(int prePOST,int GM_ai,Dword MixPos,_MapItem_ *Mi,_Hero_ *Hr,int o
 		lpointer=MixPos&0x07FF03FF;
 		lpointer|=0x10000000; if(prePOST) lpointer|=0x08000000;
 	}else{ // герой
-		lpointer=Mi->SetUp+(WL_POINTER_HE);
+		lpointer=Mi->SetUp+30100;
 	}
 	pointer=lpointer;
 	ProcessERM();
@@ -9077,15 +9161,15 @@ int ERM2Object(int prePOST,int GM_ai,Dword MixPos,_MapItem_ *Mi,_Hero_ *Hr,int o
 void HeroMove(_Hero_ *hp, int NewX, int NewY, int NewL)
 {
 	STARTNA(__LINE__, 0)
-	if(hp==0){WL_MError("\"HeroMoveTrigger:\"- cannot find hero."); RETURNV}
+	if(hp==0){MError("\"HeroMoveTrigger:\"- cannot find hero."); RETURNV}
 	ERM_GM_ai=-1;
 	ERM_HeroStr=hp;
 	ERM_PosX=NewX; ERM_PosY=NewY; ERM_PosL=NewL;
 	// любой герой
-	pointer=WL_POINTER_HM;
+	pointer=30400;
 	ProcessERM();
 	// конкретный герой
-	pointer=WL_POINTER_HM+1+hp->Number;
+	pointer=30401+hp->Number;
 	ProcessERM();
 	RETURNV
 }
@@ -9100,7 +9184,7 @@ static _Hero_ *GL_Hp;
 void DoGainLevel(void)
 {
 	STARTNA(__LINE__, 0)
-	if(GL_Hp==0){WL_MError("\"HeroGainLevel:\"- cannot find hero."); RETURNV}
+	if(GL_Hp==0){MError("\"HeroGainLevel:\"- cannot find hero."); RETURNV}
 	GL_SSkill[0] = GL_GetSSkill(GL_Hp, 1, 3, -1);
 	if (GL_SSkill[0] == -1)
 		GL_SSkill[0] = GL_GetSSkill(GL_Hp, 0, 3, -1);
@@ -9113,10 +9197,10 @@ void DoGainLevel(void)
 	ERM_HeroStr=GL_Hp;
 //  ERM_PosX=NewX; ERM_PosY=NewY; ERM_PosL=NewL;
 	// любой герой
-	pointer=WL_POINTER_HL;
+	pointer=30600;
 	ProcessERM();
 	// конкретный герой
-	pointer=WL_POINTER_HL+1+GL_Hp->Number;
+	pointer=30601+GL_Hp->Number;
 	ProcessERM();
 	if(GL_SSkill[0] == -1 && GL_SSkill[1] != -1)
 	{
@@ -9157,7 +9241,7 @@ int ERM_HeroGainLevel(char Cmd,int Num,_ToDo_* /*sp*/,Mes *Mp)
 			Apply(&GL_SSkillResult,4,Mp,0);
 			break;
 		default:
-			WL_EWrongCommand()
+			EWrongCommand();
 			RETURN(0)
 	}
 	RETURN(1)
@@ -9189,10 +9273,10 @@ void __fastcall PostGainLevel(int skill1, int skill2)
 	ERM_GM_ai = !IsAI(GL_Hp->Owner);
 	ERM_HeroStr = GL_Hp;
 	// любой герой
-	pointer = WL_POINTER_HP;
+	pointer = 31200;
 	ProcessERM();
 	// конкретный герой
-	pointer = WL_POINTER_HP +1 + GL_Hp->Number;
+	pointer = 31201 + GL_Hp->Number;
 	ProcessERM();
 	RETURNV
 }
@@ -9346,7 +9430,7 @@ void RunTimer(int Owner)
 		del=day-ERMTimer[i].FirstDay;
 		if((del%ERMTimer[i].Period)!=0) continue;
 		ERM_GM_ai=!IsAI(Owner);
-		pointer = i + (i < 100 ? WL_FUNC_COUNT : (WL_FUNC_COUNT+1000));
+		pointer = i + (i < 100 ? 30000 : 31000);
 		ProcessERM();
 	}
 	RETURNV
@@ -9363,7 +9447,7 @@ int CheckObjHint(_MapItem_ *Mp,char *Buf,_MapItem_ *MpOrig)
 		ind=MpOrig->SetUp;
 		hv=ERM_Hero[ind].HintVar;
 		if(hv==0) RETURN(0) // не задано
-		if((hv<-StrMan::Count)||(hv>32000)){ WL_MError1("CheckObjHint - wrong hero hint value\nIncorrect value: %d",hv); RETURN(0) }
+		if((hv<-StrMan::Count)||(hv>32000)){ MError("CheckObjHint - wrong hero hint value"); RETURN(0) }
 		if (hv < 0)
 			StrCopy(Buf,512,StrMan::GetStoredStr(hv));
 		else
@@ -9388,7 +9472,7 @@ int CheckObjHint(_MapItem_ *Mp,char *Buf,_MapItem_ *MpOrig)
 // if(op==0) return 0; // не нашли
 	hv=op->HintVar;
 	if(hv==0) RETURN(0) // не задано
-	if((hv<-StrMan::Count)||(hv>32000)){ WL_MError1("CheckObjHint - wrong object hint value\nIncorrect value: %d",hv); RETURN(0) }
+	if((hv<-StrMan::Count)||(hv>32000)){ MError("CheckObjHint - wrong object hint value"); RETURN(0) }
 	if (hv < 0)
 		StrCopy(Buf,512,StrMan::GetStoredStr(hv));
 	else
@@ -9461,7 +9545,7 @@ int ERM_HintDisplay(char Cmd,int Num,_ToDo_*,Mes *Mp)
 			Apply(&HC_Customized, 4, Mp, 0);
 			break;
 		default:
-			WL_EWrongCommand() RETURN(0)
+			EWrongCommand(); RETURN(0)
 	}
 	RETURN(1)
 }
@@ -9488,7 +9572,7 @@ void __fastcall HintTrigger(_HC_MsgParams_ *MsgParams)
 		}
 	}
 
-	pointer = WL_FUNC_COUNT+372;
+	pointer = 30372;
 	ERM_GM_ai = -1;
 	Map2Coord(HC_Map, &ERM_PosX, &ERM_PosY, &ERM_PosL);
 	HC_MsgParams = MsgParams;
@@ -9651,6 +9735,49 @@ _found:
 	RETURNV
 }
 
+static _Hero_ *MQL_hp;
+static Dword   MQL_ecx;
+static char MQL_MesBuf[30000];
+int _MakeQuestLog(void)
+{
+	STARTNA(__LINE__, 0)
+	int ind,hero,owner;
+	_QuestLog_ *qlp;
+	hero=MQL_hp->Number;
+	owner=MQL_hp->Owner;
+	ind=0; MQL_MesBuf[0]=0;
+	if(WoGType){ StrCanc(MQL_MesBuf,30000,MQL_MesBuf,"{Папирус}\n\n"); }
+	else{ StrCanc(MQL_MesBuf,30000,MQL_MesBuf,"{Papyrus}\n\n"); }
+	while((qlp=GetQuest(hero,owner,&ind))!=0){
+		if (qlp->z > 0)
+			StrCanc(MQL_MesBuf,30000,MQL_MesBuf,ERM2String(StrMan::GetStoredStr(qlp->z),1,0));
+		else
+			StrCanc(MQL_MesBuf,30000,MQL_MesBuf,StrMan::GetStoredStr(qlp->z));
+		StrCanc(MQL_MesBuf,30000,MQL_MesBuf,"\n-------------------------------------------\n");
+	}
+	if(ind!=0){ // что-то было
+		if(WoGType){ StrCanc(MQL_MesBuf,30000,MQL_MesBuf,"\n{Хотите} {посмотреть} {QuestLog?}"); }
+		else{ StrCanc(MQL_MesBuf,30000,MQL_MesBuf,"\n{Do you want} {to} {see} {the} {QuestLog?}"); }
+		RETURN(Request0(MQL_MesBuf))
+	}
+	RETURN(1)
+}
+
+void MakeQuestLog(void)
+{
+	__asm pusha
+	_EAX(MQL_hp); 
+	_ECX(MQL_ecx);
+	if(_MakeQuestLog()){
+		__asm{
+			mov   ecx,MQL_ecx
+			mov   eax,0x52E910
+			call  eax
+		}
+	}
+	__asm popa
+}
+
 //int   AD_artnum,AD_ecx;
 //Dword AD_retval;
 //void FindArtHint(void) // called when artifact description is requested
@@ -9713,7 +9840,7 @@ void __stdcall ERMDebug(int,int,int,int,int,int,int,int,int,int)
 //    MakeWoMo(5,5,0,1);
 		Message(MapSavedWoG,1);
 		GEr.Show(0,0,0,0,"");
-		WL_MError("Test ERM Error Message.");
+		MError("Test ERM Error Message.");
 //    ChooseArt(ERM_HeroStr);
 	}
 	RETURNV
@@ -9788,9 +9915,9 @@ void _MouseClick(int type)
 	MixedPos(&MC_x,&MC_y,&MC_l,MC_MixPos);
 	MC_Std=1;
 	if(type){ // левый клик
-		pointer=WL_FUNC_COUNT+319;
+		pointer=30319;
 	}else{ // правый клик
-		pointer=WL_FUNC_COUNT+310;
+		pointer=30310;
 	}
 	ProcessERM();
 	if(MC_changed==1){
@@ -9901,16 +10028,16 @@ int ERM_MouseClick(char Cmd,int Num,_ToDo_* /*sp*/,Mes *Mp)
 			break;
 		case 'P': // P$/$/$ -
 			CHECK_ParamsMin(3);
-			v=MC_x; if(Apply(&v,4,Mp,0)==0){ WL_MError2("cannot set position."); RETURN(0) }
-			v=MC_y; if(Apply(&v,4,Mp,1)==0){ WL_MError2("cannot set position."); RETURN(0) }
-			v=MC_l; if(Apply(&v,4,Mp,2)==0){ WL_MError2("cannot set position."); RETURN(0) }
+			v=MC_x; if(Apply(&v,4,Mp,0)==0){ MError("\"!!CM:P\"-cannot set position."); RETURN(0) }
+			v=MC_y; if(Apply(&v,4,Mp,1)==0){ MError("\"!!CM:P\"-cannot set position."); RETURN(0) }
+			v=MC_l; if(Apply(&v,4,Mp,2)==0){ MError("\"!!CM:P\"-cannot set position."); RETURN(0) }
 			break;
 		case 'R': // R$ - станд поведение (1) или нет (0)
 			v=MC_Std; if(Apply(&v,4,Mp,0)) break; MC_Std=v; break;
 		case 'H': // A?$/?$ - номера героев
 			CHECK_ParamsMin(2);
-			v=MC_lhp; if(Apply(&v,4,Mp,0)==0){ WL_MError2("cannot set hero number."); RETURN(0) }
-			v=MC_rhp; if(Apply(&v,4,Mp,1)==0){ WL_MError2("cannot set hero number."); RETURN(0) }
+			v=MC_lhp; if(Apply(&v,4,Mp,0)==0){ MError("\"!!CM:H\"-cannot set hero number."); RETURN(0) }
+			v=MC_rhp; if(Apply(&v,4,Mp,1)==0){ MError("\"!!CM:H\"-cannot set hero number."); RETURN(0) }
 			break;
 		case 'D': // D$ - код позиция на поле битвы куда кликнули
 			__asm{
@@ -9929,12 +10056,12 @@ int ERM_MouseClick(char Cmd,int Num,_ToDo_* /*sp*/,Mes *Mp)
 			break;
 		case 'M': // 3.58 Mz#, M message text
 			CHECK_ParamsNum(1);
-			if(Mp->VarI[0].Type!=7){ WL_MError2("not a Z variable."); RETURN(0) }
-			if(Mp->VarI[0].Check!=0){ WL_MError2("cannot get or check text."); RETURN(0) }
+			if(Mp->VarI[0].Type!=7){ MError2("not a Z variable."); RETURN(0) }
+			if(Mp->VarI[0].Check!=0){ MError2("cannot get or check text."); RETURN(0) }
 			if (StrMan::Apply(TSBuffer, Mp, 0))
 				ShowTSHint(TSBuffer);
 			break;
-		default: WL_EWrongCommand() RETURN(0)
+		default: EWrongCommand(); RETURN(0)
 	}
 	RETURN(1)
 }
@@ -9998,7 +10125,7 @@ int _MouseClickTown(void)
 	Copy((Byte *)MCT_msp,(Byte *)&MC_MouseStr,sizeof(_MouseStr_));
 	MC_MouseStr.Item=GetRealItem(MCT_TownMan,&MC_MouseStr);
 	MC_Std=1;
-	pointer=WL_FUNC_COUNT+311; //
+	pointer=30311; //
 	ProcessERM();
 	Copy((Byte *)&MC_MouseStr,(Byte *)MCT_msp,sizeof(_MouseStr_));
 	if(MC_Std==0){ // не надо стандартной реакции
@@ -10021,7 +10148,7 @@ int _MouseOverTown(void)
 	STARTNA(__LINE__, 0)
 	Copy((Byte *)MCT_msp,(Byte *)&MC_MouseStr,sizeof(_MouseStr_));
 	MC_Std=1;
-	pointer=WL_FUNC_COUNT+318; //
+	pointer=30318; //
 	ProcessERM();
 	Copy((Byte *)&MC_MouseStr,(Byte *)MCT_msp,sizeof(_MouseStr_));
 	RETURN(MC_Std)
@@ -10045,7 +10172,7 @@ void __stdcall MouseOverTown(_MouseStr_ *MStr)
 void _EnterTownHall(int Type)
 {
 	STARTNA(__LINE__, 0)
-	pointer=WL_FUNC_COUNT+324+Type; //
+	pointer=30324+Type; //
 	ProcessERM();
 	RETURNV
 }
@@ -10068,7 +10195,7 @@ int MouseClickHero(_MouseStr_ *msp,_Hero_ *hp)
 	MC_Std=1;
 	ERM_HeroStr=hp;
 	MC_lhp=hp->Number;
-	pointer=WL_FUNC_COUNT+312; //
+	pointer=30312; //
 	ProcessERM();
 	Copy((Byte *)&MC_MouseStr,(Byte *)msp,sizeof(_MouseStr_));
 	if(MC_Std==0){ // не надо стандартной реакции
@@ -10143,7 +10270,7 @@ void _MouseClick2Hero(void)
 //  ERM_HeroStr=hp;
 	MC_lhp=((_Hero_ *)MC2H_sm[0x40/4])->Number;
 	MC_rhp=((_Hero_ *)MC2H_sm[0x44/4])->Number;
-	pointer=WL_FUNC_COUNT+313; //
+	pointer=30313; //
 	ProcessERM();
 	Copy((Byte *)&MC_MouseStr,(Byte *)MC2H_msp,sizeof(_MouseStr_));
 	if(MC_Std==0){ // не надо стандартной реакции
@@ -10172,7 +10299,7 @@ void _MouseClickBattle(void)
 	STARTNA(__LINE__, 0)
 	Copy((Byte *)MCB_msp,(Byte *)&MC_MouseStr,sizeof(_MouseStr_));
 	MC_Std=1;
-	pointer=WL_FUNC_COUNT+314; //
+	pointer=30314; //
 	ProcessERM();
 	Copy((Byte *)&MC_MouseStr,(Byte *)MCB_msp,sizeof(_MouseStr_));
 	if(MC_Std==0){ // не надо стандартной реакции
@@ -10194,7 +10321,7 @@ void MouseClickBattle(void)
 void _MouseMoveBattle(void)
 {
 	STARTNA(__LINE__, 0)
-	pointer=WL_FUNC_COUNT+317;
+	pointer=30317;
 	ProcessERM();
 	RETURNV
 }
@@ -10253,14 +10380,14 @@ int ERM_MouseMove(char Cmd,int Num,_ToDo_* /*sp*/,Mes *Mp)
 				mov    [eax+0x132D4],ebx
 			}
 			break;
-		default: WL_EWrongCommand() RETURN(0)
+		default: EWrongCommand(); RETURN(0)
 	}
 	RETURN(1)
 }
 /////////////////////////////
 static void GameSaveLoadTR(int st){
 	STARTNA(__LINE__, 0)
-	pointer=WL_FUNC_COUNT+360+st;
+	pointer=30360+st;
 	ProcessERM();
 	RETURNV
 }
@@ -10290,7 +10417,7 @@ void ArtifactOnOff(int ONoff)
 	STARTNA(__LINE__, 0)
 	ERM_HeroStr=ART_hp;
 	ERM_PosX=ART_art; ERM_PosY=ART_pos;
-	pointer=WL_FUNC_COUNT+315+ONoff; //
+	pointer=30315+ONoff; //
 	ProcessERM();
 	RETURNV
 }
@@ -10320,7 +10447,7 @@ void ArtifactOn(void)
 int Check4NewSpecPic(int hn)
 {
 	STARTNA(__LINE__, 0)
-		if((hn<0)||(hn>=HERNUM)){ WL_MError1("Incorrect Hero index in get spec pic.\nIncorrect value: %d",hn); RETURN(0) }
+	if((hn<0)||(hn>=HERNUM)){ MError("Incorrect Hero index in get spec pic."); RETURN(0) }
 	// 3.58
 	if(HSpecNames[hn].PicNum==0){ // не установлено ERM
 		// попробуем определить автоматически
@@ -10340,7 +10467,7 @@ void ReceiveERMVars(int len,Byte *buf)
 {
 	STARTNA(__LINE__, 0)
 	int i;
-	if(len!=(1000*sizeof(int))){ WL_MError("Wrong length of sent ERM vars"); RETURNV }
+	if(len!=(1000*sizeof(int))){ MError("Wrong length of sent ERM vars"); RETURNV }
 	for(i=0;i<1000;i++) ERMVar2[9000+i]=((int *)buf)[i];
 	RETURNV
 }
@@ -10362,7 +10489,7 @@ void DaylyMonChanged(void)
 void CrIsChanged(int Num)
 {
 	STARTNA(__LINE__, 0)
-		if((Num<0)||(Num>=MONNUM)){ WL_MError1("Creature index out of range\nIncorrect value: %d",Num); RETURNV }
+	if((Num<0)||(Num>=MONNUM)){ MError("Creature index out of range"); RETURNV }
 	CrChanged[Num].DayOfSet=GetCurDate();
 	RETURNV
 }
@@ -10429,12 +10556,12 @@ void ReceiveCreatures(int len,Byte *buf)
 	STARTNA(__LINE__, 0)
 	int i,j,k,num;
 	num=len/sizeof(_CrState_);
-	if(len!=(int)(num*sizeof(_CrState_))){ WL_MError("Wrong length of sent Modified Creatures"); RETURNV };
-	if((num<0)||(num>MONNUM)){ WL_MError1("Incorrect number of Modified Creature\nIncorrect value: %d",num); RETURNV }
+	if(len!=(int)(num*sizeof(_CrState_))){ MError("Wrong length of sent Modified Creatures"); RETURNV };
+	if((num<0)||(num>MONNUM)){ MError("Incorrect number of Modified Creature"); RETURNV }
 	for(i=0;i<len;i++) ((Byte *)CrState)[i]=buf[i];
 	for(j=0;j<num;j++){
 		i=CrState[j].Index;
-		if((i<0)||(i>MONNUM)){ WL_MError1("Incorrect index of Modified Creature\nIncorrect value: %d",i); RETURNV }
+		if((i<0)||(i>MONNUM)){ MError("Incorrect index of Modified Creature"); RETURNV }
 		MonTable[i].Group=CrState[j].Group;
 		MonTable[i].SubGroup=CrState[j].SubGroup;
 		MonTable[i].Flags=CrState[j].Flags;
@@ -10602,7 +10729,7 @@ int LoadERM(int /*ver*/)
 ////  _Scope_ *sp;
 	char buf[4]; if(Loader(buf,4)) RETURN(1)
 	if(buf[0]!='L'||buf[1]!='E'||buf[2]!='R'||buf[3]!='M')
-			{WL_MError("LoadERM cannot start loading"); RETURN(1)}
+			{MError("LoadERM cannot start loading"); RETURN(1)}
 	LuaCall("LoadGame");
 	if(StrMan::Load()) RETURN(1)
 	if(Loader(ERMVar,sizeof(ERMVar))) RETURN(1)
@@ -10665,19 +10792,19 @@ int LoadERM(int /*ver*/)
 			
 			v=ArtNames[i].NameVar;
 			if(v!=0){
-				if((v<-StrMan::Count)){ WL_MError1("Artifact - wrong z var index for Name.\nIncorrect value: %d",v); RETURN(1) }
+				if((v<-StrMan::Count)){ MError("Artifact - wrong z var index for Name."); RETURN(1) }
 				ap->Name = StrMan::GetStoredStr(v);
 			}else{ ap->Name=ArtSetUpBack[i].Name; }
 			
 			v=ArtNames[i].DescVar;
 			if(v!=0){
-				if((v<-StrMan::Count)){ WL_MError1("Artifact - wrong z var index for Description.\nIncorrect value: %d",v); RETURN(1) }
+				if((v<-StrMan::Count)){ MError("Artifact - wrong z var index for Description."); RETURN(1) }
 				ap->Description = StrMan::GetStoredStr(v);
 			}else{ ap->Description=ArtSetUpBack[i].Description; }
 			
 			v=ArtNames[i].PickUp;
 			if(v!=0){
-				if((v<-StrMan::Count)){ WL_MError1("Artifact - wrong z var index for Pick Up Message.\nIncorrect value: %d",v); RETURN(1) }
+				if((v<-StrMan::Count)){ MError("Artifact - wrong z var index for Pick Up Message."); RETURN(1) }
 				ArtPickUp[i] = StrMan::GetStoredStr(v);
 			}else{ ArtPickUp[i] = ArtPickUpBack[i]; }
 		}
@@ -10699,7 +10826,7 @@ int LoadERM(int /*ver*/)
 			for(j=0;j<4;j++){
 				v=SSAllNames[i].Var[j];
 				if(v!=0){
-					if((v<-StrMan::Count)){ WL_MError1("Secondary Skill - wrong z var index for Name.\nIncorrect value: %d",v); RETURN(1) }
+					if((v<-StrMan::Count)){ MError("Secondary Skill - wrong z var index for Name."); RETURN(1) }
 					char *str = StrMan::GetStoredStr(v);
 					if(j==0){
 						SSNAME[i].Name = str;
@@ -10721,7 +10848,7 @@ int LoadERM(int /*ver*/)
 			for(j=0;j<5;j++){
 				v=MonNames[i].Var[j];
 				if(v!=0){
-					if((v<-StrMan::Count)){ WL_MError1("Monster - wrong z var index for Name.\nIncorrect value: %d",v); RETURN(1) }
+					if((v<-StrMan::Count)){ MError("Monster - wrong z var index for Name."); RETURN(1) }
 					char *str = StrMan::GetStoredStr(v);
 					switch(j){
 						case 0: // single
@@ -10756,7 +10883,7 @@ int LoadERM(int /*ver*/)
 			for(j=0;j<3;j++){
 				v=HSpecNames[i].Var[j];
 				if(v!=0){
-					if((v<-StrMan::Count)){ WL_MError1("HeroSpec - wrong z var index.\nIncorrect value: %d",v); RETURN(1) }
+					if((v<-StrMan::Count)){ MError("HeroSpec - wrong z var index."); RETURN(1) }
 					char *str = StrMan::GetStoredStr(v);
 					switch(j){
 						case 0: // short
@@ -10787,7 +10914,7 @@ int LoadERM(int /*ver*/)
 	for (i = 0; i < TextConstCount; i++)
 	{
 		v = TextConstVars[i];
-		if((v<-StrMan::Count)){ WL_MError1("TextConst - wrong z var index.\nIncorrect value: %d",v); RETURN(1) }
+		if((v<-StrMan::Count)){ MError("TextConst - wrong z var index."); RETURN(1) }
 		if (v!=0) TextConst[i] = StrMan::GetStoredStr(v, TextConst[i]);
 	}
 

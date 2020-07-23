@@ -1,3 +1,5 @@
+#pragma once
+
 #include <string.h>
 //#define EXPOMUL 100
 #define EXPOMUL1 1

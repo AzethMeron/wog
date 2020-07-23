@@ -1,3 +1,5 @@
+#pragma once
+
 extern Byte MoJumper1[MONNUM-13]; //Diakon
 extern int MoJmpAdr1[]; //Diakon
 extern Byte MagHint[MONNUM-13];//Diakon

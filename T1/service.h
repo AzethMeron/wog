@@ -1,3 +1,5 @@
+#pragma once
+
 #include "classes.h"
 #include "txtfile.h"
 #include "windows.h"

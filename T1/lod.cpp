@@ -255,15 +255,15 @@ int ERM_LODs(char Cmd,int Num,_ToDo_* /*sp*/,Mes *Mp)
 			Apply(&ind,4,Mp,0);
 			char *name="undefined";
 			CHECK_ParamsNum(3);
-			if(BAD_INDEX_LZ(Mp->n[2])){ WL_MError3("wrong z var index (-20...-1,1...1000).\nIncorrect value: %d",Mp->n[2]); RETURN(0) }
+			if(BAD_INDEX_LZ(Mp->n[2])){ MError("\"LD:L\"-wrong z var index (-20...-1,1...1000)."); RETURN(0) }
 			if(Mp->n[2]>1000) name=ERM2String(StringSet::GetText(Mp->n[2]),1,0);
 			else if(Mp->n[2]>0) name=ERM2String(ERMString[Mp->n[2]-1],1,0);
 			else name=ERM2String(ERMLString[-Mp->n[2]-1],1,0);
 			Apply(&loc,4,Mp,1);
 			if(Cmd == 'L'){
-				if(loc==5){ WL_MError2("script folder can't be specified as LOD base location"); RETURN(0) }
-				if(loc==10){ WL_MError2("absolute path can't be specified as LOD location"); RETURN(0) }
-				if(strlen(name) > 31){ WL_MError2("LOD path must not exceed 31 character"); RETURN(0) }
+				if(loc==5){ MError2("script folder can't be specified as LOD base location"); RETURN(0) }
+				if(loc==10){ MError2("absolute path can't be specified as LOD location"); RETURN(0) }
+				if(strlen(name) > 31){ MError2("LOD path must not exceed 31 character"); RETURN(0) }
 			}
 			ind = Lod::LoadCustomLOD(loc, name, (Cmd == 'L' ? Lod::STORED : Lod::TEMP));
 			Apply(&ind,4,Mp,0);
@@ -276,7 +276,7 @@ int ERM_LODs(char Cmd,int Num,_ToDo_* /*sp*/,Mes *Mp)
 			Lod::UnloadCustomLOD(ind);
 			break;
 		}
-		default: WL_EWrongCommand(); RETURN(0)
+		default: EWrongCommand(); RETURN(0)
 	}
 	RETURN(1)
 }
@@ -303,7 +303,7 @@ int LoadLODs(int /*ver*/)
 	STARTNA(__LINE__, 0)
 	ResetLODs();
 	char buf[4]; if(Loader(buf,4)) RETURN(1)
-	if(buf[0]!='L'||buf[1]!='O'||buf[2]!='D'||buf[3]!='0') {WL_MError("LoadLODs cannot start loading"); RETURN(1)}
+	if(buf[0]!='L'||buf[1]!='O'||buf[2]!='D'||buf[3]!='0') {MError("LoadLODs cannot start loading"); RETURN(1)}
 	int  num;
 	if(Loader(&num,sizeof(int))) RETURN(1)
 	if(num==0) RETURN(0)

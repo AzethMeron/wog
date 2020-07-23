@@ -1,3 +1,4 @@
+#pragma once
 int __stdcall ArtAIAnal(Dword ArtNum,Dword par2,Dword par1);
 void __stdcall AdjustSquarePassability(_MapItem_ *MIp,int ADDremove);
 void SoDArtMenchHintFix(void);

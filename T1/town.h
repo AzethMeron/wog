@@ -1,3 +1,5 @@
+#pragma once
+
 #ifndef _TOWN_H_
 #define _TOWN_H_
 

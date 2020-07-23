@@ -469,14 +469,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\WogLegacy\WLA_Common.hpp"
-				>
-			</File>
-			<File
-				RelativePath=".\WogLegacy\WLA_ERM.hpp"
-				>
-			</File>
-			<File
 				RelativePath=".\womo.h"
 				>
 			</File>
@@ -911,22 +903,6 @@
 						BrowseInformation="1"
 					/>
 				</FileConfiguration>
-			</File>
-			<File
-				RelativePath=".\WogLegacy\WL_Numeric_C.hpp"
-				>
-			</File>
-			<File
-				RelativePath=".\WogLegacy\WL_QuestLog_C.hpp"
-				>
-			</File>
-			<File
-				RelativePath=".\WogLegacy\WLA_Common_C.hpp"
-				>
-			</File>
-			<File
-				RelativePath=".\WogLegacy\WLA_ERM_C.hpp"
-				>
 			</File>
 			<File
 				RelativePath=".\womo.cpp"

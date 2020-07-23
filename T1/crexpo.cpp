@@ -4766,13 +4766,13 @@ int ERM_AICrExp(char Cmd,int Num,_ToDo_*sp,Mes *Mp)
 	switch(sp->ParSet){
 		case 1: // тип монстра
 			Type=GetVarVal(&sp->Par[0]);
-			if(Type<-BFNUM || Type>=MAXCREXPAB){ WL_MError2("wrong creature type index."); RETURN(0) }
+			if(Type<-BFNUM || Type>=MAXCREXPAB){ MError("\"!!EA\"-wrong creature type index."); RETURN(0) }
 			break;
 //    case 2: // установки AI 1/DifLevel
 //      Type=GetVarVal(&sp->Par[1]);
 //      if(Type<0 || Type>=5){ MError("\"!!EA\"-wrong creature type index."); RETURN(0) }
 		default:
-			WL_MError2("unsupported syntax."); RETURN(0)
+			MError("\"!!EA\"-unsupported syntax."); RETURN(0)
 	}
 	switch(Cmd){
 		case 'M': // ExpMul
@@ -4811,7 +4811,7 @@ int ERM_AICrExp(char Cmd,int Num,_ToDo_*sp,Mes *Mp)
 			if(Type<0) CrExpBon::Apply(MonPos(-Type-1));
 			break;
 		case 'B': // BonusLine
-			if(Num<15){ WL_MError2("wrong number of parameters."); RETURN(0) }
+			if(Num<15){ MError("\"!!EA\"-wrong number of parameters."); RETURN(0) }
 //      if(Apply(&MType,4,Mp,0)) break;
 			if(Apply(&Ind,4,Mp,0)) break;
 			CrExpBon::GetBonLine(Type,Ind,&Flags,&Bon,&Mod,lvls);
@@ -4835,7 +4835,7 @@ int ERM_AICrExp(char Cmd,int Num,_ToDo_*sp,Mes *Mp)
 			int Mode=0;
 			if(Apply(&v,4,Mp,0)) break; // source creature
 			if(Num>1){ if(Apply(&Mode,4,Mp,1)) break; }
-			if(v<-BFNUM || v>=MAXCREXPAB){ WL_MError2("wrong creature type index."); RETURN(0) }
+			if(v<-BFNUM || v>=MAXCREXPAB){ MError("\"!!EA:O\"-wrong creature type index."); RETURN(0) }
 			CrExpBon::ApplyBFBonus(v,Type,Mode);
 			if(Type<0){ 
 				CrExpBon::Apply(MonPos(-Type-1));
@@ -4846,15 +4846,15 @@ int ERM_AICrExp(char Cmd,int Num,_ToDo_*sp,Mes *Mp)
 //      CrExpMod::Copy(CrExpMod::Get(Type),CrExpMod::Get(v));
 			break;}
 		case 'D':
-			if(Type<-BFNUM || Type>=0){ WL_MError3("-wrong creature type index.\nIncorrect value: %d",Type); RETURN(0) }
+			if(Type<-BFNUM || Type>=0){ MError("\"!!EA:D\"-wrong creature type index."); RETURN(0) }
 			v=CrExpBon::BFBodyAct[-Type-1];
 			Apply(&v,4,Mp,0);
 			break;
 		case 'R':{ // add artifact R$art/$option
 			CHECK_ParamsMin(2);
-			if(Type<-BFNUM || Type>=0){ WL_MError3("-wrong creature type index.\nIncorrect value: %d",Type); RETURN(0) }
+			if(Type<-BFNUM || Type>=0){ MError("\"!!EA:R\"-wrong creature type index."); RETURN(0) }
 			CrExpo *cr=CrExpoSet::GetBF(-Type-1);
-			if(cr==0){ WL_MError2("-internal#1."); RETURN(0) }
+			if(cr==0){ MError("\"!!EA:R\"-internal#1."); RETURN(0) }
 			if(cr->HasArt()){ art=cr->GetArt(); opt=cr->GetSubArt(); }
 			else{ art=-1; opt=0; }
 			fl=0;
@@ -4870,7 +4870,7 @@ int ERM_AICrExp(char Cmd,int Num,_ToDo_*sp,Mes *Mp)
 			CrExpBon::ApplySpell(MonPos(-Type-1),0);
 			break;}
 		case 'E':{
-			if(Type<-BFNUM || Type>=0){ WL_MError3("-wrong creature type index.\nIncorrect value: %d",Type); RETURN(0) }
+			if(Type<-BFNUM || Type>=0){ MError("\"!!EA:E\"-wrong creature type index."); RETURN(0) }
 			CHECK_ParamsMin(4);
 			Type=-Type-1;
 			CrExpo *cr=&CrExpoSet::BFBody[Type];
@@ -4926,7 +4926,7 @@ int ERM_AICrExp(char Cmd,int Num,_ToDo_*sp,Mes *Mp)
 		case 'H': // Human Expo Multiplier
 			v=CrExpoSet::PlayerMult; if(Apply(&v,4,Mp,0)) break; CrExpoSet::PlayerMult=v;
 			break;
-		default: WL_EWrongCommand() RETURN(0)
+		default: EWrongCommand(); RETURN(0)
 	}
 	RETURN(1)
 }

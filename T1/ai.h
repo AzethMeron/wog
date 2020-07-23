@@ -1,3 +1,5 @@
+#pragma once
+
 #include "structs.h"
 struct _AIRun_{
 	char  Used;

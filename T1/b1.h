@@ -1,3 +1,4 @@
+#pragma once
 #include "txtfile.h"
 
 extern int        MapWoG;

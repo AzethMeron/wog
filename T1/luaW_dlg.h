@@ -1,3 +1,6 @@
+#pragma once
+
+
 #include "dlg.h"
 #undef __FILENUM__
 #define __FILENUM__ 24

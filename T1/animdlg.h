@@ -1,3 +1,5 @@
+#pragma once
+
 class AnimDlg{
 	Dword VTable;
 	Byte  Obj[1024];

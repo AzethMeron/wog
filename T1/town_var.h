@@ -1,3 +1,5 @@
+#pragma once
+
 #include "town.h"
 #include "global.h"
 

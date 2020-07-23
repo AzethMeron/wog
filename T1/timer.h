@@ -1,3 +1,5 @@
+#pragma once
+
 struct _TurnTimeStruct_{
 	Dword LastShownTime;
 	Dword StartTimeMain;

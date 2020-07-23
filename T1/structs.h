@@ -1,3 +1,5 @@
+#pragma once
+
 #ifndef ___STRUCTS
 #define ___STRUCTS
 
@@ -10,14 +12,14 @@
 #define  MAX_PATH       260
 
 #define WOG_VERSION 359
-#define WOG_STRING_VERSION "3 . 59 Alpha 8.2\nBuilt on " __DATE__/*""BETAVERSION""*/
+#define WOG_STRING_VERSION "3 . 59 Alpha 8\nBuilt on " __DATE__/*""BETAVERSION""*/
 //#define TE_STRING_VERSION "1 . 03\nBuilt on "__DATE__/*""BETAVERSION""*/
 //#define WOG_VERSION_WIDE "\x33\x0\x2E\x0\x35\x0\x38\x0\x66\x0"
 //#define WOG_VERSION_WIDE "\x33\x0\x2E\x0\x35\x0\x39\x0\x0\x0"
 
 // !release! ERM_VERSION = 300 + major build version. When scripts API changes a new major version must start.
-#define ERM_VERSION 310
-#define ERM_STRING_VERSION "310"/*BETAVERSION""*/
+#define ERM_VERSION 307
+#define ERM_STRING_VERSION "307"/*BETAVERSION""*/
 
 #define SAVEWOGLETTER 'S'
 #define SAVEWOG359    (SAVEWOGLETTER-'A')
@@ -57,7 +59,7 @@
 #define RESNUM_0       6    // станд. кол-во ресурсов (6)
 #define RESNUM         7    // кол. рес. с Мифрилом
 #define MONNUM_0       150  // Do not change!!!
-#define MONNUM         197  //(150+9+1+4+4+5+1+9*2+5) Diakon INCREASE THIS TO MAKE MORE CR
+#define MONNUM         500  //(150+9+1+4+4+5+1+9*2+5) Diakon
 #define MONNUM_OLD     197  // Diakon
 #define GHOSTTYPE     (150+9)   // привидение
 #define GHOSTNUM       5        // количество их генерации
@@ -125,6 +127,7 @@ typedef unsigned long  Dword;
 #define _EBP(X) __asm mov X,ebp
 
 // стандартный формат строки по указателю
+// "standard string format by pointer"
 struct _Mes_{
 	char *s;
 	long  l;  
@@ -156,18 +159,27 @@ enum _ERM_VarTyp_
 };
 
 /////////////////////////////////
-struct VarNum{
-	int  Num; // номер флага, переменной  или число
-	Byte Type; // тип переменной
-// (в случае yv1 это - 6, т.е. y)
-// 0=число, 1=флаг, 2=f...t, 3=v1...1000, 4=w1...100, 5=x1...100, 6=y1...100
-// 7=z-20...1000+,8=e1...e100
-// ******* Not used now: 8=Scope v1...1000, 9=Scope z1...z500
-	Byte IType; // тип индиксирующей переменной
-// indexed (в случае yv1 это - 3, т.е. v)
-// 0=нет, 1=флаг, 2=f...t, 3=v1...1000, 4=w1...100, 5=x1...100, 6=y1...100
-	Byte Check; // тип проверки
-// 0=nothing, 1?, 2=, 3<>, 4>, 5<, 6>=, 7<=
+struct VarNum {
+      // номер флага, переменной  или число
+      // "flag number, variable or number"
+      int Num; 
+
+      // тип переменной
+      // (в случае yv1 это - 6, т.е. y)
+      // "variable type"
+      // "(in case of yv1 this is 6, i.e. y)"
+      // 0=число, 1=flag, 2=f...t, 3=v1...1000, 4=w1...100, 5=x1...100, 6=y1...100, 7=z-20...1000+,8=e1...e100
+      Byte Type;
+
+      // тип индиксирующей переменной
+      // "type of the index variable"
+      // indexed (в случае yv1 это - 3, т.е. v)
+      // 0=нет, 1=флаг, 2=f...t, 3=v1...1000, 4=w1...100, 5=x1...100, 6=y1...100
+      Byte IType;
+
+      // тип проверки
+      // "check type"
+      Byte Check;  // 0=nothing, 1?, 2=, 3<>, 4>, 5<, 6>=, 7<=
 };
 
 ///////////////////////////
@@ -196,17 +208,36 @@ struct _Cmd_{
 	struct _ToDo_ ToDo[1];
 };
 
+
 struct Mes{
-	long  i;    // первым для быстрого доступа
-	_Mes_ m;
-//  VarNum Efl [16][2];
-//  VarNum Ofl [16][2];      // до 16 флагов зависимости |
-	VarNum Efl[2][16][2];      // до 16 флагов зависимости & и |
-	VarNum VarI[16]; // сами параметры
-	char  c[16]; // вроде, используется только при парсинге
-	char  f[16]; // 1, если использован d синтаксис
-	int   n[16];
-	// строки ^^ обрабатываются не так как все. Они всегда стоят в конце и берутся по m.c[i] и далее
+    // первым для быстрого доступа 
+    // "first for quick access"
+    long  i;    
+    
+	// Receiver might have 1 string in parameters
+    _Mes_ m;
+    
+	//  VarNum Efl [16][2];
+	//  VarNum Ofl [16][2];      // до 16 флагов зависимости |
+	
+    // "up to 16 dependency flags | and &"
+    VarNum Efl[2][16][2];      // до 16 флагов зависимости & и |
+
+    // сами параметры 
+    // "parameters themselves"
+    VarNum VarI[16]; 
+    
+    // вроде, используется только при парсинге
+    //  "seems to be used only for parsing"
+    char  c[16]; 
+    
+    // 1, если использован d синтаксис 
+    // "1 if d syntax is used"
+    char  f[16]; 
+    
+    // строки ^^ обрабатываются не так как все. Они всегда стоят в конце и берутся по m.c[i] и далее
+    // " ^^ lines are processed differently. They always stand at the end and are taken by m.c [i] and further"
+    int   n[16]; 
 };
 
 struct _ZPrintf_{

@@ -1,5 +1,5 @@
 // LuaCall (light version) by Sergey Rozhenko
-
+#pragma once
 #ifndef LuaCall_h
 #define LuaCall_h
 

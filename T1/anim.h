@@ -1,3 +1,5 @@
+#pragma once
+
 // режим
 #define OAM_NOTHING 0
 // 0-ничего не менять

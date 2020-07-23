@@ -1,3 +1,5 @@
+#pragma once
+
 #ifndef _LOGMANAGER_H_
 #define _LOGMANAGER_H_
 

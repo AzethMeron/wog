@@ -272,7 +272,7 @@ int __fastcall GetAIMapPosValue(int val, _Hero_ *hp, int *dist, int baseDist, in
 	ERM_GM_ai = IsThis(hp->Owner);
 	ERM_HeroStr = hp;
 	MixedPos(&ERM_PosX, &ERM_PosY, &ERM_PosL, mixPo);
-	pointer = WL_FUNC_COUNT+377;
+	pointer = 30377;
 	ProcessERM();
 
 	AIstruct = old;
@@ -287,13 +287,13 @@ int ERM_AIRun(char Cmd,int Num,_ToDo_* /*sp*/,Mes *Mp)
 	int   h,o,n,ind,chk,x,y,l;
 	Dword mixpos,AIval;
 	Word  flags;
-	if(Cmd != 'S' && Cmd != 'D' && AIstruct == 0) { WL_MError2("not in !?AI trigger"); RETURN(0) }
+	if(Cmd != 'S' && Cmd != 'D' && AIstruct == 0) { MError2("not in !?AI trigger"); RETURN(0) }
 	switch(Cmd){
 		case 'S': // S#герой/#хоз€ин/#номер/$x/$y/$l/$значимость/$флаги
 			CHECK_ParamsMin(8);
-			if(Apply(&h,4,Mp,0)){ WL_MError2("-cannot get or check hero."); RETURN(0) }
-			if(Apply(&o,4,Mp,1)){ WL_MError2("-cannot get or check owner."); RETURN(0) }
-			if(Apply(&n,4,Mp,2)){ WL_MError2("-cannot get or check number."); RETURN(0) }
+			if(Apply(&h,4,Mp,0)){ MError("\"!!AI:S\"-cannot get or check hero."); RETURN(0) }
+			if(Apply(&o,4,Mp,1)){ MError("\"!!AI:S\"-cannot get or check owner."); RETURN(0) }
+			if(Apply(&n,4,Mp,2)){ MError("\"!!AI:S\"-cannot get or check number."); RETURN(0) }
 			ind=AIRGetThis((short)h,(short)o,(short)n);
 			if(ind<0){ // нет такого
 				/*mixpos=-1;*/ x=-1; y=-1; l=0;
@@ -322,9 +322,9 @@ int ERM_AIRun(char Cmd,int Num,_ToDo_* /*sp*/,Mes *Mp)
 			break;
 		case 'D': // D#герой/#хоз€ин/#номер
 			CHECK_ParamsMin(3);
-			if(Apply(&h,4,Mp,0)){ WL_MError2("-cannot get or check hero."); RETURN(0) }
-			if(Apply(&o,4,Mp,1)){ WL_MError2("-cannot get or check owner."); RETURN(0) }
-			if(Apply(&n,4,Mp,2)){ WL_MError2("-cannot get or check number."); RETURN(0) }
+			if(Apply(&h,4,Mp,0)){ MError("\"!!AI:D\"-cannot get or check hero."); RETURN(0) }
+			if(Apply(&o,4,Mp,1)){ MError("\"!!AI:D\"-cannot get or check owner."); RETURN(0) }
+			if(Apply(&n,4,Mp,2)){ MError("\"!!AI:D\"-cannot get or check number."); RETURN(0) }
 			if(n<1) AIRDelAll((short)h,(short)o);
 			else    AIRDelThis((short)h,(short)o,(short)n);
 			break;
@@ -342,7 +342,7 @@ int ERM_AIRun(char Cmd,int Num,_ToDo_* /*sp*/,Mes *Mp)
 			else
 				Apply(AIstruct->Dist, 4, Mp, 0);
 			break;
-		default: WL_EWrongCommand() RETURN(0)
+		default: EWrongCommand(); RETURN(0)
 	}
 	RETURN(1)
 }

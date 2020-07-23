@@ -1,3 +1,5 @@
+#pragma once
+
 class String{
 	int   Ind;
 	char *Text;

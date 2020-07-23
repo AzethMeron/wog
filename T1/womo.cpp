@@ -390,7 +390,7 @@ int WoMoPlace(int x,int y,int l,int subtype)
 	WO_mo.HasSetUp=0;
 	stpword=*(Dword *)&WO_mo;
 	ret=AddWM(x,y,l);
-	if(ret==-1){ WL_MError("WoMoPlace: Cannot add more Wandering Monsters"); RETURN(-1) }
+	if(ret==-1){ MError("WoMoPlace: Cannot add more Wandering Monsters"); RETURN(-1) }
 	_PlaceObject(x,y,l,54,subtype,-1,stpword);
 	CoorectMonsterRadius();
 	RETURN(ret)
@@ -481,13 +481,13 @@ int WoMoMove(int ind)
 //  _CMonster_ *SMp;
 	_MapItem_ *MIp;
 	_WoMo_ *wmp=&WoMo[ind];
-	if(wmp->ToDo==WMO_NOTUSED){ WL_MError("WoMoMove: Try to move not a Wandering Monster"); RETURN(-2) }
+	if(wmp->ToDo==WMO_NOTUSED){ MError("WoMoMove: Try to move not a Wandering Monster"); RETURN(-2) }
 	x0=wmp->x; y0=wmp->y; l0=wmp->l; x1=wmp->new_x; y1=wmp->new_y; l1=wmp->new_l;
 	MIp=GetMapItem(x0,y0,l0);
 	subtype=MIp->OSType;
 	stpword=MIp->SetUp;
 //asm int 3
-	if(MIp->OType!=54){ WL_MError("WoMoMove: Not a monster."); RETURN(-2) }
+	if(MIp->OType!=54){ MError("WoMoMove: Not a monster."); RETURN(-2) }
 //  int poind=FindWoMoPosition(x0,y0,l0); if(poind==-1) return -1;
 	int poind=MIp->DrawNum; //if(poind==-1) return -1;
 //  if(EmptyPlace(GetMapItem(x1,y1,l1))==0) return -1;
@@ -518,7 +518,7 @@ int WoMoMove(int ind)
 	PlaceWoMoInternal(subtype,Lind,po);
 	MIp=GetMapItem(x1,y1,l1);
 //  if(MIp->SetUp==0xFFFFFFFF) return -1;
-	if(MIp->OType!=54){ WL_MError("WoMoMove: Monster was not placed at the new position."); RETURN(-2) }
+	if(MIp->OType!=54){ MError("WoMoMove: Monster was not placed at the new position."); RETURN(-2) }
 	MIp->SetUp=stpword;
 // 3.58 leave agression as is
 //  SMp=(_CMonster_ *)MIp;
@@ -536,7 +536,7 @@ int MakeWoMoPos(_MapItem_  *MIp,int YESno)
 	Map2Coord(MIp,&x,&y,&l);
 	if(YESno){
 		ret=AddWM(x,y,l);
-		if(ret==-1){ WL_MError("MakeWoMoPos: Cannot add more Wandering Monsters"); RETURN(-1) }
+		if(ret==-1){ MError("MakeWoMoPos: Cannot add more Wandering Monsters"); RETURN(-1) }
 	}else{
 		ret=DelWM(x,y,l);
 	}
@@ -603,7 +603,7 @@ void CallWMKilled(int moind)
 	STARTNA(__LINE__, 0)
 	ERM_GM_ai=-1;
 	ERMVar2[996]=moind+1;
-	pointer=WL_FUNC_COUNT+306;
+	pointer=30306;
 	ProcessERM();
 	RETURNV
 }
@@ -612,7 +612,7 @@ void CallWMDest(int moind)
 	STARTNA(__LINE__, 0)
 	ERM_GM_ai=-1;
 	ERMVar2[996]=moind+1;
-	pointer=WL_FUNC_COUNT+305;
+	pointer=30305;
 	ProcessERM();
 	RETURNV
 }
@@ -807,8 +807,8 @@ void CompleteWoMo(int player)
 						Mn=SMp->Number;
 						if(SMp->HasSetUp){
 							mn=SMp->SetUpInd;
-							if(mn>GetMonsterNum()){ WL_MError("AutoWoMo: cannot find monster by num (internal)."); continue; }
-							MEp=GetMonsterBase(); if(MEp==0){ WL_MError("AutoWoMo: cannot find monster base(internal)."); continue; }
+							if(mn>GetMonsterNum()){ MError("AutoWoMo: cannot find monster by num (internal)."); continue; }
+							MEp=GetMonsterBase(); if(MEp==0){ MError("AutoWoMo: cannot find monster base(internal)."); continue; }
 							MEp=&MEp[mn];
 						}else MEp=0;
 						Mt=MIp->OSType;
@@ -963,7 +963,7 @@ int ERM_WMon(char Cmd,int Num,_ToDo_*sp,Mes *Mp)
 			break;
 		case 'E': // E?exist проверка на существование
 			wm=GetVarVal(vnp);
-			if((wm<1)||(wm>WOMONUM)){ WL_MError3("-Wandering Monster out of range (1...1000).\nIncorrect value: %d",wm); RETURN(0) }
+			if((wm<1)||(wm>WOMONUM)){ MError("\"!!MW:A\"-WM out of range (1...1000)."); RETURN(0) }
 			wmp=&WoMo[wm-1];
 			if(wmp->ToDo==WMO_NOTUSED) v=0; else v=1;
 			Apply(&v,4,Mp,0);
@@ -971,9 +971,9 @@ int ERM_WMon(char Cmd,int Num,_ToDo_*sp,Mes *Mp)
 		case 'A': // A#/par атрибуты
 			CHECK_ParamsMin(2);
 			wm=GetVarVal(vnp);
-			if((wm<1)||(wm>WOMONUM)){ WL_MError3("-Wandering Monster out of range (1...1000).\nIncorrect value: %d",wm); RETURN(0) }
+			if((wm<1)||(wm>WOMONUM)){ MError("\"!!MW:A\"-WM out of range (1...1000)."); RETURN(0) }
 			wmp=&WoMo[wm-1];
-			if(wmp->ToDo==WMO_NOTUSED){ WL_MError2("-WM is not exist."); RETURN(0) }
+			if(wmp->ToDo==WMO_NOTUSED){ MError("\"!!MW:A\"-WM is not exist."); RETURN(0) }
 			t=0; Apply(&t,4,Mp,0);
 			switch(t){
 				case 1: // позиция x/y/l
@@ -1017,11 +1017,11 @@ int ERM_WMon(char Cmd,int Num,_ToDo_*sp,Mes *Mp)
 					v=wmp->Radius; if(Apply(&v,4,Mp,1)==0) wmp->Radius=(Byte)v;
 					break;
 				default:
-					WL_MError2("-unrecognised command type."); RETURN(0)
+					MError("\"!!MW:A\"-Anknown command type."); RETURN(0)
 			}
 			break;
 		default:
-			WL_EWrongCommand();
+			EWrongCommand();
 			RETURN(0)
 	}
 	RETURN(1)

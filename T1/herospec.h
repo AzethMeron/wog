@@ -1,3 +1,5 @@
+#pragma once
+
 #include "structs.h"
 struct _HeroSpecCus_{
 	int   Used;

@@ -152,6 +152,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\RepeatableBattle.cpp"
+				>
+			</File>
+			<File
 				RelativePath="..\\RSMem.cpp"
 				>
 			</File>
@@ -199,6 +203,10 @@
 			</File>
 			<File
 				RelativePath="..\\luaW_dlg.h"
+				>
+			</File>
+			<File
+				RelativePath=".\RepeatableBattle.h"
 				>
 			</File>
 			<File

@@ -15,6 +15,7 @@
 #include "monsters.h"
 #include "global.h"
 #include "string.h"
+#include "NewWoG/RepeatableBattle.h"
 #define __FILENUM__ 6
 
 //static Byte *BACall_Mon=0;
@@ -62,7 +63,7 @@ int ERM_MonAtr(char Cmd,int Num,_ToDo_*,Mes *Mp)
 		case 'C': // Цена C#/#/$ по номерам ресурсов (0...6)
 			CHECK_ParamsNum(3);
 			l=Mp->n[1];  // номер ресурса
-			if((l<0)||(l>6)) { WL_MError3("resource index out of bounds (0...6)\nIncorrect value: %d", l); RETURN(0)}
+			if((l<0)||(l>6)) { MError2("resource index out of bounds (0...6)"); RETURN(0)}
 			if(Apply(&MonTable[k].CostRes[l],4,Mp,2)) break;
 			CrIsChanged(k);
 			break;
@@ -1779,7 +1780,7 @@ Found:;
 			Arts=MonArrTmp[3].Cn[i]/16;
 			if((t!=-1)&&(n!=0)){
 				cr=CrExpoSet::FindEmpty();
-				if(cr==0){ WL_MError("No more rooms in experience system"); RETURNV }
+				if(cr==0){ MError("No more rooms in experience system"); RETURNV }
 				cr->SetN(CE_HERO,MAKEHS(id,i),t,n,Expo/n,Arts);
 			}
 		}
@@ -1885,7 +1886,7 @@ void _M2MHero2TownAutoWoG(void)
 				CrExpoSet::Del(CE_TOWN,MAKETS(x,y,l,j)); CrExpoSet::Del(CE_HERO,MAKEHS(id,i));
 				val=Expo*n+Expo2*n2; n+=n2; if(n<=0) n=1; Expo=val/n; Arts+=Arts2;
 				cr=CrExpoSet::FindEmpty();
-				if(cr==0){ WL_MError("No more rooms in experience system"); RETURNV }
+				if(cr==0){ MError("No more rooms in experience system"); RETURNV }
 				cr->SetN(CE_HERO,MAKEHS(id,i),t,n,Expo,Arts);
 				hp->Cn[i]+=cst->GuardsN[j]; cst->GuardsT[j]=0xFFFFFFFF; cst->GuardsN[j]=0;
 			}
@@ -1950,7 +1951,7 @@ L_Added:;
 		}
 		if(hp->Cn[i]==0) continue;
 		cr=CrExpoSet::FindEmpty();
-		if(cr==0){ WL_MError("No more rooms in experience system"); RETURNV }
+		if(cr==0){ MError("No more rooms in experience system"); RETURNV }
 		cr->SetN(CE_HERO,MAKEHS(id,i),t2,Arr[m][1],Arr[m][2],Arr[m][3]);
 		Arr[m][4]=0;
 	}
@@ -2299,6 +2300,7 @@ int __stdcall Get2Battle(Dword MixedPos,_Hero_ *HrA,_MonArr_ *MArrA,
 	__asm  pusha
 	ExpoFromBattle=1;
 	CheckForCompleteAI();
+	PreBattle(MixedPos, HrA, MArrA, OwnerD, Pv4, HrD, MArrD, Pv3, Pv2, Pv1);
 	G2B_Prepare();
 	__asm  popa
 	if(G2B_EnableBattle==0){
@@ -3204,7 +3206,7 @@ int ERM_MAction(char Cmd,int Num,_ToDo_* /*sp*/,Mes *Mp)
 	char *bh;
 	STARTNA(__LINE__,&Mp->m.s[Mp->i])
 	if(G2B_CompleteAI){
-		WL_MError("ERROR! Attempt to use \"!!BG\" in non-human battle (use flag 1000 for checking)."); RETURN(0)
+		MError("ERROR! Attempt to use \"!!BG\" in non-human battle (use flag 1000 for checking)."); RETURN(0)
 	}
 	bm = combatManager;
 	switch(Cmd){
@@ -3245,27 +3247,27 @@ int ERM_MAction(char Cmd,int Num,_ToDo_* /*sp*/,Mes *Mp)
 			CHECK_ParamsNum(1);
 			v=M2B_GetMonNum(bm);
 			if(Apply(&v,4,Mp,0)) break;
-			if(v < 0 || v > 41){ WL_MError3("incorrect stack index.\nIncorrect value: %d",v); RETURN(0) }
+			if(v < 0 || v > 41){ MError2("incorrect stack index."); RETURN(0) }
 			CombatMan_SetCurrentMon(combatManager, (v > 20) ? 1 : 0, v % 21);
 			break;
 		case 'V':{ // 3.59 V$stack/$varind/$varval
 			CHECK_ParamsMin(3);
 			int ind=0,st=0;
-			Apply(&st,4,Mp,0);  if(st <0 || st >99){ WL_MError3("incorrect stack index.\nIncorrect value: %d",st); RETURN(0) }
-			Apply(&ind,4,Mp,1); if(ind<0 || ind>99){ WL_MError3("incorrect value index.\nIncorrect value: %d",ind); RETURN(0) }
+			Apply(&st,4,Mp,0);  if(st <0 || st >99){ MError("\"!!BG:V\"-incorrect stack index."); RETURN(0) }
+			Apply(&ind,4,Mp,1); if(ind<0 || ind>99){ MError("\"!!BG:V\"-incorrect value index."); RETURN(0) }
 			Apply(&Tmp_BtlStackVars[st][ind],4,Mp,2);
 			break;}
 		case 'C':{ // 3.59 C or C$stack - clean up all or stack vars
 			CHECK_ParamsNum(1);
 			int st=0;
-			Apply(&st,4,Mp,0);  if(st <-1 || st >99){ WL_MError3("incorrect stack index.\nIncorrect value: %d",st); RETURN(0) }
+			Apply(&st,4,Mp,0);  if(st <-1 || st >99){ MError("\"!!BG:C\"-incorrect stack index."); RETURN(0) }
 			if(st==-1){
 				memset(Tmp_BtlStackVars,0,sizeof(Tmp_BtlStackVars));
 			}else{
 				memset(Tmp_BtlStackVars[st],0,sizeof(Tmp_BtlStackVars[0]));
 			}
 			break;}
-		default: WL_EWrongCommand(); RETURN(0)
+		default: EWrongCommand(); RETURN(0)
 	}
 	RETURN(1)
 }
@@ -3603,7 +3605,7 @@ Byte AIMagicJumper[MONNUM-13]={
 /*160*/ 0x03, 0x03, 0x03, 0x03, 0x03, 0x03, 0x03, 0x03, 0x03, 0x03,
 /*170*/ 0x03, 0x03, 0x03, 0x02, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01,
 /*180*/ 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01,
-/*190*/ 0x01, 0x01, 0x03, 0x03, 0x03, 0x03, 0x03//, 0x03, 0x03, 0x03,
+/*190*/ 0x01, 0x01, 0x03, 0x03, 0x03, 0x03, 0x03, 0x03, 0x03, 0x03,
 };
 
 int AIJmpAdr [] = {0x421484, 0x42149F, 0x4214BA, 0x4214D5, (int)&AICastMagic};
@@ -3882,7 +3884,7 @@ Byte MoJumper1[MONNUM-13]={ // Diakon
 /*160*/ 0x08, 0x08, 0x08, 0x08, 0x08, 0x08, 0x08, 0x08, 0x08, 0x08,
 /*170*/ 0x08, 0x08, 0x08, 0x07, 0x07, 0x07, 0x07, 0x07, 0x07, 0x07,
 /*180*/ 0x07, 0x07, 0x07, 0x07, 0x07, 0x07, 0x07, 0x07, 0x07, 0x07,
-/*190*/ 0x07, 0x07, 0x08, 0x08, 0x08, 0x08, 0x08//, 0x08, 0x08, 0x08,
+/*190*/ 0x07, 0x07, 0x08, 0x08, 0x08, 0x08, 0x08, 0x08, 0x08, 0x08,
 };
 
 int MoJmpAdr1[]={//Diakon
@@ -3902,7 +3904,7 @@ Byte MagHint [MONNUM-13]={
 	/*141*/0x09, 0x09, 0x09, 0x09, 0x09, 0x09, 0x09, 0x09, 0x09, 0x09, 0x09, 0x09, 0x09, 0x09, 0x09, 0x09,
 	/*157*/0x09, 0x09, 0x09, 0x09, 0x09, 0x09, 0x09, 0x09, 0x09, 0x09, 0x09, 0x09, 0x09, 0x09, 0x09, 0x09,
 	/*173*/0x09, 0x09, 0x09, 0x09, 0x09, 0x09, 0x09, 0x09, 0x09, 0x09, 0x09, 0x09, 0x09, 0x09, 0x09, 0x09,
-	/*189*/0x09, 0x09, 0x09, 0x09, 0x09, 0x09, 0x09, 0x09//, 0x09, 0x09, 0x09, 0x09, 0x09, 0x09, 0x09, 0x09
+	/*189*/0x09, 0x09, 0x09, 0x09, 0x09, 0x09, 0x09, 0x09, 0x09, 0x09, 0x09, 0x09, 0x09, 0x09, 0x09, 0x09
 };
 
 int MagHintJmp[]={0x492A6E, 0x492AAB, 0x492AF6, 0x492CE5, 0x492C03, 0x492C91, 0x492BC9,
@@ -3929,7 +3931,7 @@ Byte MoJumper2[MONNUM-13]={
 /*160*/ 0x09, 0x09, 0x09, 0x09, 0x09, 0x09, 0x09, 0x09, 0x09, 0x09,
 /*170*/ 0x09, 0x09, 0x09, 0x08, 0x08, 0x08, 0x08, 0x08, 0x08, 0x08,
 /*180*/ 0x08, 0x08, 0x08, 0x08, 0x08, 0x08, 0x08, 0x08, 0x08, 0x08,
-/*190*/ 0x08, 0x08, 0x09, 0x09, 0x09, 0x09, 0x09//, 0x09, 0x09, 0x09,
+/*190*/ 0x08, 0x08, 0x09, 0x09, 0x09, 0x09, 0x09, 0x09, 0x09, 0x09,
 }; // таблица переходов 448460
 
 int MagJmp [] = {0x44826A, 0x448351, 0x448308, 0x4483C4, 0x448394, 
@@ -4410,13 +4412,13 @@ int ERM_MonRes(char Cmd,int/*Num*/,_ToDo_* /*sp*/,Mes *Mp) //!!MR
 	STARTNA(__LINE__,&Mp->m.s[Mp->i])
 	int v;
 	if(MR_Trigger==0){
-		WL_MError("ERROR! Attempt to call \"!!MR\" not in !?MR section.");
+		MError("ERROR! Attempt to call \"!!MR\" not in !?MR section.");
 		RETURN(0)
 	}
 	switch(Cmd){
 		case 'N': // номер монстра (0...41)
 			if(G2B_CompleteAI){
-				WL_MError("ERROR! Attempt to use \"!!MR:N\" in non-human battle (use flag 1000 for checking).");
+				MError("ERROR! Attempt to use \"!!MR:N\" in non-human battle (use flag 1000 for checking).");
 				RETURN(0)
 			}
 			v = *((int*)0x699420) + 0x54CC; // the first monster address
@@ -4432,7 +4434,7 @@ int ERM_MonRes(char Cmd,int/*Num*/,_ToDo_* /*sp*/,Mes *Mp) //!!MR
 			Apply(&MR_Dam,4,Mp,0); break;
 		case 'F': // конечный урон
 			Apply(&MR_Ret,4,Mp,0); break;
-		default: WL_EWrongCommand(); RETURN(0)
+		default: EWrongCommand(); RETURN(0)
 	}
 	RETURN(1)
 }
@@ -5347,13 +5349,13 @@ int ERM_BRound(char Cmd,int Num,_ToDo_*sp,Mes *Mp) //!!BM
 	Byte *bm,*mon,*tmon;
 	STARTNA(__LINE__,&Mp->m.s[Mp->i])
 	if(G2B_CompleteAI){
-		WL_MError("ERROR! Attempt to use \"!!BM\" in non-human battle (use flag 1000 for checking).");
+		MError("ERROR! Attempt to use \"!!BM\" in non-human battle (use flag 1000 for checking).");
 		RETURN(0)
 	}
 	int mn=GetVarVal(&sp->Par[0]);
 	//  if(Num<2){ MError("\"!!BR:\"-wrong syntax."); return 0; }
 	if((mn<-1)||(mn>41)){
-		WL_MError3("monster index is incorrect (-1, 0...41).\nIncorrect value: %d",mn);
+		MError("\"!!BM:\"-monster index is incorrect (-1, 0...41).");
 		RETURN(0)
 	}
 	bm = combatManager;
@@ -5403,14 +5405,14 @@ int ERM_BRound(char Cmd,int Num,_ToDo_*sp,Mes *Mp) //!!BM
 					Apply((int *)&mon[0x28],4,Mp,1); 
 					break;
 				default:
-					WL_EWrongSyntax(); RETURN(0)
+					EWrongSyntax(); RETURN(0)
 			}
 			break;
 		case 'G':
 			CHECK_ParamsMin(3);
-			if(Apply(&Spell,4,Mp,0)){ WL_MError2("par 1 may be set only."); RETURN(0) }
+			if(Apply(&Spell,4,Mp,0)){ MError("\"!!BM:G\"-par 1 may be set only."); RETURN(0) }
 			//  Но то, что проверки нет, уже используется в скриптах
-			if(Spell*4+0x198 < 0 || Spell*4+0x198 >= 0x548){ WL_MError3("spell index is incorrect.\nIncorrect value: %d",Spell); RETURN(0) }
+			if(Spell*4+0x198 < 0 || Spell*4+0x198 >= 0x548){ MError("\"!!BM:G\"-spell index is incorrect."); RETURN(0) }
 			val = *(int*)&mon[Spell*4+0x198]; // last duration
 			Apply((int *)&mon[Spell*4+0x198],4,Mp,1); // длительность
 			if (Spell*4+0x2DC >= 0x548) break; // Использование в качестве хака для получения/изменения параметров монстра
@@ -5430,11 +5432,11 @@ int ERM_BRound(char Cmd,int Num,_ToDo_*sp,Mes *Mp) //!!BM
 			break;
 		case 'C': // Cspell/pos/Mskill/HSkill/Check4TargetMonster
 			CHECK_ParamsMin(5);
-			if(Apply(&Spell,4,Mp,0)){ WL_MError2("par 1 may be set only."); RETURN(0) }
-			if(Apply(&Pos,4,Mp,1))  { WL_MError2("par 2 may be set only."); RETURN(0) }
-			if(Apply(&MSkill,4,Mp,2)) { WL_MError2("par 3 may be set only."); RETURN(0) }
-			if(Apply(&HSkill,4,Mp,3)) { WL_MError2("par 4 may be set only."); RETURN(0) }
-			if(Apply(&Check,4,Mp,4)) { WL_MError2("par 5 may be set only."); RETURN(0) }
+			if(Apply(&Spell,4,Mp,0)){ MError("\"!!BM:C\"-par 1 may be set only."); RETURN(0) }
+			if(Apply(&Pos,4,Mp,1))  { MError("\"!!BM:C\"-par 2 may be set only."); RETURN(0) }
+			if(Apply(&MSkill,4,Mp,2)) { MError("\"!!BM:C\"-par 3 may be set only."); RETURN(0) }
+			if(Apply(&HSkill,4,Mp,3)) { MError("\"!!BM:C\"-par 4 may be set only."); RETURN(0) }
+			if(Apply(&Check,4,Mp,4)) { MError("\"!!BM:C\"-par 5 may be set only."); RETURN(0) }
 			if((*(int *)&mon[0x4C])==0) break; // монстр уже убит
 			if(Check){ // если надо проверять
 				for(i=0,st=-1;i<(21*2);i++){
@@ -5506,7 +5508,7 @@ int ERM_BRound(char Cmd,int Num,_ToDo_*sp,Mes *Mp) //!!BM
 				case 0: QuickSand(1,mn,Pos,Redraw); break;
 				case 1: LandMine(1,mn,Pos,Redraw); break;
 				default:
-					WL_EWrongSyntax(); RETURN(0)
+					EWrongSyntax(); RETURN(0)
 			}
 			break;
 		case 'V': //V# -animate magic # 3.58
@@ -5532,7 +5534,7 @@ int ERM_BRound(char Cmd,int Num,_ToDo_*sp,Mes *Mp) //!!BM
 				PlayAnimation(bm, mon, Mp->n[0], (Num == 2 ? Mp->n[1] : 0));
 			}
 			break;
-		default: WL_EWrongCommand(); RETURN(0)
+		default: EWrongCommand(); RETURN(0)
 	}
 	RETURN(1)
 }
@@ -5544,12 +5546,12 @@ int ERM_BHero(char Cmd,int Num,_ToDo_*sp,Mes *Mp)
 	Byte *bm,*tmon;
 	STARTNA(__LINE__,&Mp->m.s[Mp->i])
 	if(G2B_CompleteAI){
-		WL_MError("ERROR! Attempt to use \"!!BH\" in non-human battle (use flag 1000 for checking).");
+		MError("ERROR! Attempt to use \"!!BH\" in non-human battle (use flag 1000 for checking).");
 		RETURN(0)
 	}
 	int hn=GetVarVal(&sp->Par[0]);
 	if((hn<0)||(hn>1)){
-		WL_MError3("hero side index is incorrect (0...1).\nIncorrect value: %d",hn);
+		MError("\"!!BH:\"-hero side index is incorrect (0...1).");
 		RETURN(0)
 	}
 	__asm{
@@ -5598,11 +5600,11 @@ int ERM_BHero(char Cmd,int Num,_ToDo_*sp,Mes *Mp)
 			switch(v){
 				case 0: QuickSand(0,hn,Pos,Redraw); break;
 				case 1: LandMine(0,hn,Pos,Redraw); break;
-				default: WL_EWrongSyntax(); RETURN(0)
+				default: EWrongSyntax(); RETURN(0)
 			}
 			break;
 		default:
-			WL_EWrongCommand();
+			EWrongCommand();
 			RETURN(0)
 	}
 	RETURN(1)
@@ -5615,7 +5617,7 @@ int ERM_BUniversal(char Cmd,int Num,_ToDo_*,Mes *Mp)
 	char *bh;
 	STARTNA(__LINE__,&Mp->m.s[Mp->i])
 	if(G2B_CompleteAI){
-		WL_MError("ERROR! Attempt to use \"!!BU\" in non-human battle (use flag 1000 for checking).");
+		MError("ERROR! Attempt to use \"!!BU\" in non-human battle (use flag 1000 for checking).");
 		RETURN(0)
 	}
 	__asm{
@@ -5629,10 +5631,10 @@ int ERM_BUniversal(char Cmd,int Num,_ToDo_*,Mes *Mp)
 			int sind;
 			char *txtp;
 			CHECK_ParamsNum(1);
-			if(Mp->VarI[0].Type!=7){ WL_MError2("not a Z variable."); RETURN(0) }
+			if(Mp->VarI[0].Type!=7){ MError("\"!!BU:\"- not a Z variable."); RETURN(0) }
 			sind=GetVarVal(&Mp->VarI[0]);
-			if(BAD_INDEX_LZ(sind)||(sind>1000)){ WL_MError3("wrong z (destination) index (-20...-1,1...1000).\nIncorrect value: %d", sind); RETURN(0) }
-			if(Mp->VarI[0].Check!=0){ WL_MError2("can use only set syntax."); RETURN(0) }
+			if(BAD_INDEX_LZ(sind)||(sind>1000)){ MError("\"!!BU:\"-wrong z (destination) index (-20...-1,1...1000)."); RETURN(0) }
+			if(Mp->VarI[0].Check!=0){ MError("\"!!BU:\"- can use only set syntax."); RETURN(0) }
 			if(sind>0) txtp=ERMString[sind-1];
 			else       txtp=ERMLString[-sind-1];
 			__asm{
@@ -5652,7 +5654,7 @@ int ERM_BUniversal(char Cmd,int Num,_ToDo_*,Mes *Mp)
 			CHECK_ParamsMin(2);
 			if(Apply(&v,4,Mp,0)) break;
 			bh=(char *)GetHexStr(v);
-			if(bh==0){ WL_MError2("incorrect hex number."); RETURN(0) }
+			if(bh==0){ MError("\"!!BU:E\"-incorrect hex number."); RETURN(0) }
 			if(bh[0x18]==-1){ // нет живого стека
 				st=-1;
 			}else{
@@ -5664,7 +5666,7 @@ int ERM_BUniversal(char Cmd,int Num,_ToDo_*,Mes *Mp)
 			CHECK_ParamsMin(2);
 			if(Apply(&v,4,Mp,0)) break;
 			bh=(char *)GetHexStr(v);
-			if(bh==0){ WL_MError2("incorrect hex number."); RETURN(0) }
+			if(bh==0){ MError("\"!!BU:D\"-incorrect hex number."); RETURN(0) }
 			if(bh[0x18]==-1){ // нет живого стека
 //        if((bh[0x10]&2)==0){ // не припятствие
 				v=bh[0x1C]-1;
@@ -5678,7 +5680,7 @@ int ERM_BUniversal(char Cmd,int Num,_ToDo_*,Mes *Mp)
 			CHECK_ParamsMin(2);
 			if(Apply(&v,4,Mp,0)) break;
 			bh=(char *)GetHexStr(v);
-			if(bh==0){ WL_MError2("incorrect hex number."); RETURN(0) }
+			if(bh==0){ MError("\"!!BU:O\"-incorrect hex number."); RETURN(0) }
 /*
 			if(bh[0x10]&2){ // припятствие
 				st=1;
@@ -5720,7 +5722,7 @@ int ERM_BUniversal(char Cmd,int Num,_ToDo_*,Mes *Mp)
 			}
 			break;
 		default:
-			WL_EWrongCommand();
+			EWrongCommand();
 			RETURN(0)
 	}
 	RETURN(1)
@@ -6377,7 +6379,7 @@ int LoadMapMon(int ver)
 	int i,MonNum;
 	char buf[4]; if(Loader(buf,4)) RETURN(1)
 	if(buf[0]!='L'||buf[1]!='M'||buf[2]!='M'||buf[3]!='N')
-			{WL_MError("LoadMapMon cannot start loading"); RETURN(1)}
+			{MError("LoadMapMon cannot start loading"); RETURN(1)}
 	if(Loader(MonMapInfo,sizeof(MonMapInfo))) RETURN(1)
 //__asm int 3 
 //MonMapInfo[0].Owner=MonMapInfo[1].Owner;
@@ -6521,7 +6523,7 @@ int ERM_BattleField(char Cmd,int Num,_ToDo_*,Mes *Mp)
 	Byte *bh;
 	STARTNA(__LINE__,&Mp->m.s[Mp->i])
 	if(G2B_CompleteAI){
-		WL_MError("ERROR! Attempt to use \"!!BF\" in non-human battle (use flag 1000 for checking).");
+		MError("ERROR! Attempt to use \"!!BF\" in non-human battle (use flag 1000 for checking).");
 		RETURN(0)
 	}
 	switch(Cmd){
@@ -6530,11 +6532,11 @@ int ERM_BattleField(char Cmd,int Num,_ToDo_*,Mes *Mp)
 			break;
 		case 'O': // Oposition/object - поместить
 			CHECK_ParamsMin(2);
-			if(Apply(&v,4,Mp,0)){ WL_MError2("cannot be got or checked."); RETURN(0) }
-			if(Apply(&t,4,Mp,1)){ WL_MError2("cannot be got or checked."); RETURN(0) }
+			if(Apply(&v,4,Mp,0)){ MError("\"!!BF:O\"-cannot be got or checked."); RETURN(0) }
+			if(Apply(&t,4,Mp,1)){ MError("\"!!BF:O\"-cannot be got or checked."); RETURN(0) }
 			if(v==-1){ // просто непроходимая клетка
 				bh=GetHexStr(t);
-				if(bh==0){ WL_MError2("wrong position number."); RETURN(0) }
+				if(bh==0){ MError("\"!!BF:O\"-wrong position number."); RETURN(0) }
 				if((bh[0x10]&0x3D)!=0) break; // припятствие
 //        if(bh[0x18]!=0xFF) break; // есть живой стек
 //        if(bh[0x1C]!=0) break; // есть мертвый стэк
@@ -6555,7 +6557,7 @@ int ERM_BattleField(char Cmd,int Num,_ToDo_*,Mes *Mp)
 			BF_Prepare=0;
 			break;
 		default:
-			WL_EWrongCommand();
+			EWrongCommand();
 			RETURN(0)
 	}
 	RETURN(1)
@@ -6571,7 +6573,7 @@ int ERM_Battle(char Cmd,int Num,_ToDo_*,Mes *Mp)
 		case 'H': // H0...1/$ - герой
 			CHECK_ParamsMin(2);
 			ind=Mp->n[0];
-			if((ind<0)||(ind>1)){ WL_MError3("side out of range (0,1).\nIncorrect value: %d",ind); RETURN(0) }
+			if((ind<0)||(ind>1)){ MError("\"!!BA:H\"-side out of range (0,1)."); RETURN(0) }
 			if(ind){ hp=G2B_HrD; }else{ hp=G2B_HrA; }
 			if(hp!=0) val=hp->Number; else val=-2;
 			if(Apply(&val,4,Mp,1)) break;
@@ -6581,10 +6583,10 @@ int ERM_Battle(char Cmd,int Num,_ToDo_*,Mes *Mp)
 			break;
 		case 'M': // M0..1/0...6/type/number - монстры
 			CHECK_ParamsMin(4);
-			ind=Mp->n[0];  if((ind<0)||(ind>1)){ WL_MError3("\"side out of range (0,1).\nIncorrect value: %d",ind); RETURN(0) }
-			slot=Mp->n[1]; if((slot<0)||(slot>6)){ WL_MError3("slot out of range (0...6).\nIncorrect value: %d",slot); RETURN(0) }
+			ind=Mp->n[0];  if((ind<0)||(ind>1)){ MError("\"!!BA:M\"-side out of range (0,1)."); RETURN(0) }
+			slot=Mp->n[1]; if((slot<0)||(slot>6)){ MError("\"!!BA:M\"-slot out of range (0...6)."); RETURN(0) }
 			if(ind) ma=G2B_MArrD; else ma=G2B_MArrA;
-			if(ma==0){ WL_MError2("mon pointer=0(internal error)."); RETURN(0) }
+			if(ma==0){ MError("\"!!BA:M\"-mon pointer=0(internal error)."); RETURN(0) }
 			v=0;
 			if(Apply(&ma->Ct[slot],4,Mp,2)) v=1;
 			if(Apply(&ma->Cn[slot],4,Mp,3)) v=1;
@@ -6654,28 +6656,26 @@ int ERM_Battle(char Cmd,int Num,_ToDo_*,Mes *Mp)
 			Apply(&val,4,Mp,0);
 			break;
 		case 'B': // B# - установить бэкграунд
-			if(Num == 1)
+			if(Num == 1) // Old Syntax
 			{
-				// Old, original syntax
 				v=Mp->n[0];
 				if(v==0){ // копируем строку
 					StrCopy(BFBackGrUDef,255,ERM2String(&Mp->m.s[Mp->i],0,&vv));
 					Mp->i+=vv;
 				}else{
-					if((v<-1)||(v>25)){ WL_MError3("wrong BA background index.\nIncorrect value: %d",v); RETURN(0) }
+					if((v<-1)||(v>25)){ MError("\"!!BA:B\"-wrong BA background index."); RETURN(0) }
 				}
 				BF_BatFieldNum=v;
-			}
-			else if(Num == 2)
+			} 
+			else if(Num == 2) // New syntax
 			{
-				// New syntax, made to use Lua/ERM. 
 				v=0;
 				StrMan::Apply(BFBackGrUDef, Mp, 0, 255);
 				BF_BatFieldNum=v;
 			}
 			else
 			{
-				WL_EWrongSyntax()
+				EWrongParamsNum();
 			}
 			break;
 		case 'Q': // Q$ - 3.58 quick battle (1=yes/0=no)
@@ -6695,7 +6695,7 @@ int ERM_Battle(char Cmd,int Num,_ToDo_*,Mes *Mp)
 			Apply(&val,4,Mp,0);
 			break;
 		default:
-			WL_EWrongCommand();
+			EWrongCommand();
 			RETURN(0)
 	}
 	RETURN(1)
@@ -8675,7 +8675,7 @@ int ERM_MonFeature(char Cmd,int/*Num*/,_ToDo_* /*sp*/,Mes *Mp) //!!MR
 	Byte *bm;
 	STARTNA(__LINE__,&Mp->m.s[Mp->i])
 	if(MF_Trigger==0){
-		WL_MError("ERROR! Attempt to call \"!!MF\" not in !?MF section.");
+		MError("ERROR! Attempt to call \"!!MF\" not in !?MF section.");
 		RETURN(0)
 	}
 	__asm{
@@ -8686,7 +8686,7 @@ int ERM_MonFeature(char Cmd,int/*Num*/,_ToDo_* /*sp*/,Mes *Mp) //!!MR
 	switch(Cmd){
 		case 'N': // номер монстра (0...41)
 			if(MF_Mon==0){
-				WL_MError2("not a monster structure (internal)");
+				MError("\"!!MF:N\": not a monster structure (internal)");
 			}
 //      v=M2B_GetMonNum(MF_Mon);
 			v=-1;
@@ -8713,7 +8713,7 @@ int ERM_MonFeature(char Cmd,int/*Num*/,_ToDo_* /*sp*/,Mes *Mp) //!!MR
 			if(MF_RetAddr==0x465964) v=2;
 			Apply(&v,4,Mp,0); 
 			break;
-		default: WL_EWrongCommand(); RETURN(0)
+		default: EWrongCommand(); RETURN(0)
 	}
 	RETURN(1)
 }
@@ -10187,7 +10187,7 @@ int ERM_NetworkService(char Cmd,int Num,_ToDo_* /*sp*/,Mes *Mp)
 		case 'R': // sync random generator
 		 SyncRGSeed();
 		 break;
-		default: WL_EWrongCommand(); RETURN(0)
+		default: EWrongCommand(); RETURN(0)
 	}
 	RETURN(1)
 }

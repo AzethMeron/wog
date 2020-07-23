@@ -6,8 +6,6 @@
 #include "windows.h"
 #include "LogManager.h"
 #include "erm_lua.h"
-#include "WogLegacy/WLA_Common.hpp"
-
 #define STRINGER( x ) #x
 
 ///////////////////////////////
@@ -112,16 +110,19 @@ void Town2Hero0(_CastleSetup_ *CStr);
 //void Terminate(char *Mes);
 void Terminate(char *File,int Line);
 #define Exit() Terminate(__FILE__,__LINE__)
-// !! - don't use those, use WL_MError instead
 #define Error() _Error(__FILENUM__,__LINE__)
 #define MError(X) _MError(__FILENUM__,__LINE__,X)
 #define MError2(X) _MError(__FILENUM__,__LINE__,Format("\"%s\"-%s", ErrorCmd.Name, X))
-// !!
 #define TError(X) _TError(__FILENUM__,__LINE__,X)
 
-#define CHECK_ParamsNum(n) if(Num!=n) { WL_EWrongParamsNum(Num,"equal",n); RETURN(0) }
-#define CHECK_ParamsMax(n) if(Num>n) { WL_EWrongParamsNum(Num,"maximum ",n); RETURN(0) }
-#define CHECK_ParamsMin(n) if(Num<n) { WL_EWrongParamsNum(Num,"minimum",n); RETURN(0) }
+#define EWrongCommand() MError2("unknown command.")
+#define EWrongSyntax() MError2("wrong syntax.")
+#define EWrongParam() MError2("invalid parameter value.")
+#define EWrongParamsNum() MError2("wrong number of parameters.")
+
+#define CHECK_ParamsNum(n) if(Num!=n) { EWrongParamsNum(); RETURN(0) }
+#define CHECK_ParamsMax(n) if(Num>n) { EWrongParamsNum(); RETURN(0) }
+#define CHECK_ParamsMin(n) if(Num<n) { EWrongParamsNum(); RETURN(0) }
 
 char* __cdecl Format(const char* str, ...);
 char* __cdecl Format2(const char* str, ...);
