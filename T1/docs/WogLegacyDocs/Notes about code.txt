@@ -65,10 +65,10 @@ int Apply(&variable,4,Mp,0)
 - Mp - address of Mes structure
 - 0 - number of parameter (0..15)
 Somehow Apply works both for get and set syntax
-Return 0 if variable wasn't changed, otherwise... idk, 1 probably
+Return 0 if variable wasn't changed. Otherwise... idk, 1 probably
 Or rather, return 1 if value in variable was changed, or 0 if wasn't, like in StrMan::Apply?
 
-************
+***********
 
 Triggers
 struct _ERM_Trigger_{ // triggers with 1 or no parameters
@@ -239,6 +239,12 @@ Btw what is PL_WoGOptions[0][907]?
 
 
 
+Testing trigger: !?UU; and receiver !!UU...
+Added for convenience, they are stored in separate files: TestingERM.h/cpp
+For experiments and testing only. For trigger, use pointer=30378.
+
+
+
  Trigger list
 // 0-30000 functions
 // 30000-30100 timers
@@ -313,3 +319,21 @@ Btw what is PL_WoGOptions[0][907]?
 // 0x08000000+ OB leave
 //      +  0x10000000+ OB position leave
 //      +  0x40000000+ OB type/subtype leavestruct _ERM_Trigger_{ // triggers with 1 or no parameters
+
+
+
+ Using get OR set syntax with Apply
+SET-SYNTAX ONLY: if(Apply(&value,4,Mp,0)) { MError2("Cannot get parameter 1"); RETURN(0); }
+GET-SYNTAX ONLY: if(Apply(&output,4,Mp,2) == 0) { MError2("Cannot set parameter 3"); RETURN(0)}
+
+
+
+ !?OBType/Subtype trigger pointer
+Tested via experimental !!UU:R;
+// !?OB - dec 1073741824, hex 
+// !?OB98; - dec 1074143232, hex 0x40062000, 0x40062000 - 0x40000000 = 0x62000 = 401408
+// 401408/98 = 4096 = 0x1000
+// !?OB98/6; - dec 1074143239, hex 0x40062007, 0x40062007 - 0x40062000 = 0x7 = 7
+Thus i think it is calculated this way:
+pointer = 0x40000000 + Type*0x1000 + 1 + Subtype
+EDIT: Yup, proof: pointer = lpointer + (o_t<<12); (ERM2Object)

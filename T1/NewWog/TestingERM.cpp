@@ -10,31 +10,65 @@
 // Header file for Testing ERM Receiver and Trigger
 // ~!!!
 
-// Argument type: 2 - x/y/l
-int ERM_Testing(char Cmd,int Num,_ToDo_* sp,Mes *Mp)
+double round( double fValue )
+{
+    return fValue < 0 ? ceil( fValue - 0.5 )
+        : floor( fValue + 0.5 );
+}
+
+// Argument type: 0 - none. It changes frequently
+int ERM_Testing(char Cmd,int Num,_ToDo_* /*sp*/,Mes *Mp)
 {
 	STARTNA(__LINE__, 0)
 	//Dword MixPos=GetDinMixPos(sp);
 	//_MapItem_ *mip=GetMapItem2(MixPos);
 	switch(Cmd)
 	{
+		// Show pointer value
 		case 'P':
 		{
-			pointer=30378;
-			ProcessERM();
+			Message(Format("(Internal) Pointer value: %lu", pointer));
 		} break;
 
-		case 'N':
+		// Get square root of value
+		case 'R':
 		{
 			CHECK_ParamsNum(3)
 			int value = 0;
+			if(Apply(&value,4,Mp,0)) { MError2("Cannot get parameter 1 - value to be rooted"); RETURN(0); }
 			int modifier = 0;
-			if(Apply(&value,4,Mp,0)) { MError2("Can't get value to be rooted"); RETURN(0); }
-			if(Apply(&modifier,4,Mp,1)) { MError2("Can't get modifier"); RETURN(0); }
+			if(Apply(&modifier,4,Mp,1)) { MError2("Cannot get parameter 2 - modifier"); RETURN(0); }
 			int output = int( \
 				sqrt(double(value)) * double(modifier) \
 				);
-			if(Apply(&output,4,Mp,2) == 0) { MError2("Can't set output of sqrt"); RETURN(0)}
+			if(Apply(&output,4,Mp,2) == 0) { MError2("Cannot set parameter 3 - output value"); RETURN(0)}
+		} break;
+
+		// Call any trigger - note it is bad idea, cuz it doesn't make ANY other changes
+		case 'C':
+		{
+			CHECK_ParamsNum(1);
+			unsigned long ptr = 0;
+			if(Apply(&ptr,sizeof(ptr),Mp,0)) { MError2("Cannot get parameter 1 - pointer"); RETURN(0); }
+			pointer=ptr;
+			ProcessERM();
+		} break;
+
+		// Calculate natural logaritm (n-based) of value
+		case 'L':
+		{
+			CHECK_ParamsNum(4)
+			int base = 0;
+			if(Apply(&base,4,Mp,0)) { MError2("Cannot get parameter 1 - logbase"); RETURN(0); }
+			int value = 0;
+			if(Apply(&value,4,Mp,1)) { MError2("Cannot get parameter 2 - value to be logarithmed"); RETURN(0); }
+			int modifier = 0;
+			if(Apply(&modifier,4,Mp,2)) { MError2("Cannot get parameter 3 - modifier"); RETURN(0); }
+			double temp1 = log( double(value) );
+			double temp2 = log( double(base) );
+			temp1 = temp1 / temp2;
+			int output = round(temp1 * double(modifier));
+			if(Apply(&output,4,Mp,3) == 0) { MError2("Cannot set parameter 4 - output value"); RETURN(0)}
 		} break;
 
 		default:
