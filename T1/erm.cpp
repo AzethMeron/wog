@@ -711,6 +711,7 @@ int GetVarVal(VarNum *vnp)
 		case 0: // number
 		case 7: // z1...500
 			// возвращаем сам индекс
+			// "return index itself"
 			break;
 		case 8: // e1...100
 			if(vi<0) vi=(int)ERMVarFT[-vi-1];
@@ -4930,7 +4931,7 @@ struct _ERM_Addition_{
 	{'la',0,0},
 	{'go',0,0},
 // WoG Legacy
-	{'UU',ERM_Testing,0},
+	{'UU',ERM_Testing,2},
 	
 	{0,0}
 };

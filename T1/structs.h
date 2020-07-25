@@ -1189,7 +1189,7 @@ struct _MapItem_{
 	Byte    RdType;    // +9
 	Word   _u1;        // +0A
 //  Dword   Bits;
-	Byte    Mirror;    // +0C тип отражения
+	Byte    Mirror;    // +0C тип отражения, "reflection type"
 		
 	Byte    Attrib;    // +0D ж или к клетки
 	Word   _Bits;      // +0E
@@ -1197,8 +1197,8 @@ struct _MapItem_{
 	ODraw   *Draw;     // +12
 	ODraw   *DrawEnd;  // +16
 	ODraw   *DrawEnd2; // +1A
-	int     OType;     // +1E
-	Word    OSType;    // +22
+	int     OType;     // +1E, type of object
+	Word    OSType;    // +22, subtype of object
 	Word    DrawNum;   // +24
 };
 // Лагерь беженцев.
