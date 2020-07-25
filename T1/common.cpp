@@ -173,11 +173,12 @@ int M_MDisabled;
 int M_MDisabledNext;
 int Message(const char *zmes,int n,int showtime)
 /*
-	1-сообщение
-	2-запрос 
-	4-инфа по правой мышке
-	7-просьба выбрать
- 10-можно и выбрать и отказаться
+	Syntax is same/almost the same as IF:M. Thus i think 7 and 10 doesn't work.
+	1-сообщение, message
+	2-запрос, request
+	4-инфа по правой мышке, "info on the right mouse"
+	7-просьба выбрать, "choose" 
+ 10-можно и выбрать и отказаться, "you can choose and refuse"
 */
 {
 	STARTNA(__LINE__, 0)

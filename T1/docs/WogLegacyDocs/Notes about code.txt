@@ -1,0 +1,220 @@
+struct Mes{
+    // первым для быстрого доступа 
+    // "first for quick access"
+    long  i;    
+    
+    _Mes_ m;
+    
+    "up to 16 dependency flags | and &"
+    VarNum Efl[2][16][2];      // до 16 флагов зависимости & и |
+
+    // сами параметры 
+    // "parameters themselves"
+    VarNum VarI[16]; 
+    
+    // вроде, используется только при парсинге
+    //  "seems to be used only for parsing"
+    char  c[16]; 
+    
+    // 1, если использован d синтаксис 
+    // "1 if d syntax is used"
+    char  f[16]; 
+    
+    // строки ^^ обрабатываются не так как все. Они всегда стоят в конце и берутся по m.c[i] и далее
+    // " ^^ lines are processed differently. They always stand at the end and are taken by m.c [i] and further"
+    int   n[16]; 
+};
+
+// стандартный формат строки по указателю
+// "standard string format by pointer"
+struct _Mes_{
+    char *s;
+    long  l;  
+};
+
+
+
+struct _ERM_Addition_{
+    Word   Id; // "name", like 'QW', 'UN'
+    int  (*Fun)(char,int,_ToDo_ *,Mes *); // function to be called
+    int    Type; // Type, represents arguments of receiver (NOT command!)
+} ERM_Addition[]={
+    {'CD',ERM_CasDem,0},
+    {'MA',ERM_MonAtr,0},
+    {0,0}
+};
+
+Type 0 means no parameters
+Type 2 means x/y/l parameters, aswell as indirect reference (OB998)
+
+ERM Receiver header:
+int ERM_func(char Cmd,int Num,_ToDo_* /*sp*/,Mes *Mp)
+- Cmd - command, for example 'A', 'B', 'U' and so on. Use switch(Cmd) case 'A'... 
+- Num - number of parameters passed
+- _ToDo_* - struct containing various data, for exanple arguments of receiver SY(v998,v999,v1000) for example.
+- *Mp - struct containing parameters 
+
+First line: STARTNA(__LINE__, 0)
+Use RETURN() - macro - instead of return 
+About returning: 0 means error, 1 means okay. Stick to that rule in ERM_receiver functions.
+
+Getting data from Mes
+int Apply(&variable,4,Mp,0)
+- &variable - address of variable to store data
+- 4 - size in bytes (4 means integer)
+- Mp - address of Mes structure
+- 0 - number of parameter (0..15)
+Somehow Apply works both for get and set syntax
+Looks like it returns 0 if there is error, or used get syntax?
+Or rather, return 1 if value in variable was changed, or 0 if wasn't, like in StrMan::Apply?
+
+************
+
+Triggers
+struct _ERM_Trigger_{ // triggers with 1 or no parameters
+    Word Id; // name of trigger, for example 'BA'
+    int Event; // the start of events range, UNIQUE identifier
+    int paramMin; // minimum parameter value
+    int paramMax; // maximum parameter value
+    Byte post; // post trigger ?
+} ERM_Triggers[]=
+{
+    {'IP',30330,0,3},          // IP#;
+    {'BA',30300,0,1},          // BA#;
+    {0,0}
+};
+
+To add trigger:
+- create hook in global_hooks.h (NewWog) to call your function
+- edit ERM variables if trigger requires it
+- set global variable 'pointer' to identifier of trigger
+- call function 'ProcessERM();'
+- done, parser will deal with everything else
+
+
+
+Managing ERM errors. There are two macros: 
+- MError(char*) 
+- MError2(char*)
+you should RETURN(0) after error
+
+The difference between them is: MError2 automatically include receiver name and command, so there is no need to write it manually. You should use it ONLY inside ERM Receiver function! Everywhere else use MError(). Macros uses global variables that can have scrapped values outside ERM Receivers.
+
+To show values in ERM Error (it is highly advisable to show value of problematic parameter) use sprintf_s OR char* Format() function. F.e.
+MError(Format("Incorrect value: %d",variable));
+
+Also there are macros regarding common errors and param num:
+#define EWrongCommand() MError2("unknown command.")
+#define EWrongSyntax() MError2("wrong syntax.")
+#define EWrongParam() MError2("invalid parameter value.")
+#define EWrongParamsNum() MError2("wrong number of parameters.")
+#define CHECK_ParamsNum(n) if(Num!=n) { EWrongParamsNum(); RETURN(0) }
+#define CHECK_ParamsMax(n) if(Num>n) { EWrongParamsNum(); RETURN(0) }
+#define CHECK_ParamsMin(n) if(Num<n) { EWrongParamsNum(); RETURN(0) }
+Note MError2 - use it only within ERM receiver function!
+
+
+
+struct VarNum {
+      // номер флага, переменной  или число
+      // "flag number, variable or number"
+      int Num; 
+
+      // тип переменной
+      // (в случае yv1 это - 6, т.е. y)
+      // "variable type"
+      // "(in case of yv1 this is 6, i.e. y)"
+      // 0=число, 1=flag, 2=f...t, 3=v1...1000, 4=w1...100, 5=x1...100, 6=y1...100, 7=z-20...1000+,8=e1...e100
+      Byte Type;
+
+      // тип индиксирующей переменной
+      // "type of the index variable"
+      // indexed (в случае yv1 это - 3, т.е. v)
+      // 0=нет, 1=флаг, 2=f...t, 3=v1...1000, 4=w1...100, 5=x1...100, 6=y1...100
+      Byte IType;
+
+      // тип проверки
+      // "check type"
+      Byte Check;  // 0=nothing, 1?, 2=, 3<>, 4>, 5<, 6>=, 7<=
+};
+
+ Apply string
+Function apply doesnt work with strings, fortunatelly we have StrMan
+StrMan::Apply(SP_Current, Mp, 0, 256);
+int StrMan::Apply(void* destination, Mes* mp, int index, int bufsize);
+destination - address of vessel for string
+mp - address of Mes struct, passed by ERM parser
+index - index in Mes (0..15, which parameter is string, f.e XX:B1/^Hello^ means ind=1)
+bufsize - Buffer size for string. Usually 255 is fine
+Works similarly to usual Apply. Return 1 if string (destination) was changed
+
+OLD SYNTAX. You probably shouldn't use it:
+StrCopy( BFBackGrUDef, 255, ERM2String(&Mp->m.s[Mp->i],0,&vv));
+int _fastcall StrCopy(char* destination, int length, char* source)
+Simple function to copy char-array of "length" from "source" into "destination"
+Though you need to 'cast' ERM parser parameters to ERM string. Thus, ERM2String
+char* ERM2String(char* message, int zstr, int* output_length)
+As message, you must pass &Mp->s[INSERT_INDEX]
+Not sure what zstr is, probably 1 if it's z-var, otherwise 0
+output_length - function writes length of string INTO given variable (pass address!)
+
+
+ 
+Format. Very cool function, written in assembler
+char* Format(const char*, ...)
+Works like sprintf. So you can use Format("Hello from number %d", (int)i); to insert value of 'i' into string. Don't know if you can use it with any dataformat tho
+
+Notes from comments:
+// Format() must be called from main thread
+// returned string can be used in subsequent call to Format
+
+ALERT: there should be accessible sprintf_s function from Visual. If so, use it instead of Format. Should be safer.
+
+If possible, we should remake Format to use sprintf_s too? Should be safer
+
+
+
+Most of editable (via erm) objects are declared in structs.h
+
+Huge need to translate everything here from russian, and figure out how it is connected to ingame data
+
+Edit: lets discuss adventure map objects. Example: shipyard. Coords are taken from receiver arguments (SY(998) f.e.) stored in _ToDo*. Game loads data from memory via GetMapItem into _MapItem_* struct. It is universal struct for adv map objects.  Next, this pointer is casted to _CShipyard_*, dont know how. All changes to this struct are reflected ingame without synchronization, so it looks like it pointa directly to data in game memory. 
+
+Getting _MapItem_* - looks like its pointer directly to game memory. Wog gets pointer to 1dim array of objects, then calculates using x,y,z and Mapsize index in this array, then returns &Temp[index]. Mapsize itself is loaded from memory aswell within same function GetMapItem(
+
+If the above is correvt, it means that _MapItem_ is actual representation of any adv map tile in the game, and the game stores them one by one, in given order. 
+
+
+
+__FILENUM__ macro must be defined in every CPP (and only CPP) file, for example: #define __FILENUM__ 8
+This macro is used in many other macros, so it's mandatory to set. Every file must have UNIQUE number. We need to "map" all FileNums in project.
+
+
+
+ Get/Set VarVal
+Another way of getting/setting value. You should use apply and local variables to make setonly/getonly syntax, but i will still describe those shortly so you can understand original/old source. 
+
+TODO don't understand how they works yet xD
+Looks like it allows to get/set value. if it is numerical value, or get index of z-var. How does setting z-var work? Unknown yet
+
+int GetVarVal(VarNum *vnp)
+int SetVarVal(VarNum *vnp,int Val) // 0 means error, 1 means ok
+
+
+
+ ERM Variables
+int ERMVar[20]; - quick variables, f..t
+char ERMFlags[1000]; - flags
+int ERMVar2[]; - v-vars
+int ERMVarX[16]; - x-vars
+int *ERMVarY,*ERMVarYT; - normal/trigger y-vars
+float *ERMVarF,*ERMVarFT; - normal/trigger e-vars
+int ERMVarH[HERNUM][200]; - hero w-vars
+char ERMString[1000][512]; - strings, z-vars
+int PL_WoGOptions[2][PL_WONUM]; - WoG options. Dunno why it's 2-dim array. 
+
+Every ERM variable has additional char-type variable 'USED', for example 'char ERMVar2Used[VAR_COUNT_V];' it probably stores 0/1 and is flag 'if_used', not sure for what purpose, maybe logging.
+
+int ERM_PosX, ERM_PosY, ERM_PosL; - x/y/l, dunno if they are automatically set in triggers, need to check that
+
+Btw what is PL_WoGOptions[0][907]?
