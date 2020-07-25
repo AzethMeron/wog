@@ -168,6 +168,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\TestingERM.cpp"
+				>
+			</File>
+			<File
 				RelativePath="..\\town.cpp"
 				>
 			</File>
@@ -219,6 +223,10 @@
 			</File>
 			<File
 				RelativePath="..\string.h"
+				>
+			</File>
+			<File
+				RelativePath=".\TestingERM.h"
 				>
 			</File>
 			<File

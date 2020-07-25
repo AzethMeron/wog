@@ -28,6 +28,8 @@
 #include "erm_lua.h"
 #include "global.h"
 
+#include "NewWog/TestingERM.h"
+
 bool IsLuaCall = false;
 
 _Cmd_     *Heap;
@@ -4764,6 +4766,7 @@ struct _ERM_Trigger_{ // triggers with 1 or no parameters
 	{'DG',30376},              // DG; Dig Grail
 	{'HL',31200,-1,HERNUM-1,true},  // HL#; -1 - every hero gains level post-trigger
 	{'AI',30377},              // AI; Get Map Position Importance
+	{'UU',30378},			   // Trigger for tests ~!!!
 	{0,0}
 };
 
@@ -4926,7 +4929,9 @@ struct _ERM_Addition_{
 	{'en',0,0},
 	{'la',0,0},
 	{'go',0,0},
-
+// WoG Legacy
+	{'UU',ERM_Testing,0},
+	
 	{0,0}
 };
 

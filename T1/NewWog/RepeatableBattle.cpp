@@ -4,6 +4,7 @@
 #include "../erm.h"
 
 // TODO __FILENUM__
+// ~!!!
 
 // Prepared place for RepeatableBattle
 
