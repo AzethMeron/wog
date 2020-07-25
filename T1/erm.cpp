@@ -4767,6 +4767,7 @@ struct _ERM_Trigger_{ // triggers with 1 or no parameters
 	{'DG',30376},              // DG; Dig Grail
 	{'HL',31200,-1,HERNUM-1,true},  // HL#; -1 - every hero gains level post-trigger
 	{'AI',30377},              // AI; Get Map Position Importance
+// WoG Legacy
 	{'UU',30378},			   // Trigger for tests ~!!!
 	{0,0}
 };
@@ -4825,6 +4826,7 @@ struct _ERM_Trigger_{ // triggers with 1 or no parameters
 // 30375 Flag Color (!?FC)
 // 30376 Dig Grail (!?DG)
 // 30377 Get Map Position Importance for AI (!?AI)
+// 30378 Testing trigger ~!!!
 // ...
 // 30400-30600 hero every movement (!!! must change for new town)
 // 30600-30800 hero gain level (!!! must change for new town)

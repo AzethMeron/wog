@@ -65,7 +65,7 @@ int Apply(&variable,4,Mp,0)
 - Mp - address of Mes structure
 - 0 - number of parameter (0..15)
 Somehow Apply works both for get and set syntax
-Looks like it returns 0 if there is error, or used get syntax?
+Return 0 if variable wasn't changed, otherwise... idk, 1 probably
 Or rather, return 1 if value in variable was changed, or 0 if wasn't, like in StrMan::Apply?
 
 ************
@@ -97,9 +97,7 @@ Managing ERM errors. There are two macros:
 - MError(char*) 
 - MError2(char*)
 you should RETURN(0) after error
-
 The difference between them is: MError2 automatically include receiver name and command, so there is no need to write it manually. You should use it ONLY inside ERM Receiver function! Everywhere else use MError(). Macros uses global variables that can have scrapped values outside ERM Receivers.
-
 To show values in ERM Error (it is highly advisable to show value of problematic parameter) use sprintf_s OR char* Format() function. F.e.
 MError(Format("Incorrect value: %d",variable));
 
@@ -138,6 +136,8 @@ struct VarNum {
       Byte Check;  // 0=nothing, 1?, 2=, 3<>, 4>, 5<, 6>=, 7<=
 };
 
+
+
  Apply string
 Function apply doesnt work with strings, fortunatelly we have StrMan
 StrMan::Apply(SP_Current, Mp, 0, 256);
@@ -163,40 +163,60 @@ output_length - function writes length of string INTO given variable (pass addre
 Format. Very cool function, written in assembler
 char* Format(const char*, ...)
 Works like sprintf. So you can use Format("Hello from number %d", (int)i); to insert value of 'i' into string. Don't know if you can use it with any dataformat tho
-
 Notes from comments:
 // Format() must be called from main thread
 // returned string can be used in subsequent call to Format
-
 ALERT: there should be accessible sprintf_s function from Visual. If so, use it instead of Format. Should be safer.
-
 If possible, we should remake Format to use sprintf_s too? Should be safer
 
 
 
 Most of editable (via erm) objects are declared in structs.h
-
 Huge need to translate everything here from russian, and figure out how it is connected to ingame data
-
 Edit: lets discuss adventure map objects. Example: shipyard. Coords are taken from receiver arguments (SY(998) f.e.) stored in _ToDo*. Game loads data from memory via GetMapItem into _MapItem_* struct. It is universal struct for adv map objects.  Next, this pointer is casted to _CShipyard_*, dont know how. All changes to this struct are reflected ingame without synchronization, so it looks like it pointa directly to data in game memory. 
-
 Getting _MapItem_* - looks like its pointer directly to game memory. Wog gets pointer to 1dim array of objects, then calculates using x,y,z and Mapsize index in this array, then returns &Temp[index]. Mapsize itself is loaded from memory aswell within same function GetMapItem(
-
 If the above is correvt, it means that _MapItem_ is actual representation of any adv map tile in the game, and the game stores them one by one, in given order. 
 
 
 
 __FILENUM__ macro must be defined in every CPP (and only CPP) file, for example: #define __FILENUM__ 8
 This macro is used in many other macros, so it's mandatory to set. Every file must have UNIQUE number. We need to "map" all FileNums in project.
+erm.cpp: __FILENUM__ 1
+herospec.cpp: __FILENUM__ 2
+service.cpp: __FILENUM__ 3
+common.cpp: __FILENUM__ 4
+casdem.cpp: __FILENUM__ 5
+monsters.cpp: __FILENUM__ 6
+womo.cpp: __FILENUM__ 7
+_B1.cpp: __FILENUM__ 8
+anim.cpp: __FILENUM__ 9
+sound.cpp: __FILENUM__ 10
+ai.cpp: __FILENUM__ 11
+npc.cpp: __FILENUM__ 12
+-- 13 is free appearantly
+string.cpp: __FILENUM__ 14
+crexpo.cpp: __FILENUM__ 15
+artifact.cpp: __FILENUM__ 16
+txtfile.cpp: __FILENUM__ 17
+timer.cpp: __FILENUM__ 18
+lod.cpp: __FILENUM__ 19
+dlg.cpp: __FILENUM__ 20
+spell.cpp: __FILENUM__ 21
+global.cpp: __FILENUM__ 22
+-- 23 is free appearantly
+luaW_dlg.h: __FILENUM__ 24 // Header file?
+erm_lua.cpp: __FILENUM__ 25
+dxproxy.cpp: __FILENUM__ 26 // this one is commented
+-- Thus, i've added two more files with numbers
+TestingERM.cpp: __FILENUM__ 30
+RepeatableBattle.cpp: __FILENUM__ 31
 
 
 
  Get/Set VarVal
 Another way of getting/setting value. You should use apply and local variables to make setonly/getonly syntax, but i will still describe those shortly so you can understand original/old source. 
-
 TODO don't understand how they works yet xD
 Looks like it allows to get/set value. if it is numerical value, or get index of z-var. How does setting z-var work? Unknown yet
-
 int GetVarVal(VarNum *vnp)
 int SetVarVal(VarNum *vnp,int Val) // 0 means error, 1 means ok
 
@@ -214,7 +234,82 @@ char ERMString[1000][512]; - strings, z-vars
 int PL_WoGOptions[2][PL_WONUM]; - WoG options. Dunno why it's 2-dim array. 
 
 Every ERM variable has additional char-type variable 'USED', for example 'char ERMVar2Used[VAR_COUNT_V];' it probably stores 0/1 and is flag 'if_used', not sure for what purpose, maybe logging.
-
-int ERM_PosX, ERM_PosY, ERM_PosL; - x/y/l, dunno if they are automatically set in triggers, need to check that
-
+int ERM_PosX, ERM_PosY, ERM_PosL; - x/y/l, you need to set them manually. Map2Coord(_MapItem_*, int* x, int* y, int* l); can help you with that
 Btw what is PL_WoGOptions[0][907]?
+
+
+
+ Trigger list
+// 0-30000 functions
+// 30000-30100 timers
+// 30100-30300 heroes (!!! must change for new town)
+// 30300 to battle
+// 30301 from battle
+// 30302 next battle turn
+// 30303 monster's action
+// 30304 monster's after action
+// 30305 WM reach dest
+// 30306 WM killed
+// 30307 MR Magic Resistance in Battle (pre-)
+// 30308 MR Magic Resistance in Battle (post-)
+// 30309 MR Dwarf Magic Resistance
+// 30310 mouse click на карте (правый) !?CM0
+// 30311 mouse click в Городе !?CM1
+// 30312 mouse click in hero screen !?CM2
+// 30313 mouse click it two heroes screen !?CM3
+// 30314 mouse click in battlefield !?CM4
+// 30315 игрок снял артифакт
+// 30316 игрок одел артифакт
+// 30317 mouse move over battlefield
+// 30318 mouse move over townscreen
+// 30319 mouse click на карте (левый) !?CM5
+// 30320 MP3 music
+// 30321 WAV and M82 Sound 3.58
+// 30322 Magic cast (adv. map) (pre-)
+// 30323 Magic cast (adv. map) (post-)
+// 30324 Go to Town Hall Screen 3.58 !?TH0
+// 30325 Leave Town Hall Screen 3.58 !?TH1
+// 30330 MP before sending data before battle
+// 30331 MP after receiving data before battle
+// 30332 MP before sending data after battle
+// 30333 MP after receiving data after battle
+// 30334 MP received data during a battle
+// 30340 CO Перед открытием диалога Командира
+// 30341 CO После закрытия диалога Командира
+// 30342 CO После покупки Командира в городе
+// 30343 CO После воскрешения Командира в городе
+// 30350 to battle
+// 30351 from battle
+// 30352 universal to battle
+// 30353 universal from battle
+// 30354 on show battlefield (!?BA54)
+// 30360 Load Game
+// 30361 Save Game
+// 30370 Post Instruction call (только при старте новой карты, но не загрузки)
+// 30371 Dlg CallBack
+// 30372 Hint text callback (!?HD)
+// 30373 Castle Income (!?CI0)
+// 30374 Castle Monsters Growth (!?CI1)
+// 30375 Flag Color (!?FC)
+// 30376 Dig Grail (!?DG)
+// 30377 Get Map Position Importance for AI (!?AI)
+// 30378 Testing trigger ~!!!
+// 30400-30600 hero every movement (!!! must change for new town)
+// 30600-30800 hero gain level (!!! must change for new town)
+// 30800 setup battle field
+// 30801 MFCall(0); !?MF0; - Defence coefficient
+// 30802 MFCall(1); !?MF1; - Block ability
+// 30803 MFCall(2); !?MF2; - Hate trigger - control hate and basic damage done to a creature (Defence not included, any effects that depend on chance not included)
+// ...
+// 30900-30904 ; TL - timer #-seconds to call
+// 31000-31099 - 100 local functions
+// 31100-31199 - autotimers (!?TM#1/#2/#3/#4)
+// 31200-31400 - hero gain level post-trigger (!!! must change for new town)
+// ...
+// 0x04000000 ... макс используемый тип - уровень
+// 0x10000000+ OB position enter
+// 0x20000000+ LE position
+// 0x40000000+ OB type/subtype enter
+// 0x08000000+ OB leave
+//      +  0x10000000+ OB position leave
+//      +  0x40000000+ OB type/subtype leavestruct _ERM_Trigger_{ // triggers with 1 or no parameters

@@ -3,8 +3,7 @@
 #include "../structs.h"
 #include "../erm.h"
 
-// TODO __FILENUM__
-// ~!!!
+#define __FILENUM__ 31
 
 // Prepared place for RepeatableBattle
 
