@@ -1,87 +1,87 @@
- Самый базовый адрес ADR0=1646920 неаходится в [0x699538]    [r698560][e69A538]
- размер 4E7D0h
+ The most basic address ADR0=1646920 is in [0x699538]    [r698560][e69A538]
+ size 4E7D0h
    +000000 -> ???
-   +000004 db*46h какие шрайны еще можно поставить на карту (0)
+   +000004 db*46h which temples can still be put on the map (0)
 ...
    +00003C dd =??? show FPS
 ...
-   +00004A db*46h разрешено закл (0) на карте или запрещено (1)
+   +00004A db*46h allowed to conclude (0) on the map or prohibited (1)
 ...
    +000084 dd =???
 ...
-   +00008C db =??? что-то с активизацией главного окна
-   +000090 dd =CriticalSection Object для запуска/остановки видео BINKW32.DLL
+   +00008C db =??? something with the activation of the main window
+   +000090 dd =CriticalSection Object to start / stop video BINKW32.DLL
    +000094 = TownRef
-   +000098 -> структуры замков (88h размер) l 0x4BD034
+   +000098 -> castle structures (88h size) l 0x4BD034
           +54 db = ? (0)
-          +68 dd = 8 тип города (0...8)
-   +00009C -> конечный элемент
-   +0000A0 -> конец всей выделенной памяти
-   +0000A4 db*334h*N(9Ch) = описание всех типов героев
+          +68 dd = 8 town type (0...8)
+   +00009C -> end element
+   +0000A0 -> end of all allocated memory
+   +0000A4 db*334h*N(9Ch) = description of all types of heroes
    +01F454
-   +01F458 db ЧИТЕР! устанавливается для сообщения
+   +01F458 db CHEATER! set to message
 
    +01F45A
    +01F45C dd = ??? (20)
 ...
    +01F4D4 db ? l 0x4BD241   
-   +01F4D5 db*? ??? буфер под имя файла
+   +01F4D5 db*? ??? buffer for the file name
 ...
    +01F634 db ? l 0x4BD276
 ...
-   +01F636 db*8 есть игрок=0 или нет=1 (?)
-   +01F63E dw - текущий день недели >=1
-   +01F640 dw - текущая неделя >=1 l 0x4BD468
-   +01F642 dw - текущий месяц >=1  l 0x4BD49F
+   +01F636 db*8 player=0 or not=1 (?)
+   +01F63E dw - current day of the week >=1
+   +01F640 dw - this week >=1 l 0x4BD468
+   +01F642 dw - current month >=1  l 0x4BD49F
    +01F644 db*20h ? l 0x4BD4D9
-   +01F664 dd*7 - артифакты у торговца
+   +01F664 dd*7 - artifacts from the merchant
    +01F680
 ...
-   +01F690 dw X позиция Грааль l 0x4BD2AB   
-   +01F692 dw Y позиция Грааль l 0x4BD2E2
-   +01F694 db L уровень Грааль l 0x4BD319   
-   +01F695 db ? l 0x4BD34E что то с Граалем тоже  
-   +01F696 db Грааль есть=1    l 0x4BD383   
-           db выравнивание
-   +01F698 dd ? l- 0x4BD3BD = числи столбов
-                  ТИП КАРТЫ (0=ер,1=аб,2=сод)
-   +01F69C db ЧИТЕР ???
-   +01F69D db ?   0x4C8C49 - не 0, если можно удвоить монстров в начале месяца
-                  0x46A086 - (атака - неделя монстра?)
-                  НЕ УРОВЕНЬ СЛОЖНОСТИ
+   +01F690 dw X Grail position l 0x4BD2AB   
+   +01F692 dw Y Grail position l 0x4BD2E2
+   +01F694 db L Grail level l 0x4BD319   
+   +01F695 db ? l 0x4BD34E something with the Grail too  
+   +01F696 db Grail is=1    l 0x4BD383   
+           db alignment
+   +01F698 dd ? l- 0x4BD3BD = number of pillars [[[>>>>moze chodzic o liczbe pol, wiec niekoniecznie filary<<<<<]]]]
+                  MAP TYPE (0=ер,1=аб,2=сод)
+   +01F69C db CHEATER ???
+   +01F69D db ?   0x4C8C49 - not 0, if it possible to double number of the monsters at the beginning of the month
+                  0x46A086 - (attack - monster week?)
+                  NOT DIFFICULTY
    +01F69E dw ? l 0x4BD431
 ...
-   +01F6B0 dd*8 = Стартовые типы замков игроков
+   +01F6B0 dd*8 = Starting types of players towns
 ...
-   +01F6D8 db = уровень сложности игры
-   +01F6D9 db*251 (дес) = имя H3M (GM1,GMC...) файла при загрузке новой или записанной карты
+   +01F6D8 db = game difficulty level
+   +01F6D9 db*251 (дес) = name H3M (GM1,GMC...) file when loading a new or saved map [[[[[>>>>(дес) to jakis skrot. Na nasze litery to dies lub des, nie udalo mi sie ustalic co to za skrot, ale notatka moze pomoze (zapewne jakies slowo zblizone do polskiego)<<<<]]]]]]
    +01F7D4 dd*19h ?
    +01F838
 ...
    +01F840
-эти поля далее заполняются из карты n 457990
-   +01F86C dd   - +0   тип карты (0E,15,1C)
+these fields are then filled out from the map n 457990
+   +01F86C dd   - +0   map type (0E,15,1C)
    +01F870 db*8 - +4
-   +01F871 db   - Уровень сложности карты
-   +01F877 db   = макс уровень развития героя
+   +01F871 db   - Map difficulty level
+   +01F877 db   = max level of hero development
    +01F878 db   - +C
-   +01F879 db*8 - +D   номер команды игрока по числу команд {0,1,2,3,4,5,6,7}
-!!!+01F881 db*3 - +15h три байта выравнивания - не используются
-   +01F884 dd   - +18h размер карты dx и dy из карты с +18h
-   +01F888 db   - есть подземелье из карты с +1Сh
-   +01F881 db*3 - три байта дополнения до dd
+   +01F879 db*8 - +D   player team number by number of teams {0,1,2,3,4,5,6,7}
+!!!+01F881 db*3 - +15h three alignment bytes - not used
+   +01F884 dd   - +18h map size dx and dy from map с +18h [[[[>>>> byc moze "c" przed +18h nalezy zamienic na "with"<<<<]]]]]
+   +01F888 db   - there is a dungeon from the map с +1Сh [[[[>>>>to samo co wyzej. Dziwnie brzmi tlumaczenie, ale tutaj bylo doslownie: jest podziemie z mapy<<<<]]]]]
+   +01F881 db*3 - three bytes of padding to dd
 ...
-   +01F89C dd*13h - 13h*dd байт из карты +30h - Условия выигрыша/проигрыша
-   +01F8E8 dd* 9h -  9h*dd байт из карты +7Ch
+   +01F89C dd*13h - 13h*dd byte from map +30h - Terms of win / loss
+   +01F8E8 dd* 9h -  9h*dd byte from map +7Ch
    +01F90C db 44h(size)*8(number)=220h
    +01FB2C
 ...
-   +01FB50 dd -> описание карты
-   +01FB54 dd    длина описания карты
-   +01FB70 структура main (начало)
+   +01FB50 dd -> map description
+   +01FB54 dd    map description length
+   +01FB70  main structure (beginning) [[[[>>>beginning lub start, jednak beginning wydalo mi sie lepszym okresleniem. Rosyjskie slowo начало (naczalo) to poczatek lub start w zaleznosci od kontekstu<<<]]]]
    +01FB70 dd   _u1a, _Types_       *Tp0,*Tp1,*_u2a;           // +00
    +01FB80 dd   _u1b, _Position_    *Pp0,*Pp1,*_u2b;           // +10
-   +01FB90 dd   _u1c[4]; // DEFы                               // +20
+   +01FB90 dd   _u1c[4]; // DEFS                               // +20 [[[[[>>>>>oryginal to DEFы (DEFy), zamienilem wiec tylko ostatnia literke, na to co wedlug mnie pasuje. Moge sie mylic<<<<]]]] 
    +01FBA0 dd   _u1d, _ArtRes_      *Ap0,*Ap1,*_u2d;           // +30
    +01FBB0 dd   _u1e, _Monster_     *Mp0,*Mp1,*_u2e;           // +40
    +01FBC0 dd   _u1f, _Event_       *Ep0,*Ep1,*_u2f;           // +50
@@ -93,120 +93,120 @@
    +01FC20 dd   _u1l[4];                                       // +B0
    +01FC30 dd   _u1m[4];                                       // +C0
    +01FC40 dd   _MapItem_ *MIp0;                               // +D0 l 0x4FE235
-   +01FC44 dd = размер карты (по x и y)                        // +D4
-   +01FC48 db = 0-один уровень, 1-два уровня                   // +D8
+   +01FC44 dd = map size (x and y)                        // +D4 [[[[[[>>>>>oryginal (по x и y). Po polsku (wedlug x i y)<<<<]]]]]
+   +01FC48 db = 0-one level, 1-two levels                  // +D8
    +01FC4C  E8h * 10h                                          // +DC
-           dd   _u1n, _Types_ *start,*stop,*end // по каждому типу и подтипам
-   +020AD0  8 структур по игрокам, размер 168h   l 0x4BD898
-        +0 db = номер цвера игрока
-        +1 db = количество героев у игрока
-        +4 dd = текущий активный герой (-1 - нет)
-        +8 dd*8 = номера игроков у героя (по количеству, но не >8)
-       +28 dd = номер героя в таверне (правый?)
-       +2C dd = номер героя в таверне (левый?)
-	   +39 dd = ??? что-то с Граалем
-       +3D db = сколько дней до убивания героя (может быть >7)
-                если не FF, то всегда выдает сообщение
-       +3E db = количество замков у игрока 3.58
-       +40 db*??? = номер города для всех городов игрока
+           dd   _u1n, _Types_ *start,*stop,*end // for each type and subtype
+   +020AD0  8 player structures, size 168h   l 0x4BD898    [[[[>>>>oryginal структур по игрокам. Po polsku: struktury wedle (lub wedlug) graczy<<<<]]]]]
+        +0 db = number of player color  [[[[>>>w oryginale byla literowka цвера игрока zamiast цвета игрока<<<<<]]]]]
+        +1 db = number of heroes per player
+        +4 dd = current active hero (-1 - no)
+        +8 dd*8 = hero player numbers (by quantity but not >8)  [[[[[>>>>oryginal: номера игроков у героя. Po naszemu: numer graczy u bohatera. Nie wiem jak to rozumiec, wiec przetlumaczylem jak tego nie rozumiem :):):)<<<<]]]]]
+       +28 dd = number of hero in tavern (right?)   [[[[[[>>>>>"right" w sensie "prawo"(kierunek). Po rosyjsku bylo "правый" czyli to przymiotnik "prawy" od slowa "prawo"<<<<]]]]]
+       +2C dd = number of hero in tavern (left?)    
+	   +39 dd = ??? something with the Grail
+       +3D db = how many days to killing a hero (may be >7)   
+                if not FF, it always gives a message
+       +3E db = number of player castles  3.58
+       +40 db*??? = town number for all player towns
        +84 dd = ?
-       +9C dd - дерево
-       +A0 dd - сера
-       +A4 dd - камни
-       +A8 dd - ртуть
-       +AC dd - драг. камни
-       +B0 dd - кристаллы
-       +B4 dd - золото
-       +B8 dd = посещенные магические сады
-       +BC dd = посещение магического ручья
-	   +C8 dd = номер в игре сетевого игрока ??? (вышел)
+       +9C dd - wood
+       +A0 dd - sulfur
+       +A4 dd - stone  [[[[>>>>pewnie chodzi o rude, ale po rosyjsku stalo "kamien"<<<<]]]]
+       +A8 dd - mercury
+       +AC dd - gems    [[[[>>>>w wersji rosyjskiej byly drogocenne kamienie, zmienilem na normalna wersje<<<]]]]   
+       +B0 dd - crystals
+       +B4 dd - gold
+       +B8 dd = visiting magic gardens
+       +BC dd = visiting the magic stream
+	   +C8 dd = network player number in game ??? (came out)  [[[[[[[>>>>>>номер в игре сетевого игрока czyli "numer w grze sieciowego gracza" po polsku, tak doslownie<<<<]]]]]]
        +СС
-       +E1 db = 1-GM / 0-AI (тот, что сидит за экраном)
-       +E2 db = 1-GM / 0-AI (главный)
-       +E4 dw = MP на этом PC ? (номер игрока как игрока на карте???)
-       +E8 dd = 32 бита - один на Комбо Артифакт, что этот игрок имеет
+       +E1 db = 1-GM / 0-AI (the one behind the screen) [[[[[[[>>>>>>>тот, что сидит за экраном czyli "ten kto siedzi za ekranem". Byc moze lepiej pasuje "this one, who is sitting behind the screen"<<<<<<]]]]]
+       +E2 db = 1-GM / 0-AI (main)
+       +E4 dw = MP on this PC ? (player number as a player on the map???)  [[[[[>>>>>>>w nawiasie номер игрока как игрока на карте czyli "numer gracza jak [w domysle]numer gracza na karcie". Byc moze bardziej pasuje "player number as player number on the map"<<<<<]]]]]
+       +E8 dd = 32 bits - one on combo artifact that this player has
 ...
-  +020C38 ... второй
-  +020DA0 ... третий
-  +020F08 ... четвертый
-  +021070 ... пятый
-  +0211D8 ... шестой
-  +021340 ... седьмой
-  +0214A8 ... восьмой
-     +021610 = db(dd) замки есть/нет
-     +021614 -> структуры замков (168h размер)
-     +021618 -> конец всех структур замков
-     +02161C -> всего памяти под замки
-   +021620 db*492h*N(9Ch) - описания конкретных героев (формируется 4CACAE) l 0x4BD0B8
-   +04DF18 db*9Ch доступность героя: FF-можно, 0...7-есть уже у игрока, 40h-нельзя (в таверне или запрещен) 
-   +04DFB4 dd*9Ch кем может быть нвнят (один цвет-один бит)
+  +020C38 ... second
+  +020DA0 ... third
+  +020F08 ... fourth
+  +021070 ... fifth
+  +0211D8 ... sixth
+  +021340 ... seventh
+  +0214A8 ... eighth
+     +021610 = db(dd) castles are/aren't
+     +021614 -> castles structures (168h size)
+     +021618 -> end of all castles structures
+     +02161C -> total memory for castles
+   +021620 db*492h*N(9Ch) - descriptions of specific heroes (formed 4CACAE) l 0x4BD0B8
+   +04DF18 db*9Ch hero availability: FF-can, 0...7-already player has a hero, 40h-not allowed (in the tavern or banned)  
+   +04DFB4 dd*9Ch who can be hired (one color-one bit)
    +04E224 db*90h ?
-   +04E2B4 db*90h Артификт разрешен для появления (=0) или нет (<>0)
+   +04E2B4 db*90h The artifact is allowed to appear (=0) or not (<>0)
    +04E344 db*20h ? l 0x4BD537
-     +1 db посещение лебединого озера
-     +2 db посещение игроками домика фей
-     +3 db посещение фонтана удачи
-   +04E35E db посещение оазиса
+     +1 db visiting the swan lake
+     +2 db players visiting the fairy house
+     +3 db visiting the fountain of fortune
+   +04E35E db visiting oasis
 
-   +04E364 db*8h  Посещенные тенты кеймастеров один бит - один цвет, байт - полатка
+   +04E364 db*8h  visiting tents of key masters one bit - one color, byte - tent
    +04E36C db*6h  ? l 0x4BD595
    +04E372 db*3h  ? l 0x4BD5C4
    +04E375
    +04E378 dd = 0
-   +04E37C dd -> ук. на Знаки и бутылки (0x14 размер)
-   +04E380 dd -> ук. за последнюю
-   +04E384 dd -> конец всей выделенной памяти
+   +04E37C dd -> ук. на Знаки и бутылки (0x14 size) [[[[[[[>>>>>>>tutaj nie wiem o co chodzi z powodu skrotu "ук."(uk.). Tlumaczenie reszty to "na Znaki i butelki". Moze pasowac rosyjskie slowo tlumaczone na "wskazywac/pokazywac" lub "ukladac"<<<<]]]]]
+   +04E380 dd -> ук. за последнюю  [[[[[>>>>>tutaj to samo co wyzej. Niestety reszta tlumaczenia tej linijki zalezy od tego co znaczy skrot "uk.". Bo moze chodzic o "na koniec" lub "za ostatnim" w zaleznosci od kontekstu. Tlumaczenie skrotu tak samo jak wyzej<<<<<]]]]]
+   +04E384 dd -> end of all allocated memory
    +04E388 dd = 0
-   +04E38C dd -> ук. на Шахты и маяк (0x40 размер) 0x4A3624
-   +04E390 dd -> ук. за последнюю шахту
-   +04E394 dd -> конец всей выделенной под шахты памяти
+   +04E38C dd -> ук. на Шахты и маяк (0x40 size) 0x4A3624 [[[[>>>>znowu skrot "uk.". Po nim "on the mines and the lighthouse". Byc moze faktycznie chodzi o slowo "wskazywac"<<<<]]]]]
+   +04E390 dd -> ук. за последнюю шахту     [[[[[[>>>>po "uk." za ostatnia kopalnie<<<<]]]]
+   +04E394 dd -> end of all memory allocated for the mine 
    +04E398 dd = 0
-   +04E39C dd -> таблица внешних генераторов монстров (элемент 0x5C)
-   +04E3A0 dd -> конец табл -"-
-   +04E3A4 dd -> конец всей выделенной памяти под ген.
+   +04E39C dd -> table of external monster generators (element 0x5C)
+   +04E3A0 dd -> end of table -"-
+   +04E3A4 dd -> end of all allocated memory for the generators
    +04E3A8 dd = 0
-   +04E3AC dd -> таблица гарнизонов (элемент 0x40)
-   +04E3B0 dd -> конец табл -"-
-   +04E3B4 dd -> конец всей выделенной памяти под ген.
+   +04E3AC dd -> table of garrisons (element 0x40)
+   +04E3B0 dd -> end of table -"-
+   +04E3B4 dd -> end of all allocated memory for the generators
    +04E3B8 dd = 0
-   +04E3BC dd -> таблица лодок (элемент 0x28)
-   +04E3C0 dd -> конец табл -"-
-   +04E3C4 dd -> конец всей выделенной памяти под лодки
+   +04E3BC dd -> table of boats (element 0x28)
+   +04E3C0 dd -> end of table -"-
+   +04E3C4 dd -> end of all allocated memory for the boats
    +04E3C8 dd+ 0 
-   +04E3CC dd -> начало университетов
-   +04E3D0 dd -> конец университетов
-   +04E3D4 dd -> память под университеты
+   +04E3CC dd -> beginning of universities  
+   +04E3D0 dd -> end of universities
+   +04E3D4 dd -> memory for universities
 ...
    +04E3D8 dd+ 0
-   +04E3DC dd -> начало CrBanks
-   +04E3E0 dd -> конец  CrBanks
-   +04E3DC dd -> память под CrBanks
+   +04E3DC dd -> beginning CrBanks [[[[[[[>>>>>lub "start"<<<<<]]]]]]
+   +04E3E0 dd -> end CrBanks
+   +04E3DC dd -> memory for CrBanks
 ...
-   +04E419 db*N = буфер для строки (связано с полем 4E3E8)
-   +04E3E8 db = количесто монолитов (не больше 0x30)
-   +04E3E9 db*0x30 посещаемость монолитов (бит-игрок)
+   +04E419 db*N = buffer for line (associated with field 4E3E8)
+   +04E3E8 db = number of monoliths (not more 0x30)
+   +04E3E9 db*0x30 посещаемость монолитов (bit-player) [[[[[>>>> "посещаемость" (posjeszczajetosc - to tak jak odwiedzacielnosc lub zwiedzacielnosc xD) nie wiem jak to przetlumaczyc. Google tlumacz podpowiada, ze to "obecnosc", a tlumaczenie calej linijki to "monolith traffic" wedlug google tlumacz. W slowniku sa podobne slowa, wszystkie zwiazane z odwiedzaniem i zwiedzaniem. Jak dla mnie chodzi o cos jak "odwiedzanie monolitow" (czyli moze "visiting monoliths") tylko w bardzo nietypowej dla nas formie, takiej formy nie ma w jezyku polskim<<<<<]]]]]]]
 ...   
-   +04E546 db*100h = один бай на слух (0-не показывался,1-уже показывался)
-                был слух таверны уже показан или еще нет
+   +04E546 db*100h = one byte on rumor (0-didn't show up,1-already shown) [[[[[[>>>>>>один бай на слух czyli "jeden bajt na sluch" nie wiem o co chodzi, wiec przetlumaczylem bardzo doslownie EDIT: zajrzalem do slownika i chyba chodzi o slowo "rumor" i tak poprawilem. Z kolei w nawiasie bylo doslownie "nie pokazywal sie" i "juz sie pokazywal", nie pasuje mi forma tlumaczenia na angielski, byc moze do poprawki<<<<<<]]]]]]]
+                был слух таверны уже показан или еще нет   [[[[[[>>>>>>dziwnie ulozone zdanie. Po polsku tlumaczac kazde slowo osobno: byl sluch (lub plotka) tawerny juz pokazany lub jeszcze nie. Byc moze chodzi o slowo "rumor" (zamiast "sluch" czyli "hear". Bo "sluch" z rosyjskiego oznacza po naszemu sluch lub plotke/pogloske) czyli plotke jak podpowiada wujek google i w sumie to jako jedyne ma sens i pasuje. Jednak cale wyrazenie po rosyjsku jest tak ulozone, ze zostawiam je w oryginale, bo nie wiem jak po angielsku sensownie to poskladac. Podpowiedzia moze byc doslowne tlumaczenie na pl<<<<<]]]]]
   .+04E646
 ...
-   +04E64C dd -> начало таблицы пользовательских слухов для таверны
-                14h размер структуры
-				 +00 dd = используется/нет
-				 +04 dd -> Текст
-				 +08 dd = длина текста
-				 +0C dd = длина выделенная под текст
-				 +10 db = показан уже (1) или нет (0)
-				 +11 db*3 = выравнивание
-   +04E650 dd -> конец таблицы пользовательских слухов для таверны
+   +04E64C dd -> beginning of table of customs rumors for taverns [[[[[[>>>>w oryginale начало таблицы пользовательских слухов для таверны, zostawiam to bo nie pasuje mi forma po angielsku, ktora dalem doslownie<<<]]]]
+                14h structure size
+				 +00 dd = is using/not
+				 +04 dd -> Text
+				 +08 dd = text length
+				 +0C dd = length allocated under text
+				 +10 db = shown already (1) or not (0)
+				 +11 db*3 = alignment
+   +04E650 dd -> end of table of custom rumors for taverns
 ...
-   +04E67C dd-> 0 двусторонние телепортеры l 0x4BD693   ( 8*0x10 )
-   +04E680 dd-> начало l 0x4BD693
-   +04E684 dd-> конец l 0x4BD693
-   +04E688 dd-> выделено памяти l 0x4BD693
-   далее еще 7*16 байт - еще то же для 7 монолитов
+   +04E67C dd-> 0 two-way teleporters l 0x4BD693   ( 8*0x10 )
+   +04E680 dd-> beginning l 0x4BD693
+   +04E684 dd-> the end l 0x4BD693
+   +04E688 dd-> allocated memory l 0x4BD693
+   далее еще 7*16 byte is also the same for 7 monoliths
 ...
-   +04E6FC dd -> двусторонние монолиты ? l 0x4BD6E6 ( 8*0x10 )
+   +04E6FC dd -> two-way monoliths ? l 0x4BD6E6 ( 8*0x10 )
 ...
    +04E77C dw+ ? l 0x4BD72D
 ...
@@ -219,197 +219,196 @@
 
    
 ******************************
-   0x63D1DC dd*(0x14) = позиция стэка на поле для плотной тактики расположения ???
-   0x63D118 dd*(0x14) = позиция стэка на поле для обычной тактики расположения ???
-   0x63D0A8 dd*(0x14) = позиция стэка на поле ???
+   0x63D1DC dd*(0x14) = stack position on the field for tight tactic of location ???  [[[[[>>>>>позиция стэка на поле для плотной тактики расположения - pozycja stosu na polu dla gestej/ciasnej taktyki polozenia - nie rozumiem, ale chyba w miare dobrze przetlumaczylem na angielski. Wole zostawic oryginal, bo nie ogarniam co tu tlumacze<<<<]]]]]]
+   0x63D118 dd*(0x14) = stack position on the field for conventional tactics of location ???  [[[[[>>>>>позиция стэка на поле для обычной тактики расположения - pozycja na polu dla zwyklej taktyki polozenia (moze rozplanowania)<<<]]]]
+   0x63D0A8 dd*(0x14) = stack position on the field ???
 
-   0x642224 dd * 4 = количество квиксэндов на поле при генерации в зав. от мастерства
-   0x642E30 dd * 4 номера строений 18,19,24,25 - модификаторы генераторов (5BEDA6)
+   0x642224 dd * 4 = количество квиксэндов на поле при генерации в зав. от мастерства [[[[[>>>>the number of quixands per field when generating in >>>zaw.<<< from skill - nie wiem co to za skrot zaw. moze chodzic o uczelnie<<<<]]]]]
+   0x642E30 dd * 4 building numbers 18,19,24,25 - generator modifiers (5BEDA6)
    0x642E40
 
-   0x660428 dd - > карта по типам объектов (16db*N)
+   0x660428 dd - > map by objects type (16db*N)
           +0 db 
 		  +1 db 
 
    0x6608B8 dd =
 
-   0x660B68 dd -> установки всех артефактов
-   0x660B6C dd -> битовые маски составных артифактов
+   0x660B68 dd -> installation of all artifacts
+   0x660B6C dd -> composite bit masks of artifacts
 
-   0x66CD98 8db * 64 - маска бита по номеру [строений] (5BED3C)
+   0x66CD98 8db * 64 - mask bit by number [buildings] (5BED3C)
    0x66CF98
 ...
    0x6747B0 dd -> MonTable
-   0x6747B4 dd*126 = 9 типов городов * 2 апгр и нет * 7 типы монстров для найма
+   0x6747B4 dd*126 = 9 types of towns * 2 апгр и нет * 7 types of monsters for hire [[[[[>>>>>апгр и нет tego nie rozumiem. Po polskiemu: apgr i nie<<<<<]]]]]
    0x6749AC
 ...
-   0x6783C8 dd = dX видимости
-   0x6783CC dd = dY видимости
-   0x679C70 dd -> загруженные спец. героев HeroSpec.txt
+   0x6783C8 dd = dX visibility
+   0x6783CC dd = dY visibility
+   0x679C70 dd -> loaded spec. heroes HeroSpec.txt
 
-   0x679C80 dd -> загруженные спец. героев HeroSpec.txt (длинные описания)
-   0x679C88 dw*0x0c = опыт для первых 12-ти уровней героя
+   0x679C80 dd -> loaded spec. heroes HeroSpec.txt (long descriptions)
+   0x679C88 dw*0x0c = experience for the first 12 levels of the hero
 
-   0x6834A4 dd = уровень сложности игры
+   0x6834A4 dd = game difficulty level
 
    0x687FA8 dd ->
 
-   0x6887F6 400h * 9 по числу замков
+   0x6887F6 400h * 9 by the number of castles
 
    0x691259 db = ??? go solo
 
-   0x696DEC dd*100h массив указателей на загруженные слухи в таверне
+   0x696DEC dd*100h an array of pointers to loaded rumors in the tavern
   .0x6971EC
 
    0x6971F8 dd = \
    0x6971FC dd = -> start byte[n]
    0x697200 dd = -> stop
 
-   0x697308 dd = 0 играем, = 1 конец игре
-   0x699560 dd = 0 проиграл, = 1 выиграл
+   0x697308 dd = 0 play, = 1 end of playing
+   0x699560 dd = 0 lost, = 1 win
 
-   0x697728 dd = тип действия в опциях огры
+   0x697728 dd = type of action in game options
                = 65h - Restart Game
 			   = 66h - Load Saved Game
 			   = 6Ch - Quit
 			   = 6Bh - Restart (???)
 
-   0x697788 dd = номер стека источника в экране героя (-1 - не выбран)
+   0x697788 dd = source stack number in hero screen (-1 - not selected)
 
-   0x69779C dd = ЧИТЕР было уже показано сообщение и зафиксировано
-   0x6977A0 dd = тип очередной недели
-     0-простая неделя,1-неделя монстр+15,2-грааль в Инферно(каждая неделя - тип 2A - бес)
+   0x69779C dd = CHEATER message has already been shown and fixed
+   0x6977A0 dd = type of the next week
+     0-simple week,1-monster week+15,2-grail in Inferno(every week - type 2A - demon)   [[[[[>>>>w miejsce "demon" byl wyraz "бес". Czyli bies (i po ichniemu i po naszemu) ale moze to byl jakis skrot<<<<<]]]]]
    0x6977D8 dd =
    0x6977DC dd =
 
-   0x69844C dd = номер существа, чья неделя (для типов 0 и 1)
-   0x698450 dd = 0-игра, 1-начальная инициализация
+   0x69844C dd = creature number whose week (for types 0 and 1)
+   0x698450 dd = 0-game, 1-initial initialization
 
    0x6987B0 dd = Music Volume (0...9)
    0x6987B4 dd = Effects Volume (0...9)
 
-   0x6987CC dd = быстрая битва 46A0E3 (атака)
+   0x6987CC dd = fast battle 46A0E3 (atack)
 
-   0x6987E4 dd = (?) 1=сингл, 0=мульти (автомат)
-   0x6987F4 dd = (?) 1=сингл, 0=мульти (автомат)
+   0x6987E4 dd = (?) 1=single, 0=multi (automat)
+   0x6987F4 dd = (?) 1=single, 0=multi (automat)
 
-   0x69883C dd = (2) 441B25 (атака)
-   0x698867 db*? = имя игрока (сетевого)
-   0x698A10 dd = выводить звук или нет
+   0x69883C dd = (2) 441B25 (atack)
+   0x698867 db*? = player's name (network)
+   0x698A10 dd = sound output or not
 
    0x698A94 dd
 
-   0x698A40 dd = тип игры (0-один,1-IPX,2-TCP,3-HotSit,4-DirrectConnect,5-Modem)
-   0x698A48 dd -> карта видимости (dw*l*dY*dX) l 0x4BD63D
-          +  0 db = видимость для игроков
+   0x698A40 dd = type of game (0-one,1-IPX,2-TCP,3-HotSit,4-DirrectConnect,5-Modem)
+   0x698A48 dd -> карта видимости (dw*l*dY*dX) l 0x4BD63D   [[[[[>>>>>jest kilka opcji tego tlumaczenia: mapa widocznosci, karta widocznosci, mapa wiadomosci, karta wiadomosci. Rosyjski ma te zalete i jednoczesnie wade, ze jest to szybko zmieniajacy sie jezyk tj. z kazdym rokiem przybywaja nowe slowa (lub po prostu stare zmieniaja znaczenie. Dla przykladu rosyjskie slowo "konczyc" do niedawna czesto uzywane (znaczy to samo co i nasze konczyc) obecnie jest kojarzone pejoratywnie i jest zastepowane innym slowem. Slowniki majace 10 lat moga okazac sie przestarzale.<<<<<]]]]]]]]]] 
+          +  0 db = видимость для игроков    [[[[>>>>tutaj dwie opcje: wiadomosci dla graczy lub widzialnosc dla graczy. Obstawiam pierwsza opcje<<<]]]]]]
 		  +  1 db: bit 1 - WM   
 
-   0x698AC8 dd -> сложный диалог характеристик героя 4E1AFA Call 4DE980
-   0x698AE4 dd = бонус перемещения в конющне (0x190)
-   0x698B70 dd -> ук. на текущего героя (не всегда)
+   0x698AC8 dd -> complex dialogue of the characteristics of the hero 4E1AFA Call 4DE980
+   0x698AE4 dd = bonus of moving in the final (0x190)
+   0x698B70 dd -> ук. на текущего героя (not always)  [[[>>>> nienzany skrot "ук." (prawdopodobnie wskazywac). Po nim: on current hero<<<<]]]]
 
    0x6992B0 dd -> mouseManager
    0x6992B8 dd -> advManager l 0x4BD87B
-          + 3D = ЧИТ! Показать все вражеские города
+          + 3D = Cheat! Show all enemy towns
 		  + 44 -> ???
 		       +
-		  +1F4 = ??? номер объекта (лодки)
-   0x6992C4 dd = 1=один человек, 2=много
+		  +1F4 = ??? number of object (boats)
+   0x6992C4 dd = 1=one man, 2=many
    0x6992D0 dd -> heroWindowManager
    0x699414 dd -> soundManager  
    0x699420 dd -> combatManager
    0x699530 dd -> inputManager размер 960h
-          + 34  dd разрешен ввод (1) или запрещен (0)
-          + 38  _MouseStr_(32 байта)*64
-          +838  dd номер первого непустого элемента в буфере (0...63)
-          +83C  dd номер первого пустого элемента в буфере (0...63)
-          +840  dd занят разбором мышиного ввода (1), свободен (0)
+          + 34  dd input allowed (1) or forbidden (0)
+          + 38  _MouseStr_(32 bytes)*64
+          +838  dd number of the first non-empty element in the buffer (0...63)
+          +83C  dd number of the first empty element in the buffer (0...63)
+          +840  dd busy parsing mouse input (1), is free (0)
           
-          +848  db*??? символы клавиатуры
-   0x699538 dd -> базовая структура
+          +848  db*??? keyboard characters
+   0x699538 dd -> base structure
    0x69954C dd -> townManager
           + 38 -> _CastleSetup_
           +11C -> ???
           +120 -> ???
-          +12C -> стр. источника
-                    +6C -> _MonArr_ источника стека
-          +130 = номер исходного стека
-          +134 -> стр. получателя
-                    +6C -> _MonArr_ получателя стека
-          +138 = номер приемного стека
-          +1A0 = dd маска
-          +1A4 = dd маска
-          +1A8 = dd маски того, что можно строить в экране постройки города
-          +1AC = dd маска (вторая часть)
+          +12C -> стр. источника   [[[[[[[>>>>>nie wiem co znaczy skrot CTP.(str.) ale drugi wyraz to "source"<<<<]]]]]]]]
+                    +6C -> _MonArr_ источника стека    [[[[[>>>>source czegos, jeszcze nie ustalilem co to za slowo (google tlumacz podpowiada stack source)<<<<]]]]]
+          +130 = номер исходного стека [[[[[>>>>number czegos, nie ustalilem co to za wyraz<<<<]]]]]
+          +134 -> стр. получателя [[[[>>>>znowu nieokreslony skrot potem "the recipient"<<<<]]]]]
+                    +6C -> _MonArr_ получателя стека [[[[[[>>>>the recipient czegos, wyraz do ustalenia<<<<]]]]]
+          +138 = номер приемного стека [>>>>number of receive czegos -||-<<<<]]]]]]
+          +1A0 = dd mask
+          +1A4 = dd mask
+          +1A8 = dd masks of what can be built in the city construction screen
+          +1AC = dd mask (second part)
           +1C4 = ??? 0
-   0x69959C dd =  1-есть сеть, 0-нет
+   0x69959C dd =  1-network, 0-not
 
    0x6995DC db =
 
-   0x699650 dd = HWND главного окна Героев
+   0x699650 dd = HWND Heroes main menu
 
-   0x69CCF4 dd = текущий активный игрок
-   0x69CCFC dd -> описание текущего игрока в основной стр (+020AD0)
+   0x69CCF4 dd = current active player
+   0x69CCFC dd -> описание текущего игрока в основной стр (+020AD0) [[[[[>>>>>description of the current player in the main (str) nieokreslony skrot<<<<]]]]]
 
    0x69CD08 db =
-   0x69CD10 db = 1<<номер активного игрока (битовая маска)
+   0x69CD10 db = 1<<active player number (bit mask)
 
    0x69D658 dd =
 
    0x69D680 :
-          +  0 dd = время начала ??? (0-не установлено)
-		  +  4 dd = время начала хода данного игрока (0-не установлено)
-		  +  8 dd = лимит на ход игроку (0-нет ограничений)
-		  +  C dd = лимит ??? (0-не установлено)
-		  + 10 dd = время начала битвы
+          +  0 dd = start time ??? (0-not established)
+		  +  4 dd = player start time (0-not established)
+		  +  8 dd = limit for player's move(0-no restrictions)
+		  +  C dd = limit ??? (0-not established)
+		  + 10 dd = battle start time
 
    0x69D858 dd =
 
-   0x6A8C20 8db * 44 * 9 маски битов того, что НЕ должно быть построено до этого
-     для строений для разных типов городов
+   0x6A8C20 8db * 44 * 9 bit masks of what should NOT be built before for buildings for different types of towns
    0x6A9880
 
 **************
 combatManager:
    +34    dd
-   +3C    dd = номер типа атаки монстра (по нему переход далее)
-               0A - сказочный дракон
-               06 - гарпии-ведьмы
-               0B - лечит палатка
-   +40    dd = номер заклинания при атаке героем, номер клетки при перемещении монстра, цена при сдаче (номер героя ПРОТИВНИКА (-1=нет))
-   +44    dd = позиция для атаки / действия
-   +48    dd = позиция, на которую монстр переместится телепортом / жертва Sacrifice
-   +4C    db*размер поля = доступность действия: (4934B0 копирует сюда 107 при рисовании)
-       только для человека (дает ему возможность выбрать место)
-         0 - занято декорацией или не достать по радиусу ходьбы или стоит дружеский монстр (не тот, что ходит)
-         1 - кто-то стоит (доступный для удара враг или сам ходящий монстр)
-         3 - доступно
-   +107   db*размер поля = доступность действия: (493350 заполняет)
-       только для человека или не только?
-         0 - занято декорацией или не достать по радиусу ходьбы или стоит дружеский монстр (не тот, что ходит)
-         1 - кто-то стоит (доступный для удара враг или сам ходящий монстр)
-         3 - доступно
+   +3C    dd = monster attack type number (after it go further)
+               0A - fairy dragon
+               06 - harpy witches
+               0B - medic's tent
+   +40    dd = spell number when attacking a hero, cell number when moving a monster, price for surrenderе (number of OPPONENT hero(-1=not))
+   +44    dd = the position of attack / actions
+   +48    dd = the position on which monster will teleport to / victim Sacrifice [[[[[>>>porabane tlumaczenie, ale nie wiedzialem jak inaczej<<<]]]]
+   +4C    db*field size = action availability: (4934B0 copies here 107 when drawing)
+       just for man (gives him the opportunity to choose a place)
+         0 - занято декорацией или не достать по радиусу ходьбы или стоит дружеский монстр (not the one that walks)  [[[[[>>>kompletnie nie rozumiem sensu: zajety dekoracja lub nie dostac po promieniu chodzenia lub stoi przyjazny potwor<<<<<]]]]
+         1 - someone is standing (available to strike enemy or a walking monster)
+         3 - available
+   +107   db*field size = action availability: (493350 fills)
+       only for a person or not only?
+         0 - занято декорацией или не достать по радиусу ходьбы или стоит дружеский монстр (not the one that walks)  [[[[[>>>dokladnie to samo co wyzej w uwadze<<<<]]]]
+         1 - someone is standing (available to strike enemy or a walking monster)
+         3 - available
    до +1С2
-   +1C4 db*(0x70 на клетку) поле битвы
-         +00 dw = X середины клетки
-         +02 dw = Y линии низа клетки
-         +04 dw = X начала клетки
-         +06 dw = Y начала клетки
-         +08 dw = X конца клетки
-         +0A dw = Y линии низа клетки
-         +0C dw = Y нижнего конца клетки
+   +1C4 db*(0x70 per cell) battlefield    [[>>>teraz pomyslalem, ze moze chodzic o "per frame" to w nawiasie. Dotychczas pisalem "per cell" czyli dosc doslownie. Chociaz zdania ponizej temu przecza i tam frame nie pasuje<<<<]]]]
+         +00 dw = X middle of cell
+         +02 dw = Y cell bottom lines
+         +04 dw = X cell start
+         +06 dw = Y cell start
+         +08 dw = X end of cell
+         +0A dw = Y cell bottom lines
+         +0C dw = Y lower end of the cell
          +0E dw = ? (0)
-		 +10 db &3F - препятствие (0=нет припятствий)
-		   01 - основная клетка препятствия (самая левая)
-		   02 - есть препятствие (непроходимая клетка)
+		 +10 db &3F - obstacle (0=no obstacles)
+		   01 - main obstacle cell (the leftmost)
+		   02 - there is an obstacle (impassable cell)
 		   04 - Quicksand
-		   08 - мина
-		   10 - горит стена огня
+		   08 - mine
+		   10 - fire wall burns
 		   20 - Force field
 		   40
 		   80
 		 ...
-		 +14 dd = номер препятствия в списке свойств препятствий, -1=нет
+		 +14 dd = obstacle number in the list of obstacle properties, -1=not
 		 +18 db (сторона стэка(0,1), -1=нет стэка)
 		 +19 db (номер стэка у стороны)
 		 +1A db = номер клетки 2хклеточного монстра (0 = левая, 1 = правая, -1 = 2клеточного монстра там нет)
@@ -490,8 +489,8 @@ combatManager:
    +54B8  dd = колдовал ли (0-нет, 1-да) для второго игрока
    +54BC  dd = количество реальных монстров у первого
    +54С0  dd = количество реальных монстров у второго
-   +54C4  dd -> монстры, если нет первого героя
-   +54C8  dd -> монстры, если нет второго героя
+   +54C4  dd -> potwory, jesli nie ma pierwszego bohatera
+   +54C8  dd -> potwory, jesli nie ma drugiego bohatera
    +54CC [DDD0] = структуры описания всех монстров на поле боя
    (1329C)
    +132A8 dd = ? (-1)
