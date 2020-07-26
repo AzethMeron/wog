@@ -4933,7 +4933,7 @@ struct _ERM_Addition_{
 	{'la',0,0},
 	{'go',0,0},
 // WoG Legacy
-	{'UU',ERM_Testing,0},
+	{'UU',ERM_Testing,2},
 	
 	{0,0}
 };

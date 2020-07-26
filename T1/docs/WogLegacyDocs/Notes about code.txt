@@ -210,6 +210,7 @@ dxproxy.cpp: __FILENUM__ 26 // this one is commented
 -- Thus, i've added two more files with numbers
 TestingERM.cpp: __FILENUM__ 30
 RepeatableBattle.cpp: __FILENUM__ 31
+Note: Filenum is used with error display and logging. Additionally those features use char* SourceFileList[] from common.cpp. new files must be added here too
 
 
 

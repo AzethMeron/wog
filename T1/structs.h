@@ -360,25 +360,24 @@ struct _BlackMarketInfo_{
 	Dword art[7];
 }; // size = 0x1C
 
-
 /////////////////////////////
-//    [P1+4] - начальный адрес типов объектов карты (длина 44h)
-//    [P1+8] - конечный адрес типов объектов карты
+//    [P1+4] - начальный адрес типов объектов карты (длина 44h), "starting address of map object types (length 44h)"
+//    [P1+8] - конечный адрес типов объектов карты, "final address of map object types"
 // Формат:
-//     +4  [dd] -> char * имя DEF файла
-//     +8  [dd] = длина имени DEF файла
+//     +4  [dd] -> char * имя DEF файла, "DEF file name"
+//     +8  [dd] = длина имени DEF файла, "length of DEF file name"
 //     +10 [db] = ?{2} dx
 //     +11 [db] = ?{1} dy
-//     +14 [dd*2] = ? 1 вит на элемент, всего 30h элементов
-//     +1C [dd*2] = ? 1 вит на элемент, всего 30h элементов (6 байт после DEF в карте(1))
-//     +24 [dd*2] = ? 1 вит на элемент, всего 30h элементов
-//     +2C [dd*2] = ? 1 вит на элемент, всего 30h элементов (след. 6 байт в карте(2))
-//     +38 [dd] = # типа объекта {1A-event} (4 байта из карты(4))
-//     +3C [dd] = ID объекта (4 байта из карты(5)) - подтип (тип замка,№ артифакта ...)
-//     +40 [db] = ?{00} (1 байта из карты(6))
-// структура в карте:
-// +0 dd-длина DEF,DEF имя,6б(1),6б(2),2б(-),2б(-),4б(4),4б(5),1б(-),1б(6),10hб(-)
-// *[65F458]+8+(4)*16 -> [+38] # типа объекта (коррекция старых)
+//     +14 [dd*2] = ? 1 вит на элемент, всего 30h элементов, "vit per element, total 30h elements"
+//     +1C [dd*2] = ? 1 вит на элемент, всего 30h элементов (6 байт после DEF в карте(1)), "vit per element, total 30h elements (6 bytes after DEF in map (1))"
+//     +24 [dd*2] = ? 1 вит на элемент, всего 30h элементов, "vit per element, total 30h elements"
+//     +2C [dd*2] = ? 1 вит на элемент, всего 30h элементов (след. 6 байт в карте(2)), "vit per element, total 30h elements (next 6 bytes in the card (2))"
+//     +38 [dd] = # типа объекта {1A-event} (4 байта из карты(4)), "object type {1A-event} (4 bytes from map (4))"
+//     +3C [dd] = ID объекта (4 байта из карты(5)) - подтип (тип замка,№ артифакта ...), "ID of object (4 bytes from the map (5)) - subtype (lock type, artifact number ...)"
+//     +40 [db] = ?{00} (1 байта из карты(6)), "bytes from map (6)"
+// структура в карте: "structure in the map:"
+// +0 dd-длина DEF,DEF имя,6б(1),6б(2),2б(-),2б(-),4б(4),4б(5),1б(-),1б(6),10hб(-), TRANLSATE "+0 dd-length DEF, DEF name, 6b (1), 6b (2), 2b (-), 2b (-), 4b (4), 4b (5), 1b (-), 1b (6 ), 10hb (-)"
+// *[65F458]+8+(4)*16 -> [+38] # типа объекта (коррекция старых), TRANSLATE "* [65F458] +8+ (4) * 16 -> [+38] # object type (old correction)"
 struct _Types_{
 	Dword  _u1;      //+0
 	char   *defname; //+4
@@ -395,28 +394,31 @@ struct _Types_{
 	Byte    Flat,_u10,_u11,_u12;
 };
 
-//    [P1+24] - начальный адрес указатели на имя DEF файла для типа (длина 4h)
-//    [P1+28] - конечный адрес
-// Формат:
+//    [P1+24] - начальный адрес указатели на имя DEF файла для типа (длина 4h), "starting address pointers to DEF file name for type (length 4h)"
+//    [P1+28] - конечный адрес, "final address"
+// Формат: "Format:"
 
-//    [P1+14] - начальный адрес положений объектов карты (длина 0Ch)
-//    [P1+18] - конечный адрес положений объектов карты
+//    [P1+14] - начальный адрес положений объектов карты (длина 0Ch), "starting address of map object positions (length 0Ch)"
+//    [P1+18] - конечный адрес положений объектов карты, "end address of map object locations"
 // Формат:
-//    +0  [db] - n порядковый номер среди таких же объектов FF-порядок нормирован 
+//    +0  [db] - n порядковый номер среди таких же объектов FF-порядок нормирован, "n sequence number among the same objects FF-order is normalized"
 //    +1  [db] - бу1
 //    +2  [db] - бу2
 //    +3  [db] - бу3
-//        +0 dd - номер подтипа героя (для героев)
-//        +0 dd - номер сира (для сиров)
+//        +0 dd - номер подтипа героя (для героев), "hero subtype number (for heroes)"
+//        +0 dd - номер сира (для сиров), "sire number (for sires)" ???
 //    +4  [db] - x
 //    +5  [db] - y
 //    +6  [db] - level
 //    +7  [db] - ?
-//    +8  [dw] - номер типа по порядку загрузки в таблицу типов
+//    +8  [dw] - номер типа по порядку загрузки в таблицу типов, "type number in the order of loading into the type table"
 //    +A  [db] - ?
 // структура в карте:
 // 1(x),1(y),1(l),2(t),2(-),5(-)
 // 504D04 - вычисляет +A [db]
+// structure in the map:
+// 1 (x), 1 (y), 1 (l), 2 (t), 2 (-), 5 (-)
+// 504D04 - calculates + A [db]
 struct _Position_{
 //  Byte  ser,c1,c2,_u2;
 	Dword SetUp;
@@ -424,7 +426,7 @@ struct _Position_{
 	Word  num; // номер дефа
 	Byte  t,_v2;
 };
-// первые 4 байта для монстров
+// первые 4 байта для монстров, "first 4 bytes for monsters"
 struct _CMonster_{
 	unsigned  Number    :12; // +00 число
 	unsigned  Agression : 5; // +0C 1C-присоединяется, 0A-кровожадное
@@ -436,7 +438,7 @@ struct _CMonster_{
 	unsigned _u1        : 4; // +1B
 	unsigned  HasSetUp  : 1; // +1F имеет настройку структуры монстра
 }; 
-// первые 4 байта для учителя
+// первые 4 байта для учителя, "first 4 bytes for scholar"
 struct _CSchoolar_{ // type 0x51
 	unsigned  Type  : 3; // чему учит (0-перв.ум.,1-втор.ум.,2-заклин)
 	unsigned  PSkill: 3;
@@ -444,75 +446,75 @@ struct _CSchoolar_{ // type 0x51
 	unsigned  Spell :10;
 	unsigned _u1    : 9;
 };
-// первые 4 байта для LE
+// первые 4 байта для LE, "first 4 bytes for LE"
 struct _EventPos_{
-	unsigned  Number   : 10; // номер по порядку загрузки
-	unsigned  Enabled4 :  8; // кому можно активировать
-	unsigned  AIEnable :  1; // можно ли AI
-	unsigned  OneVisit :  1; // отменить после первого посещения
+	unsigned  Number   : 10; // номер по порядку загрузки, "boot order number"
+	unsigned  Enabled4 :  8; // кому можно активировать, "which player may activate"
+	unsigned  AIEnable :  1; // можно ли AI, "AI may activate"
+	unsigned  OneVisit :  1; // отменить после первого посещения, "cancel after first visit"
 	unsigned _u1       : 12; // ?
 };
-// первые 4 байта для сундука
+// первые 4 байта для сундука, "the first 4 bytes for the chest"
 struct _CChest_{  // type 101 (дес)
-	unsigned  ArtNum : 10;  // номер артифакта
-	unsigned  HasArt :  1;  // артифакт (1) или бонус (0)
-	unsigned  Bonus  :  4;  // бонус золота * 500 (опыт * 500 - 500)
+	unsigned  ArtNum : 10;  // номер артифакта, "number of Artifact"
+	unsigned  HasArt :  1;  // артифакт (1) или бонус (0), "artifact (1) or bonus (0)"
+	unsigned  Bonus  :  4;  // бонус золота * 500 (опыт * 500 - 500), "gold bonus * 500 (experience * 500 - 500)"
 	unsigned _u1     : 17;
 };
-// первые 4 байта для ресурсов
+// первые 4 байта для ресурсов, "first 4 bytes for resources"
 struct _CRes_{
-	unsigned Value    : 19;  // количество ресурся
-	unsigned SetUpNum : 12;  // номер в структуре _ArtRes_
-	unsigned HasSetUp :  1;  // есть настройка
+	unsigned Value    : 19;  // количество ресурся, "amount of resources"
+	unsigned SetUpNum : 12;  // номер в структуре _ArtRes_, "number in the _ArtRes_ structure"
+	unsigned HasSetUp :  1;  // есть настройка, "there is a setting"
 };
-// первые 4 байта для могилы воина
+// первые 4 байта для могилы воина, "first 4 bytes for the warrior's grave"
 struct _CWTomb_{ // type 0x6C
-	unsigned  HasArt :  1;  // арт. еще есть
+	unsigned  HasArt :  1;  // арт. еще есть, "is artifact still inside"
 	unsigned _u1     :  4;
-	unsigned  Whom   :  8;  // кто уже посетил
-	unsigned  ArtNum : 10;  // номер арт
+	unsigned  Whom   :  8;  // кто уже посетил, "who have already visited""
+	unsigned  ArtNum : 10;  // номер арт, "artifact number"
 	unsigned _u2     :  9;
 };
-// первые 4 байта для дерева знаний
+// первые 4 байта для дерева знаний, "first 4 bytes for the knowledge tree"
 struct _CKTree_{ // type 0x66
-	unsigned  Number :  5;  // номер, всего 32
-	unsigned  Whom   :  8;  // кто уже посетил
+	unsigned  Number :  5;  // номер, всего 32, "number, total 32"
+	unsigned  Whom   :  8;  // кто уже посетил, "who have already visited"
 	unsigned  Type   :  2;  // 0,1,2
 	unsigned _u1     : 17;
 };
-// первые 4 байта для костра
+// первые 4 байта для костра, "first 4 bytes for bonfire"
 struct _CFire_{ // type 0x0C
 	unsigned  ResType :  4;
 	unsigned  ResVal  : 28;
 };
-// первые 4 байта для норы
+// первые 4 байта для норы, "first 4 bytes for lean-to"
 struct _CLean_{ // type 0x27
-	unsigned  Number  :  5; // =0 - пуст
+	unsigned  Number  :  5; // =0 - пуст, "empty"
 	unsigned _u1      :  1;
 	unsigned  ResVal  :  4;
 	unsigned  ResType :  4;
 	unsigned _u2      : 18;
 };
-// первые 4 байта для хижины ведьмы
+// первые 4 байта для хижины ведьмы, "first 4 bytes for the witch's hut"
 struct _CWHat_{ // type 0x71
 	unsigned _u1      :  5;
 	signed    Whom    :  8; // кто посетил
 	signed    SSkill  :  7; // номер втор. умения
 	unsigned _u2      : 12;
 };
-// первые 4 байта для обучающего камня
+// первые 4 байта для обучающего камня, "first 4 bytes for learning stone"
 struct _CLStone_{ // type 0x64
 	int Number;     // номер камня
 };
-// первые 4 байта для сада откровения
+// первые 4 байта для сада откровения, "first 4 bytes for garden of revelation"
 struct _CPluss_{ // type 0x20 ...
 };
-// NO первые 4 байта для конюшни type 0x5E 
-// NO первые 4 байта для фонтана молодости type 0x1F - настройки нет 4C1E2F
-// NO первые 4 байта для домика фей type 0x1C 
-// NO первые 4 байта для фонтана удачи type 0x1E
-// NO первые 4 байта для оазиса type 0x38
-// первые 4 байта для телеги
+// NO первые 4 байта для конюшни type 0x5E, "NO first 4 bytes for stable type 0x5E"
+// NO первые 4 байта для фонтана молодости type 0x1F - настройки нет 4C1E2F, "NO first 4 bytes for the fountain of youth type 0x1F - no settings 4C1E2F"
+// NO первые 4 байта для домика фей type 0x1C, "NO first 4 bytes for fairy house type 0x1C"
+// NO первые 4 байта для фонтана удачи type 0x1E, "NO first 4 bytes for luck fountain type 0x1E"
+// NO первые 4 байта для оазиса type 0x38, "NO first 4 bytes for oasis type 0x38"
+// первые 4 байта для телеги, "first 4 bytes for cart"
 struct _CWagon_{ // type 0x69
 	unsigned  ResVal  :  5; // кол-во ресурса
 	signed    Whom    :  8; // кто посетил
@@ -811,6 +813,9 @@ struct _CastleEvent_{
 	Byte   BuildIt[6],_u5[2];
 	Word   Cr[7],_u6;
 };
+
+// *******************************************
+
 // Seer:
 //    [P1+64/(B4)] - начальный адрес настройки объектов карты (длина 13h/(4))
 //    [P1+68/(B8)] - конечный адрес 
@@ -834,6 +839,32 @@ struct _CastleEvent_{
 //    +30  dd =  длина сообщ3
 //    +34  dd = ? (1F)
 //    +40  dd = Id кого ищем
+
+// Seer:
+// [P1 + 64 / (B4)] - initial address of setting map objects (length 13h / (4))
+// [P1 + 68 / (B8)] - end address
+// 574780 loads part of what to look for
+// +0 dd -> what structure to bring
+// +5 db (d) = what type we give
+// +9 db (d) =?
+// + D dw = amount of experience (type A)
+// structure of what we are looking for
+// +0 dd
+// +4 dd
+// + C dd -> message1
+// +10 dd = message length1
+// +14 dd =? (1F)
+// +18 dd
+// + 1C dd -> message2
+// +20 dd = message length2
+// +24 dd =? (1F)
+// +28 dd
+// + 2C dd -> message3
+// +30 dd = message length 3
+// +34 dd =? (1F)
+// +40 dd = Id who we are looking for
+
+// *******************************************
 
 //   ADR0+000A4 db*334*N - описание всех типов героев
 //   +0   db   = хозяин (цвет) FF - ничей
@@ -869,6 +900,41 @@ struct _CastleEvent_{
 //   +320 db*A = заклинания
 //   +32C db   = 1-есть первичные умения
 //   +32D db*4 = 4-ре первичных умения
+
+// ADR0 + 000A4 db * 334 * N - description of all types of heroes
+// +0 db = owner (color) FF - no one
+// +4 dd = subtype number (specific hero)
+// +8 dd = Id
+// + C db = 1-there is a name
+// + D db * D = name, 0
+// + 1A db = 1-experience
+// + 1C dd = experience
+// +20 db = 1-there is a picture
+// +21 db = picture number
+// +22 db = 1-there are 2nd skills
+// +24 dd = num. second skills
+// +28 dd * 8 = second skill numbers
+// +30 db * 8 = second skill levels
+// +38 db = 1-there are creatures
+// + 3C dd * 7 = creature types
+// +58 dw * 7 = number of creatures
+// +66 db = group / spread
+// +67 db = 1-there are artifacts
+// +68 dd * 2 * 13 = artifacts dd-number, dd- (FF) + E8 -book (3, FF)
+// +100 dd * 2 * 40 = art in backpack dd-number, dd- (FF)
+// +300 db = number of artifacts in the backpack
+// +301 dw * 2 = starting position on the map
+// +305 db = run radius
+// +306 db = 1-there is a biography
+// +308 dd = 1-memory allocated for biography
+// + 30C dd -> uk. for biography
+// +310 dd = biography length
+// +314 dd =? (1F)
+// +318 dd = 0-m, 1-f, FF-default
+// + 31C db = 1-there are spells
+// +320 db * A = spells
+// + 32C db = 1-there are primary skills
+// + 32D db * 4 = 4 primary skills
 struct _THero_{
 	char    Owner;   //! = хозяин (цвет) FF - ничей
 	Byte   _u1[3];
@@ -914,6 +980,8 @@ struct _THero_{
 	Byte   _u12[3];
 };
 
+// *******************************************
+
 //   ADR0+21620 db*492h*N - описания конкретных героев (формируется 4CACAE)
 //   +00  dw    = x position
 //   +02  dw    = y position
@@ -945,6 +1013,38 @@ struct _THero_{
 //   +3EA db*46 = заклинание (есть/нет)
 //   +430 db*46 = уровень заклинания (>=1)
 //   +476 db*4  = первичные навыки
+
+// ADR0 + 21620 db * 492h * N - descriptions of specific heroes (formed by 4CACAE)
+// +00 dw = x position
+// +02 dw = y position
+// +04 dw =? upper part y (y <<2>> C)
+// +18 dw =? spell points
+// + 1A dd = subtype number 0 ... 9B - specifies the specialization (may vary)
+// + 1E dd = Id
+// +22 db = host (color)
+// +23 db * D = name, 0
+// +30 dd = str [8] str = (* [67CD08]) [subtype number * 5C]
+// +34 db = picture number
+// +44 db = base x to run around (FF-unlimited)
+// +45 db = base y to go around (FF-unlimited)
+// +46 db = run radius (FF-unlimited)
+// +49 dd = experience to trail level
+// + 4D dd = experience to trail level
+// +51 dd = modef. experience
+// +55 dd =? slay strength = level
+// +91 dd * 7 = creature type (-1 - no)
+// + AD dd * 7 = amount
+// + C9 db * 1C = the level of 2 skills (one byte is the level of this skill number 1,2,3) 0-no
+// + E5 db * 1C = the order of displaying 2 skills in the hero window (1,2,3,4,5,6)
+// +101 dd = the number of 2 skills
+// + 12D dd * 2 * 13 = artifacts dd-number, dd- (FF) -book (3, FF)
+// + 1D4 dd * 2 * 40 = art in backpack dd-number, dd- (FF)
+// + 3D5 dd = floor
+// + 3D9 db = biography available
+// + 3DA dd -> biography
+// + 3EA db * 46 = spell (yes / no)
+// +430 db * 46 = spell level (> = 1)
+// +476 db * 4 = primary skills
 struct _Hero_{
 	Word   x;        //   +00  dw    = x position
 	Word   y;        //   +02  dw    = y position

@@ -7,7 +7,7 @@
 
 #define __FILENUM__ 30
 
-// Header file for Testing ERM Receiver and Trigger
+// Source file for Testing ERM Receiver and Trigger
 // ~!!!
 
 double round( double fValue )
@@ -17,7 +17,7 @@ double round( double fValue )
 }
 
 // Argument type: 0 - none. It changes frequently
-int ERM_Testing(char Cmd,int Num,_ToDo_* /*sp*/,Mes *Mp)
+int ERM_Testing(char Cmd,int Num,_ToDo_* sp,Mes *Mp)
 {
 	STARTNA(__LINE__, 0)
 	//Dword MixPos=GetDinMixPos(sp);
@@ -71,8 +71,20 @@ int ERM_Testing(char Cmd,int Num,_ToDo_* /*sp*/,Mes *Mp)
 			if(Apply(&output,4,Mp,3) == 0) { MError2("Cannot set parameter 4 - output value"); RETURN(0)}
 		} break;
 
+		case 'M':
+		{
+			CHECK_ParamsNum(2);
+			int slot;
+			if(Apply(&slot,4,Mp,0)) { MError2("Cannot get parameter 1 - slot"); RETURN(0); }
+			Dword MixPos=GetDinMixPos(sp);
+			_MapItem_ *mip=GetMapItem2(MixPos);
+			_BlackMarketInfo_ *ob = (_BlackMarketInfo_*) mip;
+			Apply(&ob->art[slot] ,4,Mp,1);
+			// Doesn't work
+		} break;
+
 		default:
-			EWrongCommand();
+			{ EWrongCommand(); }
 			break;
 	}
 	RETURN(1);

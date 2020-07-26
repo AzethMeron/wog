@@ -32,32 +32,37 @@ int  *IPDummy;
 
 char *SourceFileList[]={
 	"undefined", //0
-	"erm",       //1
-	"herospec",  //2
-	"service",   //3
-	"common",    //4
-	"casdem",    //5
-	"monsters",  //6
-	"womo",      //7
-	"b1",        //8
-	"anim",      //9
-	"sound",     //10
-	"ai",        //11
-	"npc",       //12
-	"Setup",     //13
-	"String",    //14
-	"CrExpo",    //15
-	"artifact",  //16
-	"txtfile",   //17
-	"timer",     //18 3.59+
-	"lod",       //19
-	"dlg",       //20
-	"spell",     //21
-	"global",    //22
+	"erm.cpp",       //1
+	"herospec.cpp",  //2
+	"service.cpp",   //3
+	"common.cpp",    //4
+	"casdem.cpp",    //5
+	"monsters.cpp",  //6
+	"womo.cpp",      //7
+	"_B1.cpp",        //8
+	"anim.cpp",      //9
+	"sound.cpp",     //10
+	"ai.cpp",        //11
+	"npc.cpp",       //12
+	"Setup",     //13 ???
+	"string.cpp",    //14
+	"CrExpo.cpp",    //15
+	"artifact.cpp",  //16
+	"txtfile.cpp",   //17
+	"timer.cpp",     //18 3.59+
+	"lod.cpp",       //19
+	"dlg.cpp",       //20
+	"spell.cpp",     //21
+	"global.cpp",    //22
 	"?", //23
-	"luaW_dlg",  //24
-	"erm_lua",   //25
-	"?",
+	"luaW_dlg.h",  //24
+	"erm_lua.cpp",   //25
+	"?", // 26, it is in dxproxy.cpp BUT commented
+	"?", // 27
+	"?", // 28
+	"?", // 29
+	"TestingERM.cpp", // 30
+	"RepeatableBattle.cpp", // 31
 	"?",
 	"?",
 	"?",
