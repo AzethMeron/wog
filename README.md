@@ -7,6 +7,8 @@ Most important features: https://drive.google.com/file/d/1QxOKFQ6G0NerG8xEb-2iGE
 
 Building from source tutorial: https://drive.google.com/open?id=1gpGqdj4BOo-crjxbtmoPp9r81cZDBBEZ&fbclid=IwAR0P7ZD2XBeMHBLDx41OMqfhkhBqC-8bxE02asWiw_z0dnfyXvCKCOJgqOc
 
+Working with ERM Parser: https://drive.google.com/file/d/1sGtK0E1DeOZMMu59FtbJzi_TIYMhgUAT/view?usp=sharing
+
 Always up-to-date ERM/Lua Help: https://azethmeron.github.io
 
 (Polish) ERM tutorial: https://drive.google.com/open?id=1L8I4NZUse8CTkazf7BCal9WEhZPrGJPQ&fbclid=IwAR10yjwbRjQhgGfTDaNN34BVghvbe1zJlyVLDTRrKCsG-jMrE-t1bEIb1Ls
