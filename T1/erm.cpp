@@ -4727,11 +4727,11 @@ int ERM_HintDisplay(char Cmd,int Num,_ToDo_*sp,Mes *Mp);
 /// ERM ERM ERM
 ///////////////////////////////////////////////
 struct _ERM_Trigger_{ // triggers with 1 or no parameters
-	Word Id;
-	int Event; // the start of events range
-	int paramMin;
-	int paramMax;
-	Byte post;
+	Word Id; // name of trigger, for example 'BA'
+	int Event; // the start of events range, UNIQUE identifier
+	int paramMin; // minimum parameter value
+	int paramMax; // maximum parameter value
+	Byte post; // post trigger ?
 } ERM_Triggers[]=
 {
 	{'IP',30330,0,3},          // IP#;
@@ -4850,9 +4850,9 @@ struct _ERM_Trigger_{ // triggers with 1 or no parameters
 //////////////////////////////
 
 struct _ERM_Addition_{
-	Word   Id;
-	int  (*Fun)(char,int,_ToDo_ *,Mes *);
-	int    Type;
+    Word   Id; // "name", like 'QW', 'UN'
+    int  (*Fun)(char,int,_ToDo_ *,Mes *); // function to be called
+    int    Type; // Type, represents arguments of receiver (NOT command!)
 } ERM_Addition[]={
 	{'CD',ERM_CasDem,0},
 	{'MA',ERM_MonAtr,0},

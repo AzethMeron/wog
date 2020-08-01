@@ -83,8 +83,20 @@ int ERM_Testing(char Cmd,int Num,_ToDo_* sp,Mes *Mp)
 			// Doesn't work
 		} break;
 
+		case 'Z':
+		{
+			int u1, u2, u3;
+			int temp = -10;
+			temp = Apply(&u1,sizeof(u1),Mp,0);
+			Message(Format("%d",temp));
+			temp = Apply(&u2,sizeof(u2),Mp,1);
+			Message(Format("%d",temp));
+			temp = Apply(&u3,sizeof(u3),Mp,2);
+			Message(Format("%d",temp));
+		} break;
+
 		default:
-			{ EWrongCommand(); }
+			{ EWrongCommand(); RETURN(0); }
 			break;
 	}
 	RETURN(1);
