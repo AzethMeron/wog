@@ -6,12 +6,6 @@ To add trigger:
 - call function 'ProcessERM();'
 - done, parser will deal with everything else
 
-Most of editable (via erm) objects are declared in structs.h
-Huge need to translate everything here from russian, and figure out how it is connected to ingame data
-Edit: lets discuss adventure map objects. Example: shipyard. Coords are taken from receiver arguments (SY(998) f.e.) stored in _ToDo*. Game loads data from memory via GetMapItem into _MapItem_* struct. It is universal struct for adv map objects.  Next, this pointer is casted to _CShipyard_*, dont know how. All changes to this struct are reflected ingame without synchronization, so it looks like it pointa directly to data in game memory. 
-Getting _MapItem_* - looks like its pointer directly to game memory. Wog gets pointer to 1dim array of objects, then calculates using x,y,z and Mapsize index in this array, then returns &Temp[index]. Mapsize itself is loaded from memory aswell within same function GetMapItem(
-If the above is correvt, it means that _MapItem_ is actual representation of any adv map tile in the game, and the game stores them one by one, in given order. 
-
 Testing trigger: !?UU; and receiver !!UU...
 Added for convenience, they are stored in separate files: TestingERM.h/cpp
 For experiments and testing only. For trigger, use pointer=30378.
