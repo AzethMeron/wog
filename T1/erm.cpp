@@ -5161,7 +5161,8 @@ _ok:
  RETURN(ERMMesBuf[4])
 }
 
-void Mess(Mes *m)
+// Error message for ERM
+void Mess(Mes *m, int Num)
 {
 	STARTNA(__LINE__,&m->m.s[m->i])
 //  DATAIT;
@@ -5169,12 +5170,90 @@ void Mess(Mes *m)
 	char last = m->m.s[m->m.l];
 	m->m.s[m->m.l] = 0;
 
-	Message(Format("%s\n\n%s", ITxt(24,0,&Strings), LuaPushERMInfo(m->m.s, false)),1);
+	if(Message(Format("%s\n\n%s\n\nDo you wish to see command parameters?", ITxt(24,0,&Strings), LuaPushERMInfo(m->m.s, false)),2)) ErmErrorShowParam(m,Num);
+
 	lua_pop(Lua, 1);
 
 	m->m.s[m->m.l] = last;
 	++m->i;
 	RETURNV
+}
+
+// Error message - show parameters
+// by Jakub Grzana. Work in progress i guess
+void ErmErrorShowParam(Mes* Mp, int Num)
+{
+	const int bufsize = 3000;
+	// Allocating memory. It's deleted at the end. Don't use return, or anything like this
+	char* message = new char[bufsize];
+	char* buffer = new char[bufsize];
+	// Two tables above are often swapped, inside for loop
+	const char* Type[] = {
+		"constant", // 0
+		"flag", // 1
+		"fast-var: f..t", // 2
+		"v-var", // 3
+		"w-var", // 4
+		"x-var", // 5
+		"y-var", // 6
+		"z-var", // 7
+		"e-var", // 8
+		"unrecognised",
+		"unrecognised",
+	};
+	const char* Check[] = {
+		"set", // 0
+		"?", // 1
+		"=", // 2
+		"<>", // 3
+		">", // 4
+		"<", // 5
+		">=", // 6
+		"<=", // 7
+		"unrecognised",
+		"unrecognised",
+	};
+	char* dsyntax[] = {
+		"", // 0
+		"d", // 1
+	};
+	
+	// Header
+	sprintf_s(message, bufsize, "{%s}\n\
+		Number of parameters: {%d}\n\
+		Note: values doesn't work for strings\n\n\
+		", Mp->m.s, Num);
+
+	// Parameters
+	for(int i = 0; i < Num; ++i)
+	{
+		const VarNum& parameter = Mp->VarI[i]; // for easier access
+		int ds = Mp->f[i];
+		if(ds!=1) ds = 0;
+		int value = 0;
+		Apply(&value,sizeof(value),Mp,i);
+		if(parameter.IType == 0) // constant value 
+		{
+			sprintf_s(buffer, bufsize, "%s\
+				Parameter {%d}, type {%s}, syntax {%s%s}, index {%s}, value {%d}\n",
+				message, i+1, Type[parameter.Type], dsyntax[ds], Check[parameter.Check], Type[parameter.IType], parameter.Num, value );
+		}
+		else // indexed value
+		{
+			sprintf_s(buffer, bufsize, "%s\
+				Parameter {%d}, type {%s}, syntax {%s%s}, index {%s}, index number {%d}, value {%d}\n",
+				message, i+1, Type[parameter.Type], dsyntax[ds], Check[parameter.Check], Type[parameter.IType], parameter.Num, value );
+		}
+		// Swapping
+		char* temp = message;
+		message = buffer;
+		buffer = temp;
+	}
+	Message(message);
+
+	// Deallocating memory
+	delete message;
+	delete buffer;
 }
 
 //static char NoERMString[]="*** ERM String Error ***";
@@ -7898,7 +7977,7 @@ l_exit:
 	ErrorCmd.Cmd = oldCmd;
 	M.i=Ind;
 	if(PL_ERMErrDis==0 && ErrString.str!=LuaErrorString){
-		Mess(&M);
+		Mess(&M,Num);
 	}
 	RETURNV
 }
