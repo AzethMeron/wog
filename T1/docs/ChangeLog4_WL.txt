@@ -6,9 +6,9 @@ New syntax for receiver BA
 		1 - dummy parameter, but must be present
 
 New command for receiver UX
-	!!UX:D$;
-		$ - string, z-var or ^^ constant. Maximum size: 256 chars.
-UX:D allows to display error message using internal tools. Might be useful for debugging. Disabling error messages using P904 disables those aswell.
+	!!UX:D#;
+		# - string, z-var or ^^ constant. Maximum size: 256 chars.
+UX:D allows to display error message using internal tools. Might be useful for debugging. Works with UN:P904 and UN:P905
 
 [+] In Lua/ERM you can use ".pre" ".firstpre" ".post" instead of ".?" ".first?" ".$".
 [+] In Lua/ERM trigger type (pre, firstpost) letter case no longer matters. You can use "FirstPost", or "FiRsTpOsT".
