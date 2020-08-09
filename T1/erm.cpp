@@ -1591,7 +1591,7 @@ int ERM_UniversalEx(char Cmd,int Num,_ToDo_*,Mes *Mp)
 			CHECK_ParamsNum(1);
 			v = timeGetTime();
 			if (Apply(&v, 4, Mp, 0)) break;
-			Message(Format("Time delta: %d", timeGetTime() - v));
+			Message(Format("Time delta: %d ms", timeGetTime() - v));
 			break;
 		}
 
