@@ -3215,9 +3215,10 @@ int ERM_MAction(char Cmd,int Num,_ToDo_* /*sp*/,Mes *Mp)
 		case 'D': Apply((int *)&bm[0x44],4,Mp,0); break; // позиция куда атака
 		case 'X': Apply((int *)&bm[0x48],4,Mp,0); break; // доп. позиция телепорта / дертвы
 		case 'Q': // (проверка) атакующая сторона
-			v=*(int *)&bm[0x132C0];
-			Apply(&v,4,Mp,0);
-			break;
+			{ 
+				v=*(int *)&bm[0x132C0];
+				if(Apply(&v,4,Mp,0) == 0) { MError2("-cannot set current attacking side"); RETURN(0);}
+			} break;
 		case 'H': // текущий герой-хозяин
 			v=*(int *)&bm[0x132C0];
 			hp=*(_Hero_ **)&bm[0x53CC+v*4];
@@ -4424,7 +4425,7 @@ int ERM_MonRes(char Cmd,int/*Num*/,_ToDo_* /*sp*/,Mes *Mp) //!!MR
 			v = *((int*)0x699420) + 0x54CC; // the first monster address
 			v = ((int)MR_Mon - v)/0x548;
 			if (v < 0 || v > 41)  v = -1; // a copy of real monster was passed to !?MR
-			Apply(&v,4,Mp,0);
+			if(Apply(&v,4,Mp,0) == 0) { MError2("-cannot set stack number on battlefield"); RETURN(0); }
 			break;
 		case 'S': // номер спелла
 			Apply(&MR_Spell,4,Mp,0); break;

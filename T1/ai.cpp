@@ -330,15 +330,21 @@ int ERM_AIRun(char Cmd,int Num,_ToDo_* /*sp*/,Mes *Mp)
 			break;
 		case 'W': // weight
 			CHECK_ParamsMin(1);
-			if (Num > 1 && Mp->n[1] == 1)
-				Apply(&AIstruct->StdVal, 4, Mp, 0);
+			if (Num > 1 && Mp->n[1] == 1) // Base
+			{
+				int backup_val = AIstruct->StdVal;
+				if(Apply(&AIstruct->StdVal, 4, Mp, 0) == 0) { MError2("-cannot set base weight of square"); AIstruct->StdVal = backup_val; RETURN(0);}
+			}
 			else
 				Apply(&AIstruct->Val, 4, Mp, 0);
 			break;
 		case 'M': // movement cost
 			CHECK_ParamsMin(1);
-			if (Num > 1 && Mp->n[1] == 1)
-				Apply(&AIstruct->BaseDist, 4, Mp, 0);
+			if (Num > 1 && Mp->n[1] == 1) // Base
+			{
+				int backup_val = AIstruct->BaseDist;
+				if(Apply(&AIstruct->BaseDist, 4, Mp, 0) == 0) { MError2("-cannot set base movement distance"); AIstruct->BaseDist = backup_val; RETURN(0); }
+			}
 			else
 				Apply(AIstruct->Dist, 4, Mp, 0);
 			break;

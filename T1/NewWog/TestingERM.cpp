@@ -30,7 +30,7 @@ int ERM_Testing(char Cmd,int Num,_ToDo_* sp,Mes *Mp)
 			Message(Format("(Internal) Pointer value: %lu", pointer));
 		} break;
 
-		// Get square root of value
+		// Get square root of value. No support for float variables
 		case 'R':
 		{
 			CHECK_ParamsNum(3)
@@ -54,7 +54,7 @@ int ERM_Testing(char Cmd,int Num,_ToDo_* sp,Mes *Mp)
 			ProcessERM();
 		} break;
 
-		// Calculate natural logaritm (n-based) of value
+		// Calculate logaritm (n-based) of value
 		case 'L':
 		{
 			CHECK_ParamsNum(4)
@@ -71,6 +71,7 @@ int ERM_Testing(char Cmd,int Num,_ToDo_* sp,Mes *Mp)
 			if(Apply(&output,4,Mp,3) == 0) { MError2("Cannot set parameter 4 - output value"); RETURN(0)}
 		} break;
 
+		// Black market receiver - TODO, doesn't work now
 		case 'M':
 		{
 			CHECK_ParamsNum(2);
@@ -81,18 +82,6 @@ int ERM_Testing(char Cmd,int Num,_ToDo_* sp,Mes *Mp)
 			_BlackMarketInfo_ *ob = (_BlackMarketInfo_*) mip;
 			Apply(&ob->art[slot] ,4,Mp,1);
 			// Doesn't work
-		} break;
-
-		case 'Z':
-		{
-			int u1, u2, u3;
-			int temp = -10;
-			temp = Apply(&u1,sizeof(u1),Mp,0);
-			Message(Format("%d",temp));
-			temp = Apply(&u2,sizeof(u2),Mp,1);
-			Message(Format("%d",temp));
-			temp = Apply(&u3,sizeof(u3),Mp,2);
-			Message(Format("%d",temp));
 		} break;
 
 		default:
