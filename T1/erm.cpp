@@ -5187,7 +5187,7 @@ void GetVarNumDescription(char* destination, int length, VarNum& var)
 	case 0: /* set syntax */ {
 		switch(var.Type)
 		{
-		case 0: { sprintf_s(destination,length,"{%s} value %d", Type[var.Type], var.Num); } break;
+		case 0: { if(var.Num == 0) sprintf_s(destination,length,"{%s} value %d, or constant {string} (^string^)", Type[var.Type], var.Num); else sprintf_s(destination,length,"{%s} value %d", Type[var.Type], var.Num); } break;
 		case 2: { sprintf_s(destination,length,"{%s}, value %d", Type[var.Type], GetVarVal(&var)); } break;
 		case 7: { if(var.IType == 0) /*Constant-indexed zvar*/ { sprintf_s(destination,length,"{%s%d}, strings aren't displayed here", Type[var.Type], var.Num); } 
 				 else /*Indexed with another variable*/ { sprintf_s(destination,length,"{%s%s%d}, index %s%d=%d, strings aren't displayed here", Type[var.Type], Type[var.IType], var.Num, Type[var.IType], var.Num, GetVarIndex(&var,true)); } } break;
@@ -5248,7 +5248,7 @@ void Mess(_ToDo_* sp, Mes *m, const int& Num)
 	}
 
 	// Display
-	Message(message);
+	Message(message,1);
 	// ???
 	lua_pop(Lua, 1);
 	m->m.s[m->m.l] = last;
