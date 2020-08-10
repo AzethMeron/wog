@@ -5161,99 +5161,103 @@ _ok:
  RETURN(ERMMesBuf[4])
 }
 
-// Error message for ERM
-void Mess(Mes *m, int Num)
+// destination - string to store output
+// length - size of destination string
+// Created for arguments and parameters of receiver. Doesn't support 'dependencies flags' 
+// Oh god this function is TRASH! Please smb remake this
+// No support for constant ^^ strings
+void GetVarNumDescription(char* destination, int length, VarNum& var)
 {
-	STARTNA(__LINE__,&m->m.s[m->i])
-//  DATAIT;
-//  Message("{ERM} Command has wrong syntax. Skipped.",1);
-	char last = m->m.s[m->m.l];
-	m->m.s[m->m.l] = 0;
-
-	if(Message(Format("%s\n\n%s\n\nDo you wish to see command parameters?", ITxt(24,0,&Strings), LuaPushERMInfo(m->m.s, false)),2)) ErmErrorShowParam(m,Num);
-
-	lua_pop(Lua, 1);
-
-	m->m.s[m->m.l] = last;
-	++m->i;
-	RETURNV
-}
-
-// Error message - show parameters
-// by Jakub Grzana. Work in progress i guess
-void ErmErrorShowParam(Mes* Mp, int Num)
-{
-	const int bufsize = 3000;
-	// Allocating memory. It's deleted at the end. Don't use return, or anything like this
-	char* message = new char[bufsize];
-	char* buffer = new char[bufsize];
-	// Two tables above are often swapped, inside for loop
+	sprintf_s(destination, length, "GetVarNumDescription error: report this");
 	const char* Type[] = {
 		"constant", // 0
 		"flag", // 1
-		"fast-var: f..t", // 2
-		"v-var", // 3
-		"w-var", // 4
-		"x-var", // 5
-		"y-var", // 6
-		"z-var", // 7
-		"e-var", // 8
-		"unrecognised",
-		"unrecognised",
+		"fast-var", // 2
+		"v", // 3
+		"w", // 4
+		"x", // 5
+		"y", // 6
+		"z", // 7
+		"e", // 8
+		"unrecognised", // 9
+		"unrecognised", // 10
 	};
-	const char* Check[] = {
-		"set", // 0
-		"?", // 1
-		"=", // 2
-		"<>", // 3
-		">", // 4
-		"<", // 5
-		">=", // 6
-		"<=", // 7
-		"unrecognised",
-		"unrecognised",
-	};
-	char* dsyntax[] = {
-		"", // 0
-		"d", // 1
-	};
-	
+	switch(var.Check)
+	{
+	case 0: /* set syntax */ {
+		switch(var.Type)
+		{
+		case 0: { sprintf_s(destination,length,"{%s} value %d", Type[var.Type], var.Num); } break;
+		case 2: { sprintf_s(destination,length,"{%s}, value %d", Type[var.Type], GetVarVal(&var)); } break;
+		case 7: { if(var.IType == 0) /*Constant-indexed zvar*/ { sprintf_s(destination,length,"{%s%d}, strings aren't displayed here", Type[var.Type], var.Num); } 
+				 else /*Indexed with another variable*/ { sprintf_s(destination,length,"{%s%s%d}, index %s%d=%d, strings aren't displayed here", Type[var.Type], Type[var.IType], var.Num, Type[var.IType], var.Num, GetVarIndex(&var,true)); } } break;
+		default: { if(var.IType == 0) /*Constant-indexed variable*/ { sprintf_s(destination,length,"{%s%d}, value {%d}", Type[var.Type], var.Num, GetVarVal(&var)); } 
+				 else /*Indexed with another variable*/ { sprintf_s(destination,length,"{%s%s%d}, index %s%d=%d, value {%d}", Type[var.Type], Type[var.IType], var.Num, Type[var.IType], var.Num, GetVarIndex(&var,true), GetVarVal(&var)); } } break;
+		}
+	} break; 
+	case 1: /* get syntax */ {
+		switch(var.Type)
+		{
+		case 0: { sprintf_s(destination,length,"error: you can't use get-syntax with {%s} value", Type[var.Type]); } break;
+		case 2: { sprintf_s(destination,length,"get-syntax, {%s}, value {undefined}", Type[var.Type]); } break;
+		default: { if(var.IType == 0) /*Constant-indexed variable*/ { sprintf_s(destination,length,"get-syntax, {%s%d}, value {undefined}", Type[var.Type], var.Num); } 
+				 else /*Indexed with another variable*/ { sprintf_s(destination,length,"get-syntax, {%s%s%d}, index %s%d=%d, value {undefined}", Type[var.Type], Type[var.IType], var.Num, Type[var.IType], var.Num, GetVarIndex(&var,true)); } } break;
+		}
+	} break; 
+	default: { sprintf_s(destination,length,"unrecognised"); } break; 
+	}
+}
+
+// Error message for ERM
+// Expanded by Jakub Grzana. Work in progress
+void Mess(_ToDo_* sp, Mes *m, const int& Num)
+{
+	STARTNA(__LINE__,&m->m.s[m->i])
+	char last = m->m.s[m->m.l];
+	m->m.s[m->m.l] = 0;
+
+	// Allocating memory. It's deleted at the end. Don't use return, or anything like this
+	const int bufsize = 4096;
+	char* message = new char[bufsize];
+	char* buffer = new char[bufsize];
+	// message always stores error message itself. When you want to expand it safely, it's written to buffer, expanded and pointers are swapped
+
 	// Header
-	sprintf_s(message, bufsize, "{%s}\n\
-		Number of parameters: {%d}\n\
-		Note: values doesn't work for strings\n\n\
-		", Mp->m.s, Num);
+	sprintf_s(buffer, bufsize, "%s\n\n%s\n\
+		", ITxt(24,0,&Strings), LuaPushERMInfo(sp->Self.s, false));
+	swap(message,buffer);
+
+	// Arguments
+	sprintf_s(buffer,bufsize,"%s\nArguments (there's always one)\n",message); swap(message,buffer);
+	for(int i = 0; i < sp->ParSet; ++i)
+	{
+		char arg_description[256];
+		GetVarNumDescription(arg_description,256,sp->Par[i]);
+		sprintf_s(buffer,bufsize,"%sArg %d: %s\n", message, i+1, arg_description);
+		swap(message,buffer);
+	}
 
 	// Parameters
+	sprintf_s(buffer,bufsize,"%s\nParameters (if none, there is syntax error in params)\n",message); swap(message,buffer);
 	for(int i = 0; i < Num; ++i)
 	{
-		const VarNum& parameter = Mp->VarI[i]; // for easier access
-		int ds = Mp->f[i];
-		if(ds!=1) ds = 0;
-		int value = 0;
-		Apply(&value,sizeof(value),Mp,i);
-		if(parameter.IType == 0) // constant value 
-		{
-			sprintf_s(buffer, bufsize, "%s\
-				Parameter {%d}, type {%s}, syntax {%s%s}, index {%s}, value {%d}\n",
-				message, i+1, Type[parameter.Type], dsyntax[ds], Check[parameter.Check], Type[parameter.IType], parameter.Num, value );
-		}
-		else // indexed value
-		{
-			sprintf_s(buffer, bufsize, "%s\
-				Parameter {%d}, type {%s}, syntax {%s%s}, index {%s}, index number {%d}, value {%d}\n",
-				message, i+1, Type[parameter.Type], dsyntax[ds], Check[parameter.Check], Type[parameter.IType], parameter.Num, value );
-		}
-		// Swapping
-		char* temp = message;
-		message = buffer;
-		buffer = temp;
+		char param_description[256];
+		GetVarNumDescription(param_description,256,m->VarI[i]);
+		sprintf_s(buffer,bufsize,"%sParam %d: %s\n", message, i+1, param_description);
+		swap(message,buffer);
 	}
+
+	// Display
 	Message(message);
+	// ???
+	lua_pop(Lua, 1);
+	m->m.s[m->m.l] = last;
+	++m->i;
 
 	// Deallocating memory
 	delete message;
 	delete buffer;
+	RETURNV
 }
 
 //static char NoERMString[]="*** ERM String Error ***";
@@ -7977,7 +7981,7 @@ l_exit:
 	ErrorCmd.Cmd = oldCmd;
 	M.i=Ind;
 	if(PL_ERMErrDis==0 && ErrString.str!=LuaErrorString){
-		Mess(&M,Num);
+		Mess(sp,&M,Num);
 	}
 	RETURNV
 }

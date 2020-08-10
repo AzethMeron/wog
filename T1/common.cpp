@@ -5673,3 +5673,4 @@ PROC DllImport(const char * dll, const char * proc, bool halt)
 		DllImportHalt(dll, proc);
 	return ret;
 }
+

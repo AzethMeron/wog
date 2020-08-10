@@ -397,13 +397,17 @@ char MarkedAsChiter(void);
 char IsThisGamer2(void *PlStruct);
 int ChooseCrToAnimDlg(void);
 int HasAnyAtThisPC(void);
-
 void ErrorMessage(const char * msg);
-
 #define SOD_LoadDef(name) (((int (__fastcall *)(char*))0x55C9C0)(name))
 #define SOD_LoadPcx(name) (((int (__fastcall *)(char*))0x55AA10)(name))
 #define SOD_LoadPcx16(name) (((int (__fastcall *)(char*))0x55B1E0)(name))
-
 #define SOD_Deref(item) (((int (__fastcall *)(void *))(((int**)item)[0][1]))((void*)item))
-
 #define timeGetTime ((DWORD (*)())(*(int*)0x63A354))
+
+template<typename Type>
+void swap(Type& a, Type& b)
+{
+	Type temp = a;
+	a = b;
+	b = temp;
+}

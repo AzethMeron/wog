@@ -8,10 +8,6 @@
 #define BAD_INDEX_LZ(vi) ((vi < -VAR_COUNT_LZ) || (vi==0))
 #define BAD_INDEX_LZ_ALLOW_0(vi) (vi < -VAR_COUNT_LZ)
 
-// ERM Errors
-void ErmErrorShowParam(Mes* Mp, int Num);
-void Mess(Mes *m, int Num);
-
 extern int NextWeekOf;   // неделя кого-то
 extern int NextWeekMess; // сообщение
 extern int NextMonthOf;  // тип месяца
