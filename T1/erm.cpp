@@ -5208,6 +5208,44 @@ void GetVarNumDescription(char* destination, int length, VarNum& var)
 	}
 }
 
+void MakeErmErrorMessage(char* dst, const int& length, _ToDo_* sp, Mes *m, const int& Num)
+{
+	// Allocating memory. It's deleted at the end. Don't use return, or anything like this
+	char* message = new char[length];
+	char* buffer = new char[length];
+	// message always stores error message itself. When you want to expand it safely, it's written to buffer, expanded and pointers are swapped
+
+	// Header
+	sprintf_s(buffer, length, "%s\n\n%s\n\
+		", ITxt(24,0,&Strings), LuaPushERMInfo(sp->Self.s, false));
+	swap(message,buffer);
+
+	// Arguments
+	sprintf_s(buffer,length,"%s\nArguments (there's always one)\n",message); swap(message,buffer);
+	for(int i = 0; i < sp->ParSet; ++i)
+	{
+		char arg_description[256];
+		GetVarNumDescription(arg_description,256,sp->Par[i]);
+		sprintf_s(buffer,length,"%sArg %d: %s\n", message, i+1, arg_description);
+		swap(message,buffer);
+	}
+
+	// Parameters
+	sprintf_s(buffer,length,"%s\nParameters (if none, there is syntax error in params)\n",message); swap(message,buffer);
+	for(int i = 0; i < Num; ++i)
+	{
+		char param_description[256];
+		GetVarNumDescription(param_description,256,m->VarI[i]);
+		sprintf_s(buffer,length,"%sParam %d: %s\n", message, i+1, param_description);
+		swap(message,buffer);
+	}
+
+	// Write output
+	sprintf_s(dst,length,"%s",message);
+	delete message;
+	delete buffer;
+}
+
 // Error message for ERM
 // Expanded by Jakub Grzana. Work in progress
 void Mess(_ToDo_* sp, Mes *m, const int& Num)
@@ -5216,36 +5254,8 @@ void Mess(_ToDo_* sp, Mes *m, const int& Num)
 	char last = m->m.s[m->m.l];
 	m->m.s[m->m.l] = 0;
 
-	// Allocating memory. It's deleted at the end. Don't use return, or anything like this
-	const int bufsize = 4096;
-	char* message = new char[bufsize];
-	char* buffer = new char[bufsize];
-	// message always stores error message itself. When you want to expand it safely, it's written to buffer, expanded and pointers are swapped
-
-	// Header
-	sprintf_s(buffer, bufsize, "%s\n\n%s\n\
-		", ITxt(24,0,&Strings), LuaPushERMInfo(sp->Self.s, false));
-	swap(message,buffer);
-
-	// Arguments
-	sprintf_s(buffer,bufsize,"%s\nArguments (there's always one)\n",message); swap(message,buffer);
-	for(int i = 0; i < sp->ParSet; ++i)
-	{
-		char arg_description[256];
-		GetVarNumDescription(arg_description,256,sp->Par[i]);
-		sprintf_s(buffer,bufsize,"%sArg %d: %s\n", message, i+1, arg_description);
-		swap(message,buffer);
-	}
-
-	// Parameters
-	sprintf_s(buffer,bufsize,"%s\nParameters (if none, there is syntax error in params)\n",message); swap(message,buffer);
-	for(int i = 0; i < Num; ++i)
-	{
-		char param_description[256];
-		GetVarNumDescription(param_description,256,m->VarI[i]);
-		sprintf_s(buffer,bufsize,"%sParam %d: %s\n", message, i+1, param_description);
-		swap(message,buffer);
-	}
+	char message[4096];
+	MakeErmErrorMessage(message,4096,sp,m,Num);
 
 	// Display
 	Message(message,1);
@@ -5254,12 +5264,8 @@ void Mess(_ToDo_* sp, Mes *m, const int& Num)
 	m->m.s[m->m.l] = last;
 	++m->i;
 
-	// Deallocating memory
-	delete message;
-	delete buffer;
 	RETURNV
 }
-
 //static char NoERMString[]="*** ERM String Error ***";
 char *ERM2String(char *mes,int zstr,int *len)
 {
