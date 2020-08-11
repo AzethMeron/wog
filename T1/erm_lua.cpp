@@ -19,6 +19,7 @@ extern "C"
 #include "global.h"
 #include "wogsetup.h"
 #include "RSMem.h"
+#include "NewWog/ErrorMess.h"
 //#include "afx.h"
 #define __FILENUM__ 25
 
@@ -71,7 +72,7 @@ static int LuaError(char *text, int level) // Marker
 static int LuaError(char *text, int level, _ToDo_* sp, Mes* m, int Num) // Marker
 {
 	char temp[4096];
-	MakeErmErrorMessage(temp,4096,sp,m,Num);
+	MakeErmErrorMessage(temp,4096,sp,m,Num,ERM_ERROR_HEADER);
 	char mess[10000];
 	sprintf_s(mess,10000,"%s\n\n%s",text,temp);
 
@@ -91,7 +92,7 @@ static int LuaError(char *text, int level, _ToDo_* sp, Mes* m, int Num) // Marke
 
 void ErrorMessage(const char * msg)
 {
-	FILE* f=fopen("LOGS/WOGLUALOG.TXT", "w"); fprintf(f,"%s\n",msg); fclose(f);
+	FILE* f=fopen(WOGLUALOG, "w"); fprintf(f,"%s\n",msg); fclose(f);
 	if (GameLoaded)
 		Message(Format("{Error}\n%s", msg));
 	else

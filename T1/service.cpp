@@ -13,6 +13,7 @@
 #include "b1.h"
 #include "global.h"
 #include "erm_lua.h"
+#include "NewWog/ErrorMess.h"
 #define __FILENUM__ 3
 //#include"WinNT.h"
 #define SILENCE 4
@@ -365,7 +366,7 @@ void SaveMinidump(EXCEPTION_POINTERS *Reason)
 	if (dump == 0) *(PROC*)&dump = DllImport("dbghelp.dll", "MiniDumpWriteDump", false);
 	if (dump == 0) return;
 	FILE* f;
-	if(fopen_s(&f, "LOGS/WOGCRASHDUMP.DMP", "wb")) return;
+	if(fopen_s(&f, WOGCRASHDUMP, "wb")) return;
 	_MINIDUMP_EXCEPTION_INFORMATION exc;
 	exc.ExceptionPointers = Reason;
 	exc.ClientPointers = false;

@@ -326,7 +326,7 @@ void DumpERMVars(char *Text, bool NoLuaTraceback)
 		if(ERMLString[i][0]==0) continue;
 		p += sprintf_s(p, p2-p, "z-%i=\"%s\"\n",i+1,ERMLString[i]); 
 	}
-	SaveSetupState("LOGS/WOGERMLOG.TXT",ME_Buf2,strlen(ME_Buf2));
+	SaveSetupState(WOGERMLOG,ME_Buf2,strlen(ME_Buf2));
 	RETURNV
 }
 
@@ -5171,7 +5171,7 @@ void Mess(_ToDo_* sp, Mes *m, const int& Num) // Marker
 	m->m.s[m->m.l] = 0;
 
 	char message[4096];
-	MakeErmErrorMessage(message,4096,sp,m,Num);
+	MakeErmErrorMessage(message,4096,sp,m,Num,ERM_ERROR_HEADER);
 
 	// Display
 	Message(message,1);

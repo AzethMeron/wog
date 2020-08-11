@@ -2,6 +2,8 @@
 #include "ErrorMess.h"
 #include <stddef.h>
 #include <stdio.h>
+#include "../erm.h"
+
 #include "../common.h"
 #include "../txtfile.h"
 #include "../b1.h"
@@ -102,19 +104,23 @@ void MakeErmErrorHeader(char* destination, const int& length, const char* info =
 /****************************************************************************************/
 // High-end tools
 
-void MakeErmErrorMessage(char* destination, const int& length, _ToDo_* sp, Mes *m, const int& Num)
+void MakeErmErrorMessage(char* destination, const int& length, _ToDo_* sp, Mes *m, const int& Num, const char* header_info)
 {
+	STARTNA(__LINE__, 0)
 	const int bufsize = 4096;
 	char header[bufsize];
-	MakeErmErrorHeader(header,bufsize,ERM_ERROR_HEADER);
+	MakeErmErrorHeader(header,bufsize,header_info);
 	char arguments[bufsize];
 	MakeErmArgDescription(arguments,bufsize,sp);
 	char parameters[bufsize];
 	MakeErmParamDescription(parameters,bufsize,m,Num);
 	sprintf_s(destination,length,"%s\n%s\n%s",header,arguments,parameters);
+	RETURNV
 }
 
 void UniversalErrorMessage(const char* message, const char* logfilename)
 {
-
+	STARTNA(__LINE__, 0)
+	
+	RETURNV
 }

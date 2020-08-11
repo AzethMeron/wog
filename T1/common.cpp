@@ -14,6 +14,7 @@
 #include "common.h"
 #include "global.h"
 #include "erm_lua.h"
+#include "NewWog/ErrorMess.h"
 #define __FILENUM__ 4
 
 int   IDummy;
@@ -5651,7 +5652,7 @@ void PEr::Show(char *Reason,void *Address,int Flag,Dword AddPar,char *Adendum)
 	time_t ltime;    time( &ltime );
 	Zsprintf2(&Frmt,"Time Stamp: %s\n%s",(Dword)asctime(gmtime( &ltime )),(Dword)GlbBuf[0]);
 	StrCopy(GlbBuf[0],30000,Frmt.Str);
-	SaveSetupState("LOGS/WOGCRASHLOG.TXT",GlbBuf[0],strlen(GlbBuf[0]));
+	SaveSetupState(WOGCRASHLOG,GlbBuf[0],strlen(GlbBuf[0]));
 	DumpERMVars("CRASH LOG RELATED CONTEXT",0);
 	Message(msg);
 }
