@@ -148,6 +148,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\ErrorMess.cpp"
+				>
+			</File>
+			<File
 				RelativePath="..\\global.cpp"
 				>
 			</File>
@@ -187,6 +191,10 @@
 			</File>
 			<File
 				RelativePath="..\\erm_lua.h"
+				>
+			</File>
+			<File
+				RelativePath=".\ErrorMess.h"
 				>
 			</File>
 			<File

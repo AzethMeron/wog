@@ -404,10 +404,3 @@ void ErrorMessage(const char * msg);
 #define SOD_Deref(item) (((int (__fastcall *)(void *))(((int**)item)[0][1]))((void*)item))
 #define timeGetTime ((DWORD (*)())(*(int*)0x63A354))
 
-template<typename Type>
-void swap(Type& a, Type& b)
-{
-	Type temp = a;
-	a = b;
-	b = temp;
-}

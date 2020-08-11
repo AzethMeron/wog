@@ -29,6 +29,7 @@
 #include "global.h"
 
 #include "NewWog/TestingERM.h"
+#include "NewWog/ErrorMess.h"
 
 bool IsLuaCall = false;
 
@@ -5159,91 +5160,6 @@ _ok:
 	/*ERMMesBuf*/stro[9999]=0;
  }
  RETURN(ERMMesBuf[4])
-}
-
-// destination - string to store output
-// length - size of destination string
-// Created for arguments and parameters of receiver. Doesn't support 'dependencies flags' 
-// Oh god this function is TRASH! Please smb remake this
-// No support for constant ^^ strings
-void GetVarNumDescription(char* destination, int length, VarNum& var)
-{
-	sprintf_s(destination, length, "GetVarNumDescription error: report this");
-	const char* Type[] = {
-		"constant", // 0
-		"flag", // 1
-		"fast-var", // 2
-		"v", // 3
-		"w", // 4
-		"x", // 5
-		"y", // 6
-		"z", // 7
-		"e", // 8
-		"unrecognised", // 9
-		"unrecognised", // 10
-	};
-	switch(var.Check)
-	{
-	case 0: /* set syntax */ {
-		switch(var.Type)
-		{
-		case 0: { if(var.Num == 0) sprintf_s(destination,length,"{%s} value %d, or constant {string} (^string^)", Type[var.Type], var.Num); else sprintf_s(destination,length,"{%s} value %d", Type[var.Type], var.Num); } break;
-		case 2: { sprintf_s(destination,length,"{%s}, value %d", Type[var.Type], GetVarVal(&var)); } break;
-		case 7: { if(var.IType == 0) /*Constant-indexed zvar*/ { sprintf_s(destination,length,"{%s%d}, strings aren't displayed here", Type[var.Type], var.Num); } 
-				 else /*Indexed with another variable*/ { sprintf_s(destination,length,"{%s%s%d}, index %s%d=%d, strings aren't displayed here", Type[var.Type], Type[var.IType], var.Num, Type[var.IType], var.Num, GetVarIndex(&var,true)); } } break;
-		default: { if(var.IType == 0) /*Constant-indexed variable*/ { sprintf_s(destination,length,"{%s%d}, value {%d}", Type[var.Type], var.Num, GetVarVal(&var)); } 
-				 else /*Indexed with another variable*/ { sprintf_s(destination,length,"{%s%s%d}, index %s%d=%d, value {%d}", Type[var.Type], Type[var.IType], var.Num, Type[var.IType], var.Num, GetVarIndex(&var,true), GetVarVal(&var)); } } break;
-		}
-	} break; 
-	case 1: /* get syntax */ {
-		switch(var.Type)
-		{
-		case 0: { sprintf_s(destination,length,"error: you can't use get-syntax with {%s} value", Type[var.Type]); } break;
-		case 2: { sprintf_s(destination,length,"get-syntax, {%s}, value {undefined}", Type[var.Type]); } break;
-		default: { if(var.IType == 0) /*Constant-indexed variable*/ { sprintf_s(destination,length,"get-syntax, {%s%d}, value {undefined}", Type[var.Type], var.Num); } 
-				 else /*Indexed with another variable*/ { sprintf_s(destination,length,"get-syntax, {%s%s%d}, index %s%d=%d, value {undefined}", Type[var.Type], Type[var.IType], var.Num, Type[var.IType], var.Num, GetVarIndex(&var,true)); } } break;
-		}
-	} break; 
-	default: { sprintf_s(destination,length,"unrecognised"); } break; 
-	}
-}
-
-void MakeErmErrorMessage(char* dst, const int& length, _ToDo_* sp, Mes *m, const int& Num)
-{
-	// Allocating memory. It's deleted at the end. Don't use return, or anything like this
-	char* message = new char[length];
-	char* buffer = new char[length];
-	// message always stores error message itself. When you want to expand it safely, it's written to buffer, expanded and pointers are swapped
-
-	// Header 
-	sprintf_s(buffer, length, "%s\n\n%s\n\
-		", ITxt(24,0,&Strings), LuaPushERMInfo(sp->Self.s, false));
-	swap(message,buffer);
-
-	// Arguments
-	sprintf_s(buffer,length,"%s\nArguments (there's always one)\n",message); swap(message,buffer);
-	for(int i = 0; i < sp->ParSet; ++i)
-	{
-		char arg_description[256];
-		GetVarNumDescription(arg_description,256,sp->Par[i]);
-		sprintf_s(buffer,length,"%sArg %d: %s\n", message, i+1, arg_description);
-		swap(message,buffer);
-	}
-
-	// Parameters
-	sprintf_s(buffer,length,"%s\nParameters (if none, there is syntax error in params)\n",message); swap(message,buffer);
-	for(int i = 0; i < Num; ++i)
-	{
-		char param_description[256];
-		GetVarNumDescription(param_description,256,m->VarI[i]);
-		sprintf_s(buffer,length,"%sParam %d: %s\n", message, i+1, param_description);
-		swap(message,buffer);
-	}
-
-	// Write output
-	sprintf_s(dst,length,"%s",message);
-	delete message;
-	delete buffer;
 }
 
 // Error message for ERM

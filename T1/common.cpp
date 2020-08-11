@@ -63,7 +63,7 @@ char *SourceFileList[]={
 	"?", // 29
 	"TestingERM.cpp", // 30
 	"RepeatableBattle.cpp", // 31
-	"?",
+	"ErrorMess", // 32
 	"?",
 	"?",
 	"?",
