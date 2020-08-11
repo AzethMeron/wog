@@ -8,6 +8,8 @@
 #define BAD_INDEX_LZ(vi) ((vi < -VAR_COUNT_LZ) || (vi==0))
 #define BAD_INDEX_LZ_ALLOW_0(vi) (vi < -VAR_COUNT_LZ)
 
+void MakeErmErrorMessage(char* dst, const int& length, _ToDo_* sp, Mes *m, const int& Num);
+
 extern int NextWeekOf;   // неделя кого-то
 extern int NextWeekMess; // сообщение
 extern int NextMonthOf;  // тип месяца

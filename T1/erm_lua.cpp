@@ -59,7 +59,7 @@ static const char* ToString(lua_State *L, int i)
 	return lua_typename(L, lua_type(L, i));
 }
 
-static int LuaError(char *text, int level)
+static int LuaError(char *text, int level) // Marker
 {
 	LuaCall("SetErrorLevel", level + 1);
 	luaL_where(Lua, level);
@@ -68,9 +68,30 @@ static int LuaError(char *text, int level)
 	return lua_error(Lua);
 }
 
+static int LuaError(char *text, int level, _ToDo_* sp, Mes* m, int Num) // Marker
+{
+	char temp[4096];
+	MakeErmErrorMessage(temp,4096,sp,m,Num);
+	char mess[10000];
+	sprintf_s(mess,10000,"%s\n\n%s",text,temp);
+
+	return LuaError(mess,level);
+	//Message(mess,1); return 0;
+}
+
+/*void LuaErmError(_ToDo_* sp, Mes* m, int Num, char* err_mess)
+{
+	char message[4096];
+	MakeErmErrorMessage(message,4096,sp,m,Num);
+	char error_message[5000];
+	sprintf_s(error_message,5000,"%s\n\n%s",err_mess,message);
+	// Display
+	Message(error_message,1);
+}*/
+
 void ErrorMessage(const char * msg)
 {
-	FILE* f=fopen("WOGLUALOG.TXT", "w"); fprintf(f,"%s\n",msg); fclose(f);
+	FILE* f=fopen("LOGS/WOGLUALOG.TXT", "w"); fprintf(f,"%s\n",msg); fclose(f);
 	if (GameLoaded)
 		Message(Format("{Error}\n%s", msg));
 	else
@@ -248,8 +269,11 @@ static int ERM_Reciever(lua_State *L)
 static int ERM_Call(lua_State *L)
 {
 	if (lua_gettop(L) > 17)
-		return LuaError(Format("\"%s:%s\"-too many parameters.", CmdToDo.Type, lua_tostring(L, 1)), ERM_Call_ErrorLevel);
-
+	{
+		char errmess[4096];
+		sprintf_s(errmess,4096,Format("\"%s:%s\"-too many parameters.", CmdToDo.Type, lua_tostring(L, 1)));
+		return LuaError(errmess, ERM_Call_ErrorLevel); // Marker
+	}
 	STARTNA(__LINE__, 0)
 
 	const char *str = lua_tostring(L, 1);
@@ -368,7 +392,9 @@ _string:
 _error:
 				if (countV)  memcpy((char*)&ERMVar2[indexV - countV], (char*)&backV[0], 4*countV);
 				StoreVars(false, true);
-				RETURN(LuaError(Format("Invalid parameter type: %s", lua_typename(L, ltype)), ERM_Call_ErrorLevel))
+				char errmess[4096];
+				sprintf_s(errmess,4096,"Invalid parameter type: %s", lua_typename(L, ltype));
+				RETURN(LuaError(errmess, ERM_Call_ErrorLevel)) // Marker
 		}
 
 	}
@@ -384,7 +410,7 @@ _error:
 
 	int failed = ProcessMes(&CmdToDo, CmdMessage, cmd, k == 0 ? 1 : k);
 	if (failed && !WasErmError)
-		MError2("unknown error.");
+		MError2("unknown error."); // Marker
 
 	ErrString = LastErrString;
 
@@ -407,8 +433,13 @@ _error:
 	if (countV)  memcpy((char*)&ERMVar2[indexV - countV], (char*)&backV[0], 4*countV);
 	StoreVars(false, true);
 
-	if (WasErmError)
-		RETURN(LuaError(LastErmError, ERM_Call_ErrorLevel))
+	// Lua Error Message
+	if (WasErmError) // Marker
+	{
+		//LuaErmError(&CmdToDo,&CmdMessage,k == 0 ? 1 : k, LastErmError);
+		//RETURN(0)
+		RETURN(LuaError(LastErmError, ERM_Call_ErrorLevel,&CmdToDo,&CmdMessage,k == 0 ? 1 : k))
+	}
 
 	RETURN(retCount)
 }

@@ -116,7 +116,7 @@ local function OutputVars(text, co, lev)
 	end
 
 	if not func then
-		return
+		return 
 	end
 
 	if d.nparams > 0 or getlocal(co, lev, -1) then
@@ -166,7 +166,7 @@ local function DefErrorFunction(s, co1)
 	if lev == 0 then
 		return s
 	end
-	local text = {traceback(co, tostring(s).."\n", co1 and 0 or 2)}
+	local text = {traceback(co, tostring(s).."\n", co1 and 0 or 2)}	
 	OutputVars(text, co, (co1 and lev - 1 or lev + 1))
 	return concat(text)
 end

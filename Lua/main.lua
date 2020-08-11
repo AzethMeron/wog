@@ -229,7 +229,7 @@ end
 
 _G.global = _G
 
-_G.PrintToFile(AppPath.."LuaLog.txt")
+_G.PrintToFile(AppPath.."LOGS/LuaLog.txt")
 _G.PrintToFile = nil
 
 local GetKeyStatePtr = internal.GetKeyStatePtr

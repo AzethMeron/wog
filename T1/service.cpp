@@ -365,7 +365,7 @@ void SaveMinidump(EXCEPTION_POINTERS *Reason)
 	if (dump == 0) *(PROC*)&dump = DllImport("dbghelp.dll", "MiniDumpWriteDump", false);
 	if (dump == 0) return;
 	FILE* f;
-	if(fopen_s(&f, "WOGCRASHDUMP.DMP", "wb")) return;
+	if(fopen_s(&f, "LOGS/WOGCRASHDUMP.DMP", "wb")) return;
 	_MINIDUMP_EXCEPTION_INFORMATION exc;
 	exc.ExceptionPointers = Reason;
 	exc.ClientPointers = false;

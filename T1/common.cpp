@@ -1727,8 +1727,8 @@ void _MError(int File,int Line,char *Txt)
 		Txt = (WoGType ? "неизвестна" : "unknown");
 	}
 	char *ErrorStr = (WoGType
-		? "Ошибка в скрипте ERM.\n\tFile: %s\n\tLine : %i\n\tПричина:\n\t%s\n\nСохранить дамп ERM переменных в WOGERMLOG.TXT (длит. процедура)?"
-		: "ERM script Error.\n\tFile: %s\n\tLine : %i\n\tReason:\n\t%s\n\nSave all ERM vars to WOGERMLOG.TXT (may take time)?"
+		? "Ошибка в скрипте ERM.\n\tFile: %s\n\tLine : %i\n\tПричина:\n\t%s\n\nСохранить дамп ERM переменных в LOGS/WOGERMLOG.TXT (длит. процедура)?"
+		: "ERM script Error.\n\tFile: %s\n\tLine : %i\n\tReason:\n\t%s\n\nSave all ERM vars to LOGS/WOGERMLOG.TXT (may take time)?"
 	);
 	Zsprintf3(&TermStruct, ErrorStr, (Dword)SourceFileList[File], (Dword)Line, (Dword)Txt);
 	//}
@@ -5643,7 +5643,7 @@ void PEr::Show(char *Reason,void *Address,int Flag,Dword AddPar,char *Adendum)
 
 	strcat_s(GlbBuf[0], 30000, Format("\nLast loaded DEF:\n\n%s", LastLoadedDefName));
 
-	char *msg = Format("%s\n\n%s", (Dword)GlbBuf[0], "PLEASE SEND {WOGCRASHDUMP.DMP}, {WOGCRASHLOG.TXT} AND {WOGERMLOG.TXT} FILES TO {sergroj@mail.ru}");
+	char *msg = Format("%s\n\n%s", (Dword)GlbBuf[0], "PLEASE SEND {WOGCRASHDUMP.DMP}, {WOGCRASHLOG.TXT} AND {WOGERMLOG.TXT} FILES TO {removed}");
 	Zsprintf2(&Frmt,"WoG Version: %s\n\n%s",(Dword)WOG_STRING_VERSION,(Dword)msg);
 	StrCopy(GlbBuf[0],30000,Frmt.Str);
 	Zsprintf2(&Frmt,"Map Saved with: %s\n\n%s",(Dword)MapSavedWoG,(Dword)GlbBuf[0]);
@@ -5651,7 +5651,7 @@ void PEr::Show(char *Reason,void *Address,int Flag,Dword AddPar,char *Adendum)
 	time_t ltime;    time( &ltime );
 	Zsprintf2(&Frmt,"Time Stamp: %s\n%s",(Dword)asctime(gmtime( &ltime )),(Dword)GlbBuf[0]);
 	StrCopy(GlbBuf[0],30000,Frmt.Str);
-	SaveSetupState("WOGCRASHLOG.TXT",GlbBuf[0],strlen(GlbBuf[0]));
+	SaveSetupState("LOGS/WOGCRASHLOG.TXT",GlbBuf[0],strlen(GlbBuf[0]));
 	DumpERMVars("CRASH LOG RELATED CONTEXT",0);
 	Message(msg);
 }

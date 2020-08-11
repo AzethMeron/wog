@@ -325,7 +325,7 @@ void DumpERMVars(char *Text, bool NoLuaTraceback)
 		if(ERMLString[i][0]==0) continue;
 		p += sprintf_s(p, p2-p, "z-%i=\"%s\"\n",i+1,ERMLString[i]); 
 	}
-	SaveSetupState("WOGERMLOG.TXT",ME_Buf2,strlen(ME_Buf2));
+	SaveSetupState("LOGS/WOGERMLOG.TXT",ME_Buf2,strlen(ME_Buf2));
 	RETURNV
 }
 
@@ -5215,7 +5215,7 @@ void MakeErmErrorMessage(char* dst, const int& length, _ToDo_* sp, Mes *m, const
 	char* buffer = new char[length];
 	// message always stores error message itself. When you want to expand it safely, it's written to buffer, expanded and pointers are swapped
 
-	// Header
+	// Header 
 	sprintf_s(buffer, length, "%s\n\n%s\n\
 		", ITxt(24,0,&Strings), LuaPushERMInfo(sp->Self.s, false));
 	swap(message,buffer);
@@ -5248,7 +5248,7 @@ void MakeErmErrorMessage(char* dst, const int& length, _ToDo_* sp, Mes *m, const
 
 // Error message for ERM
 // Expanded by Jakub Grzana. Work in progress
-void Mess(_ToDo_* sp, Mes *m, const int& Num)
+void Mess(_ToDo_* sp, Mes *m, const int& Num) // Marker
 {
 	STARTNA(__LINE__,&m->m.s[m->i])
 	char last = m->m.s[m->m.l];
