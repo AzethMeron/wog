@@ -15,6 +15,7 @@ extern int NextWeekMess; // сообщение
 extern int NextMonthOf;  // тип мес€ца
 extern int NextMonthOfMonster; // монстр *2
 extern int MonsterUpgradeTable[MONNUM];
+extern int ERMVar[];
 extern int ERMVar2[];  extern char ERMVar2Macro[VAR_COUNT_V][16];  extern char ERMVarMacro[20][16];
 extern int   ERMVarX[16];
 extern int   *ERMVarY,*ERMVarYT;  // [100]
@@ -174,7 +175,6 @@ int __stdcall MouseClick3(int p3,int p2,int p1);
 void SaveManager(void);
 void GameAfterLoad(void);
 void GameBeforeSave(void);
-void DumpERMVars(char *Text, bool NoLuaTraceback);
 int Call_Function(int ind,int *var,int num);
 // 3.59
 void TLCall(Dword timesec);

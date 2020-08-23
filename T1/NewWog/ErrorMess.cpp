@@ -1,13 +1,15 @@
 #define __FILENUM__ 32
-#include "ErrorMess.h"
 #include <stddef.h>
 #include <stdio.h>
-#include "../erm.h"
+#include <algorithm>
+#include <fstream>
+#include <windows.h>
 
+#include "ErrorMess.h"
+#include "../erm.h"
 #include "../common.h"
 #include "../txtfile.h"
 #include "../b1.h"
-#include <algorithm>
 #define GameLoaded  MainWindow
 
 /****************************************************************************************/
@@ -102,25 +104,266 @@ void MakeErmErrorHeader(char* destination, const int& length, const char* info =
 }
 
 /****************************************************************************************/
+// Logs
+
+void WriteLog(const char* logfilename, const char* message, const bool oneLine)
+{
+	FILE* file = fopen(logfilename,"at");
+	char final_message[ERR_BUFSIZE];
+	time_t ltime;
+	time(&ltime);
+	if(file != NULL)
+	{
+		size_t size = strlen(message);
+		sprintf_s(final_message,ERR_BUFSIZE,"%s	%s",asctime(gmtime( &ltime )),message);
+		if(oneLine) { for(int i = 0; i < size; ++i) { if(final_message[i] == '\n') final_message[i] = '	'; } }
+		fprintf(file, "%s\n", final_message);
+		fclose(file);
+	}
+	else
+	{
+		sprintf_s(final_message,ERR_BUFSIZE,"Failed to open {log} file\n%s\n\nThis {may} mean that there is no {woglogs} folder in Heroes 3 main directory",logfilename);
+		UniversalErrorMessage(final_message);
+	}
+}
+
+/****************************************************************************************/
 // High-end tools
 
 void MakeErmErrorMessage(char* destination, const int& length, _ToDo_* sp, Mes *m, const int& Num, const char* header_info)
 {
 	STARTNA(__LINE__, 0)
-	const int bufsize = 4096;
-	char header[bufsize];
-	MakeErmErrorHeader(header,bufsize,header_info);
-	char arguments[bufsize];
-	MakeErmArgDescription(arguments,bufsize,sp);
-	char parameters[bufsize];
-	MakeErmParamDescription(parameters,bufsize,m,Num);
+	char header[ERR_BUFSIZE];
+	MakeErmErrorHeader(header,ERR_BUFSIZE,header_info);
+	char arguments[ERR_BUFSIZE];
+	MakeErmArgDescription(arguments,ERR_BUFSIZE,sp);
+	char parameters[ERR_BUFSIZE];
+	MakeErmParamDescription(parameters,ERR_BUFSIZE,m,Num);
 	sprintf_s(destination,length,"%s\n%s\n%s",header,arguments,parameters);
 	RETURNV
 }
 
-void UniversalErrorMessage(const char* message, const char* logfilename)
+int UniversalErrorMessage(const char* message, const char* logfilename, const int& mode)
 {
 	STARTNA(__LINE__, 0)
+	if(logfilename!=NULL) { WriteLog(logfilename,message,true); }
+	if (GameLoaded)
+	{
+		if(PL_ERMErrDis!=1) RETURN(Message(message, mode));
+	}
+	else
+	{
+		MessageBox(0, message, "Error", 0);
+	}
+	RETURN(0)
+}
+
+/****************************************************************************************/
+// Predefined error messages
+
+// Error message for ERM
+// Expanded by Jakub Grzana. Work in progress
+void ErmSemanticError(_ToDo_* sp, Mes *m, const int& Num) // Marker
+{
+	STARTNA(__LINE__,&m->m.s[m->i])
+	char last = m->m.s[m->m.l];
+	m->m.s[m->m.l] = 0;
+
+	char message[4096];
+	MakeErmErrorMessage(message,4096,sp,m,Num,LuaPushERMInfo(sp->Self.s,false));
+	UniversalErrorMessage(message,WOGERMLOG);
+
+	// ???
+	lua_pop(Lua, 1);
+	m->m.s[m->m.l] = last;
+	++m->i;
+
+	RETURNV
+}
+
+void ErmSyntaxError(Mes *M, const int& Ind)
+{
+	char err_mess[ERR_BUFSIZE];
+	sprintf_s(err_mess,ERR_BUFSIZE,"%s\n\n%s", ITxt(26,0,&Strings), LuaPushERMInfo(&M->m.s[Ind], false));
+	lua_pop(Lua, 1);
+	UniversalErrorMessage(err_mess,WOGERMLOG);
+}
+
+/****************************************************************************************/
+// Old error functions
+
+void _Error(int File,int Line)
+{
+	STARTNA(__LINE__, 0)
+	char err_mess[ERR_BUFSIZE];
+	if(File==0){
+		//if(WoGType){ Zsprintf2(&TermStruct,"Ошибка в скрипте ERM. Причина не указана.",0,0); }
+		//else{ Zsprintf2(&TermStruct,"ERM script Error. Reason unknown.",0,0); }
+		sprintf_s(err_mess,ERR_BUFSIZE,"ERM script Error. Reason unknown.");
+	}else{
+		//if(WoGType){ Zsprintf2(&TermStruct,"Ошибка в скрипте ERM. \n\tФайл: %s\n\tСтрока : %i",(Dword)SourceFileList[File],(Dword)Line); }
+		//else{ Zsprintf2(&TermStruct,"ERM script Error. \n\tFile: %s\n\tLine : %i",(Dword)SourceFileList[File],(Dword)Line); }
+		sprintf_s(err_mess,ERR_BUFSIZE,"ERM script Error. \n\tFile: %s\n\tLine : %i",SourceFileList[File],Line);
+	}
+	UniversalErrorMessage(err_mess,WOGERMLOG);
+	RETURNV
+}
+
+bool DoneError;
+ErrStringInfo ErrString;
+void _MError(int File,int Line,char *Txt)
+{
+	if(DoneError) return;
+	STARTNA(__LINE__, 0)
+	PL_ERMError=1;
+	DoneError = true;
+	/*if(ErrString.str == LuaErrorString)
+	{
+		LuaLastError(Txt);
+		RETURNV
+	}*/
+
+	if(PL_ERMErrDis) RETURNV
+	//if(Txt==0){
+	//	_Error(File,Line);
+	//}else{
+	if(Txt==0){
+		Txt = (WoGType ? "неизвестна" : "unknown");
+	}
+	char *ErrorStr = (WoGType
+		? "Ошибка в скрипте ERM.\n\tFile: %s\n\tLine : %i\n\tПричина:\n\t%s\n\nСохранить дамп ERM переменных в LOGS/WOGERMLOG.TXT (длит. процедура)?"
+		: "ERM script Error.\n\tFile: %s\n\tLine : %i\n\tReason:\n\t%s\n\nSave all ERM vars to WOGERMLOG.TXT (may take time)?"
+	);
 	
+	char err_mess[ERR_BUFSIZE];
+	sprintf_s(err_mess,ERR_BUFSIZE,ErrorStr, SourceFileList[File], (Dword)Line, Txt);
+	//Zsprintf3(&TermStruct, ErrorStr, (Dword)SourceFileList[File], (Dword)Line, (Dword)Txt);
+	//}
+	//if(Request0(TermStruct.Str))
+	if(UniversalErrorMessage(err_mess,WOGERMLOG,2) == MESSAGE_YES)
+	{
+		DumpERMVars(err_mess,false); 
+	}
+	RETURNV
+}
+void _TError(int File,int Line,char *Txt)
+{
+	STARTNA(__LINE__, 0)
+	char err_mess[ERR_BUFSIZE];
+	if(Txt==0){
+		sprintf_s(err_mess,ERR_BUFSIZE,"Error. \n\tFile: %s\n\tLine : %i",(Dword)SourceFileList[File],(Dword)Line);
+	}else{
+		if(WoGType){ sprintf_s(err_mess,ERR_BUFSIZE,"Ошибка.\n\tФайл: %s\n\tСтрока: %i\n\tПричина:\n\t%s",(Dword)SourceFileList[File],(Dword)Line,(Dword)Txt); }
+		else{ sprintf_s(err_mess,ERR_BUFSIZE,"Error.\n\tFile: %s\n\tLine: %i\n\tReason:\n\t%s",(Dword)SourceFileList[File],(Dword)Line,(Dword)Txt); }
+	}
+	UniversalErrorMessage(err_mess);
+	RETURNV
+}
+
+void DumpMessage(char *txt,int offset){
+	STARTNA(__LINE__, 0)
+	char err_mess[ERR_BUFSIZE];
+	strncpy(err_mess,&txt[offset],ERR_BUFSIZE);
+	UniversalErrorMessage(err_mess);
+	RETURNV
+}
+
+static char ME_Buf2[1000000];
+void DumpERMVars(char *Text, bool NoLuaTraceback)
+{
+	// 3.58
+	STARTNA(__LINE__, 0)
+	int hout;
+	char *p = ME_Buf2;
+	char *p2 = p + sizeof(ME_Buf2);
+	p += sprintf_s(p, p2-p, "-----------------------\n%s\n-----------------------\n",Text);
+	time_t ltime;
+	time(&ltime);
+	p += sprintf_s(p, p2-p, "Time Stamp: %s\n", asctime(gmtime( &ltime )));
+	p += sprintf_s(p, p2-p, "WoG Version: %s\n\n", WOG_STRING_VERSION);
+	p += sprintf_s(p, p2-p, "Map Saved with: %s\n\n", MapSavedWoG);
+
+	/*// There's segfault
+	if(ErrString.str){
+		p += sprintf_s(p, p2-p, "ERM stack traceback:\n");
+		// this loop itself causes segfault. I've commented both commands inside and nothing changed
+		for(ErrStringInfo *e = &ErrString; (e) && (e->str); e = e->last){
+			p += sprintf_s(p, p2-p, "\n%s", LuaPushERMInfo(e->str));
+			lua_pop(Lua, 1);
+		}
+		p += sprintf_s(p, p2-p, "\n-----------------\n");
+	}
+	if(!NoLuaTraceback){
+		LuaCallStart("traceback");
+		LuaPCall(0, 1);
+		p += sprintf_s(p, p2-p, "Lua %s\n-----------------\n", lua_tostring(Lua, -1));
+		lua_pop(Lua, 1);
+	}*/
+
+	p += sprintf_s(p, p2-p, "COMMON VARS\n");
+	p += sprintf_s(p, p2-p, "f=%i\ng=%i\nh=%i\ni=%i\nj=%i\nk=%i\nl=%i\nm=%i\nn=%i\no=%i\np=%i\nq=%i\nr=%i\ns=%i\nt=%i\n",
+		ERMVar[0],ERMVar[1],ERMVar[2],ERMVar[3],ERMVar[4],
+		ERMVar[5],ERMVar[6],ERMVar[7],ERMVar[8],ERMVar[9],
+		ERMVar[10],ERMVar[11],ERMVar[12],ERMVar[13],ERMVar[14]);
+	int i,j;
+	p += sprintf_s(p, p2-p, "Common flags (1...1000)\n");
+	for(i=0;i<1000;i++){ 
+		if(ERMFlags[i]==0) continue;
+		p += sprintf_s(p, p2-p, "flag%i=%i\n",i+1,ERMFlags[i]); 
+	}
+	p += sprintf_s(p, p2-p, "Common v vars (v1...v10000)\n");
+	for(i=0;i<VAR_COUNT_V;i++){ 
+		if(ERMVar2[i]==0) continue;
+		p += sprintf_s(p, p2-p, "v%i=%i\n",i+1,ERMVar2[i]); 
+	}
+	p += sprintf_s(p, p2-p, "Hero's vars (w1...w200)\n");
+	for(i=0;i<HERNUM;i++){
+		hout=0;
+		for(j=0;j<200;j++){ 
+			if(ERMVarH[i][j]==0) continue;
+			if(hout==0){ p += sprintf_s(p, p2-p, "Hero#=%i\n",i); hout=1; }
+			p += sprintf_s(p, p2-p, "w%i=%i\n",j+1,ERMVarH[i][j]); 
+		}
+	}
+	p += sprintf_s(p, p2-p, "\nTRIGGER BASED VARS\n");
+	p += sprintf_s(p, p2-p, "Trigger y vars (y-1...y-100)\n");
+	for(i=0;i<100;i++){ 
+		if(ERMVarYT[i]==0) continue;
+		p += sprintf_s(p, p2-p, "y-%i=\"%i\"\n",i+1,ERMVarYT[i]); 
+	}
+	p += sprintf_s(p, p2-p, "Trigger e vars (e-1...e-100)\n");
+	for(i=0;i<100;i++){ 
+		if(ERMVarFT[i]==0.0) continue;
+		p += sprintf_s(p, p2-p, "e-%i=\"%f\"\n",i+1,ERMVarFT[i]); 
+	}
+
+	p += sprintf_s(p, p2-p, "\nFUNCTION BASED VARS\n");
+	p += sprintf_s(p, p2-p, "Parameters x vars (x1...x16)\n");
+	for(i=0;i<16;i++){ 
+		if(ERMVarX[i]==0) continue;
+		p += sprintf_s(p, p2-p, "x%i=\"%i\"\n",i+1,ERMVarX[i]); 
+	}
+	p += sprintf_s(p, p2-p, "Local y vars (y1...y100)\n");
+	for(i=0;i<100;i++){ 
+		if(ERMVarY[i]==0) continue;
+		p += sprintf_s(p, p2-p, "y%i=\"%i\"\n",i+1,ERMVarY[i]); 
+	}
+	p += sprintf_s(p, p2-p, "Local e vars (e1...e100)\n");
+	for(i=0;i<100;i++){ 
+		if(ERMVarF[i]==0.0) continue;
+		p += sprintf_s(p, p2-p, "e%i=\"%f\"\n",i+1,ERMVarF[i]); 
+	}
+	p += sprintf_s(p, p2-p, "\nSTRING VARS\n");
+	p += sprintf_s(p, p2-p, "Common z vars (z1...z1000)\n");
+	for(i=0;i<1000;i++){ 
+		if(ERMString[i][0]==0) continue;
+		p += sprintf_s(p, p2-p, "z%i=\"%s\"\n",i+1,ERMString[i]); 
+	}
+	p += sprintf_s(p, p2-p, "Local z vars (z-1...z-20)\n");
+	for(i=0;i<VAR_COUNT_LZ;i++){ 
+		if(ERMLString[i][0]==0) continue;
+		p += sprintf_s(p, p2-p, "z-%i=\"%s\"\n",i+1,ERMLString[i]); 
+	}
+	SaveSetupState(WOGERMLOG,ME_Buf2,strlen(ME_Buf2));
 	RETURNV
 }

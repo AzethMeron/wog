@@ -206,7 +206,6 @@ Byte ArtSlots[]={
 	0x8C,0,0,0,0,     1,6,6,
 	0x99 // последний
 };
-static char ME_Buf2[1000000];
 
 _ErrorCmd_ ErrorCmd;
 
@@ -231,103 +230,6 @@ int SetErrorTrigger(Word trigId, char triggerSign)
 	ErrorCmd.Name[4] = (triggerSign == '!') ? ':' : 0;
 	ErrorCmd.Name[5] = 0;
 	return last;
-}
-
-void DumpERMVars(char *Text, bool NoLuaTraceback)
-{
-	// 3.58
-	STARTNA(__LINE__, 0)
-	int hout;
-	char *p = ME_Buf2;
-	char *p2 = p + sizeof(ME_Buf2);
-	p += sprintf_s(p, p2-p, "-----------------------\n%s\n-----------------------\n",Text);
-	time_t ltime;
-	time(&ltime);
-	p += sprintf_s(p, p2-p, "Time Stamp: %s\n", asctime(gmtime( &ltime )));
-	p += sprintf_s(p, p2-p, "WoG Version: %s\n\n", WOG_STRING_VERSION);
-	p += sprintf_s(p, p2-p, "Map Saved with: %s\n\n", MapSavedWoG);
-
-	if(ErrString.str!=0){
-		p += sprintf_s(p, p2-p, "ERM stack traceback:\n");
-		for(ErrStringInfo *e = &ErrString; e && e->str; e = e->last){
-			p += sprintf_s(p, p2-p, "\n%s", LuaPushERMInfo(e->str));
-			lua_pop(Lua, 1);
-		}
-		p += sprintf_s(p, p2-p, "\n-----------------\n");
-	}
-	if(!NoLuaTraceback){
-		LuaCallStart("traceback");
-		LuaPCall(0, 1);
-		p += sprintf_s(p, p2-p, "Lua %s\n-----------------\n", lua_tostring(Lua, -1));
-		lua_pop(Lua, 1);
-	}
-
-	p += sprintf_s(p, p2-p, "COMMON VARS\n");
-	p += sprintf_s(p, p2-p, "f=%i\ng=%i\nh=%i\ni=%i\nj=%i\nk=%i\nl=%i\nm=%i\nn=%i\no=%i\np=%i\nq=%i\nr=%i\ns=%i\nt=%i\n",
-		ERMVar[0],ERMVar[1],ERMVar[2],ERMVar[3],ERMVar[4],
-		ERMVar[5],ERMVar[6],ERMVar[7],ERMVar[8],ERMVar[9],
-		ERMVar[10],ERMVar[11],ERMVar[12],ERMVar[13],ERMVar[14]);
-	int i,j;
-	p += sprintf_s(p, p2-p, "Common flags (1...1000)\n");
-	for(i=0;i<1000;i++){ 
-		if(ERMFlags[i]==0) continue;
-		p += sprintf_s(p, p2-p, "flag%i=%i\n",i+1,ERMFlags[i]); 
-	}
-	p += sprintf_s(p, p2-p, "Common v vars (v1...v10000)\n");
-	for(i=0;i<VAR_COUNT_V;i++){ 
-		if(ERMVar2[i]==0) continue;
-		p += sprintf_s(p, p2-p, "v%i=%i\n",i+1,ERMVar2[i]); 
-	}
-	p += sprintf_s(p, p2-p, "Hero's vars (w1...w200)\n");
-	for(i=0;i<HERNUM;i++){
-		hout=0;
-		for(j=0;j<200;j++){ 
-			if(ERMVarH[i][j]==0) continue;
-			if(hout==0){ p += sprintf_s(p, p2-p, "Hero#=%i\n",i); hout=1; }
-			p += sprintf_s(p, p2-p, "w%i=%i\n",j+1,ERMVarH[i][j]); 
-		}
-	}
-	p += sprintf_s(p, p2-p, "\nTRIGGER BASED VARS\n");
-	p += sprintf_s(p, p2-p, "Trigger y vars (y-1...y-100)\n");
-	for(i=0;i<100;i++){ 
-		if(ERMVarYT[i]==0) continue;
-		p += sprintf_s(p, p2-p, "y-%i=\"%i\"\n",i+1,ERMVarYT[i]); 
-	}
-	p += sprintf_s(p, p2-p, "Trigger e vars (e-1...e-100)\n");
-	for(i=0;i<100;i++){ 
-		if(ERMVarFT[i]==0.0) continue;
-		p += sprintf_s(p, p2-p, "e-%i=\"%f\"\n",i+1,ERMVarFT[i]); 
-	}
-
-	p += sprintf_s(p, p2-p, "\nFUNCTION BASED VARS\n");
-	p += sprintf_s(p, p2-p, "Parameters x vars (x1...x16)\n");
-	for(i=0;i<16;i++){ 
-		if(ERMVarX[i]==0) continue;
-		p += sprintf_s(p, p2-p, "x%i=\"%i\"\n",i+1,ERMVarX[i]); 
-	}
-	p += sprintf_s(p, p2-p, "Local y vars (y1...y100)\n");
-	for(i=0;i<100;i++){ 
-		if(ERMVarY[i]==0) continue;
-		p += sprintf_s(p, p2-p, "y%i=\"%i\"\n",i+1,ERMVarY[i]); 
-	}
-	p += sprintf_s(p, p2-p, "Local e vars (e1...e100)\n");
-	for(i=0;i<100;i++){ 
-		if(ERMVarF[i]==0.0) continue;
-		p += sprintf_s(p, p2-p, "e%i=\"%f\"\n",i+1,ERMVarF[i]); 
-	}
-	p += sprintf_s(p, p2-p, "\nSTRING VARS\n");
-	p += sprintf_s(p, p2-p, "Common z vars (z1...z1000)\n");
-	for(i=0;i<1000;i++){ 
-		if(ERMString[i][0]==0) continue;
-		p += sprintf_s(p, p2-p, "z%i=\"%s\"\n",i+1,ERMString[i]); 
-	}
-	p += sprintf_s(p, p2-p, "Local z vars (z-1...z-20)\n");
-	for(i=0;i<VAR_COUNT_LZ;i++){ 
-		if(ERMLString[i][0]==0) continue;
-		p += sprintf_s(p, p2-p, "z-%i=\"%s\"\n",i+1,ERMLString[i]); 
-	}
-	SaveSetupState(WOGERMLOG,ME_Buf2,strlen(ME_Buf2));
-	RETURNV
 }
 
 Byte  HeapArray[HEAPSIZE];
@@ -5162,26 +5064,6 @@ _ok:
  RETURN(ERMMesBuf[4])
 }
 
-// Error message for ERM
-// Expanded by Jakub Grzana. Work in progress
-void Mess(_ToDo_* sp, Mes *m, const int& Num) // Marker
-{
-	STARTNA(__LINE__,&m->m.s[m->i])
-	char last = m->m.s[m->m.l];
-	m->m.s[m->m.l] = 0;
-
-	char message[4096];
-	MakeErmErrorMessage(message,4096,sp,m,Num,ERM_ERROR_HEADER);
-
-	// Display
-	Message(message,1);
-	// ???
-	lua_pop(Lua, 1);
-	m->m.s[m->m.l] = last;
-	++m->i;
-
-	RETURNV
-}
 //static char NoERMString[]="*** ERM String Error ***";
 char *ERM2String(char *mes,int zstr,int *len)
 {
@@ -7903,7 +7785,7 @@ l_exit:
 	ErrorCmd.Cmd = oldCmd;
 	M.i=Ind;
 	if(PL_ERMErrDis==0 && ErrString.str!=LuaErrorString){
-		Mess(sp,&M,Num);
+		ErmSemanticError(sp,&M,Num);
 	}
 	RETURNV
 }
@@ -8565,9 +8447,9 @@ _contnext:
 	RETURN(0)
 
 l_exit:
-//  Message("{ERM} has wrong syntax. Disabled.",1);
-
-	Message(Format("%s\n\n%s", ITxt(26,0,&Strings), LuaPushERMInfo(&M.m.s[Ind], false)),1);
+	//Message("{ERM} has wrong syntax. Disabled.",1);
+	//Message(Format("%s\n\n%s", ITxt(26,0,&Strings), LuaPushERMInfo(&M.m.s[Ind], false)),1);
+	ErmSyntaxError(&M,Ind);
 	lua_pop(Lua, 1);
 
 l_exit2:

@@ -6,6 +6,7 @@
 #include "windows.h"
 #include "LogManager.h"
 #include "erm_lua.h"
+#include "NewWog/ErrorMess.h"
 #define STRINGER( x ) #x
 
 ///////////////////////////////
@@ -17,6 +18,7 @@ extern   bool      DoneError;
 extern struct ErrStringInfo{
 	char *str;
 	ErrStringInfo *last;
+	ErrStringInfo() { str = NULL; last = NULL; }
 } ErrString;
 
 void __inline NewErrStringInfo(char *str, ErrStringInfo *backup)
@@ -127,10 +129,6 @@ void Terminate(char *File,int Line);
 char* __cdecl Format(const char* str, ...);
 char* __cdecl Format2(const char* str, ...);
 char* NewString(const char* str);
-void _Error(int file,int line);
-void _MError(int file,int line,char *Txt);
-void _TError(int File,int Line,char *Txt);
-void DumpMessage(char *txt,int offset);
 char LoadCrTraits(int WoG);
 int IsAI(int gamer);
 int IsThis(int gamer);

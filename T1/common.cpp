@@ -221,7 +221,9 @@ int Message(const char *zmes,int n,int showtime)
 
 int Message(int n)
 {
-	return Message(Format("%d", n));
+	char msg[512];
+	sprintf_s(msg,512,"%d",n);
+	return Message(msg);
 }
 
 static Dword C4ME_EBPval;
@@ -1663,6 +1665,7 @@ void Terminate(char *Mes)
 }
 #else
 */
+
 _ZPrintf_ TermStruct;
 void Terminate(char *File,int Line)
 {
@@ -1687,75 +1690,6 @@ void Terminate(char *File,int Line)
 		mov   eax,0x4F3D20
 		call  eax
 	}
-}
-
-#define ErrMessage Message
-
-void _Error(int File,int Line)
-{
-	STARTNA(__LINE__, 0)
-	if(File==0){
-		if(WoGType){ Zsprintf2(&TermStruct,"Ошибка в скрипте ERM. Причина не указана.",0,0); }
-		else{ Zsprintf2(&TermStruct,"ERM script Error. Reason unknown.",0,0); }
-	}else{
-		if(WoGType){ Zsprintf2(&TermStruct,"Ошибка в скрипте ERM. \n\tФайл: %s\n\tСтрока : %i",(Dword)SourceFileList[File],(Dword)Line); }
-		else{ Zsprintf2(&TermStruct,"ERM script Error. \n\tFile: %s\n\tLine : %i",(Dword)SourceFileList[File],(Dword)Line); }
-	}
-	ErrMessage(TermStruct.Str);
-	RETURNV
-}
-
-bool DoneError;
-ErrStringInfo ErrString;
-static char ME_Buf[2000];
-void _MError(int File,int Line,char *Txt)
-{
-	if(DoneError) return;
-	STARTNA(__LINE__, 0)
-	PL_ERMError=1;
-	DoneError = true;
-	if(ErrString.str == LuaErrorString)
-	{
-		LuaLastError(Txt);
-		RETURNV
-	}
-
-	if(PL_ERMErrDis) RETURNV
-	//if(Txt==0){
-	//	_Error(File,Line);
-	//}else{
-	if(Txt==0){
-		Txt = (WoGType ? "неизвестна" : "unknown");
-	}
-	char *ErrorStr = (WoGType
-		? "Ошибка в скрипте ERM.\n\tFile: %s\n\tLine : %i\n\tПричина:\n\t%s\n\nСохранить дамп ERM переменных в LOGS/WOGERMLOG.TXT (длит. процедура)?"
-		: "ERM script Error.\n\tFile: %s\n\tLine : %i\n\tReason:\n\t%s\n\nSave all ERM vars to LOGS/WOGERMLOG.TXT (may take time)?"
-	);
-	Zsprintf3(&TermStruct, ErrorStr, (Dword)SourceFileList[File], (Dword)Line, (Dword)Txt);
-	//}
-
-	if(Request0(TermStruct.Str)){
-		DumpERMVars(TermStruct.Str,0); 
-	}
-	RETURNV
-}
-void _TError(int File,int Line,char *Txt)
-{
-	STARTNA(__LINE__, 0)
-	if(Txt==0){
-		sprintf(ME_Buf,"Error. \n\tFile: %s\n\tLine : %i",(Dword)SourceFileList[File],(Dword)Line);
-	}else{
-		if(WoGType){ sprintf(ME_Buf,"Ошибка.\n\tФайл: %s\n\tСтрока: %i\n\tПричина:\n\t%s",(Dword)SourceFileList[File],(Dword)Line,(Dword)Txt); }
-		else{ sprintf(ME_Buf,"Error.\n\tFile: %s\n\tLine: %i\n\tReason:\n\t%s",(Dword)SourceFileList[File],(Dword)Line,(Dword)Txt); }
-	}
-	ErrMessage(ME_Buf);
-	RETURNV
-}
-void DumpMessage(char *txt,int offset){
-	STARTNA(__LINE__, 0)
-	strncpy(ME_Buf,&txt[offset],1999);
-	ErrMessage(ME_Buf);
-	RETURNV
 }
 
 char Format_buffer[3*10000];

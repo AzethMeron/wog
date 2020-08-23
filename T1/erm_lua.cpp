@@ -72,9 +72,10 @@ static int LuaError(char *text, int level) // Marker
 static int LuaError(char *text, int level, _ToDo_* sp, Mes* m, int Num) // Marker
 {
 	char temp[4096];
-	MakeErmErrorMessage(temp,4096,sp,m,Num,ERM_ERROR_HEADER);
+	MakeErmErrorMessage(temp,4096,sp,m,Num,LuaPushERMInfo(sp->Self.s,false));
 	char mess[10000];
 	sprintf_s(mess,10000,"%s\n\n%s",text,temp);
+	lua_pop(Lua, 1);
 
 	return LuaError(mess,level);
 	//Message(mess,1); return 0;
