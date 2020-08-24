@@ -16,6 +16,8 @@ UX:D allows to display error message using internal tools. Might be useful for d
 [+] MR:N displays error when used with set syntax. 
 [+] BG:Q displays error when used with set syntax
 [+] Logs moved to woglogs/ folder. Remember to make it in release!
+[+] We have now LuaLog, WOGERMLOG, WOGVARLOG, WOGCRASHLOG and WOGCRASHDUMP. A lot, but it makes sense.
+[ ] Many Lua/ERM errors are managed by C code and doesn't cause crash. Additionally allows me to immediately show argument and parameter values. 
 [ ] Old saves will NOT work.
 
 Self-caused bugs
@@ -25,6 +27,7 @@ Found bugs:
 [-] When using Lua/ERM, post triggers ($) cause error with _NOGLOBALS macro. I believe game mistake them as macros. Not fixed, but i have added .pre and .post syntax - those works. For example, now you can use OB(11).pre = function() 
 [-+] When using Lua/ERM, BA:B(string) is broken. Not fixed, instead used StrMan::Apply in extended syntax - that does work well
 Not-fixed bugs
-[ ] Using BA:B - no matter, old or new syntax, while using HD Mod opens a terminal with filename. Closing this terminal closes the game aswell. Not fixed
+[ ] Using BA:B - no matter, old or new syntax - while using HD Mod opens a terminal with filename. Closing this terminal closes the game aswell. Not fixed
 [ ] WoG options - at least, the hardcoded ones - are scrapped when starting WoG map. On other maps works fine. Not fixed
 [ ] Lua/ERM errors can cause segmentation fault, due to accessing EAX=0x03. Replacing those errors with ERM errors fixes that.
+[ ] Dumping values can cause game crash (to be precise: loop responsible for ERM traceback causes crash) Commented both traceback loops.

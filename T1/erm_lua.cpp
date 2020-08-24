@@ -60,37 +60,6 @@ static const char* ToString(lua_State *L, int i)
 	return lua_typename(L, lua_type(L, i));
 }
 
-static int LuaError(char *text, int level) // Marker
-{
-	LuaCall("SetErrorLevel", level + 1);
-	luaL_where(Lua, level);
-	lua_pushstring(Lua, text);
-	lua_concat(Lua, 2);
-	return lua_error(Lua);
-}
-
-static int LuaError(char *text, int level, _ToDo_* sp, Mes* m, int Num) // Marker
-{
-	char temp[4096];
-	MakeErmErrorMessage(temp,4096,sp,m,Num,LuaPushERMInfo(sp->Self.s,false));
-	char mess[10000];
-	sprintf_s(mess,10000,"%s\n\n%s",text,temp);
-	lua_pop(Lua, 1);
-
-	return LuaError(mess,level);
-	//Message(mess,1); return 0;
-}
-
-/*void LuaErmError(_ToDo_* sp, Mes* m, int Num, char* err_mess)
-{
-	char message[4096];
-	MakeErmErrorMessage(message,4096,sp,m,Num);
-	char error_message[5000];
-	sprintf_s(error_message,5000,"%s\n\n%s",err_mess,message);
-	// Display
-	Message(error_message,1);
-}*/
-
 void ErrorMessage(const char * msg)
 {
 	FILE* f=fopen(WOGLUALOG, "w"); fprintf(f,"%s\n",msg); fclose(f);
@@ -438,9 +407,9 @@ _error:
 	// Lua Error Message
 	if (WasErmError) // Marker
 	{
-		//LuaErmError(&CmdToDo,&CmdMessage,k == 0 ? 1 : k, LastErmError);
-		//RETURN(0)
-		RETURN(LuaError(LastErmError, ERM_Call_ErrorLevel,&CmdToDo,&CmdMessage,k == 0 ? 1 : k))
+		LuaErmError(&CmdToDo,&CmdMessage,k == 0 ? 1 : k, LastErmError);
+		RETURN(0)
+		//RETURN(LuaError(LastErmError, ERM_Call_ErrorLevel,&CmdToDo,&CmdMessage,k == 0 ? 1 : k))
 	}
 
 	RETURN(retCount)
@@ -1297,4 +1266,19 @@ void InitLua()
 	if (DoFile(Format("%smain.lua", Path))) exit(0);
 	//LoadLibrary("MallocHook.dll");
 	SetCurrentDirectory(AppPath);
+}
+
+static int LuaError(char *text, int level) // Marker
+{
+	LuaCall("SetErrorLevel", level + 1);
+	luaL_where(Lua, level);
+	lua_pushstring(Lua, text);
+	lua_concat(Lua, 2);
+	return lua_error(Lua);
+}
+
+static int LuaError(char *text, int level, _ToDo_* sp, Mes* m, int Num) // Marker
+{
+	LuaErmError(sp,m,Num,text);
+	return 0;
 }

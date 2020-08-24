@@ -6,14 +6,12 @@
 #define MESSAGE_YES (30725)
 #define MESSAGE_NO (30726)
 
-// Header info's
-//#define ERM_ERROR_HEADER LuaPushERMInfo(sp->Self.s,false)
-
 // Log files
 #define WOGERMLOG ("woglogs/WOGERMLOG.TXT")
 #define WOGLUALOG ("woglogs/WOGLUALOG.TXT")
 #define WOGCRASHDUMP ("woglogs/WOGCRASHDUMP.DMP")
 #define WOGCRASHLOG ("woglogs/WOGCRASHLOG.TXT")
+#define WOGVARLOG ("woglogs/WOGVARLOG.TXT")
 
 // Composite, back-end tools
 void MakeErmVarNumDescription(char* destination, int length, VarNum& var);
@@ -34,3 +32,4 @@ void _MError(int file,int line,char *Txt);
 void _TError(int File,int Line,char *Txt);
 void DumpMessage(char *txt,int offset);
 void DumpERMVars(char *Text, bool NoLuaTraceback);
+void LuaErmError(_ToDo_* sp, Mes* m, int Num, char* err_mess);

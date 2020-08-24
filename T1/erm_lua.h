@@ -37,6 +37,5 @@ const char* LuaPushERMInfo(char *erm, bool OneLine = true);
 
 static int LuaError(char *text, int level);
 static int LuaError(char *text, int level, _ToDo_* sp, Mes* m, int Num);
-//void LuaErmError(_ToDo_* sp, Mes* m, int Num, char* err_mess);
 
 #endif

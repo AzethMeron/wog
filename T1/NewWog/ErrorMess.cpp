@@ -100,7 +100,29 @@ void MakeErmParamDescription(char* destination, const int& length, Mes *m, const
 
 void MakeErmErrorHeader(char* destination, const int& length, const char* info = "ErrorMess: info not initialised")
 {
-	sprintf_s(destination, length, "%s\n\n%s", ITxt(24,0,&Strings), info);
+	sprintf_s(destination, length, "%s\n\n%s\n", ITxt(24,0,&Strings), info);
+}
+
+// parse lua traceback to more readable form
+// destination string must be longer than traceback
+void ParseLuaTraceback(char* destination, int Length, const char* traceback, int TraceLength)
+{
+	bool check = false;
+	int j = 0;
+	for(int i = 0; i < TraceLength; ++i)
+	{
+		if(j >= Length) return;
+		destination[j] = traceback[i];
+		if(traceback[i] == ' ' && check) 
+		{
+			++j;
+			if(j >= Length) return;
+			destination[j] = '\n';
+		}
+		check = false;
+		if(traceback[i] == ':') check = true;
+		++j;
+	}
 }
 
 /****************************************************************************************/
@@ -115,9 +137,9 @@ void WriteLog(const char* logfilename, const char* message, const bool oneLine)
 	if(file != NULL)
 	{
 		size_t size = strlen(message);
-		sprintf_s(final_message,ERR_BUFSIZE,"%s	%s",asctime(gmtime( &ltime )),message);
+		sprintf_s(final_message,ERR_BUFSIZE,"%s	%s\n",asctime(gmtime( &ltime )),message);
 		if(oneLine) { for(int i = 0; i < size; ++i) { if(final_message[i] == '\n') final_message[i] = '	'; } }
-		fprintf(file, "%s\n", final_message);
+		fprintf(file, "%s", final_message);
 		fclose(file);
 	}
 	else
@@ -189,6 +211,26 @@ void ErmSyntaxError(Mes *M, const int& Ind)
 	UniversalErrorMessage(err_mess,WOGERMLOG);
 }
 
+void LuaErmError(_ToDo_* sp, Mes* m, int Num, char* err_mess)
+{
+	char message[ERR_BUFSIZE];
+	
+	char traceback[ERR_BUFSIZE] = "";
+	LuaCallStart("traceback");
+	LuaPCall(0, 1);
+	ParseLuaTraceback(traceback,ERR_BUFSIZE,lua_tostring(Lua, -1),strlen(lua_tostring(Lua, -1)));
+	lua_pop(Lua, 1);
+
+	MakeErmErrorMessage(message,4096,sp,m,Num, traceback);
+
+	char error_message[ERR_BUFSIZE];
+	sprintf_s(error_message,ERR_BUFSIZE,"%s\n\n%s\nSave all ERM vars to WOGVARLOG.TXT (may take time)?",err_mess,message);
+	if(UniversalErrorMessage(error_message,WOGERMLOG,2) == MESSAGE_YES)
+	{
+		DumpERMVars(err_mess,false); 
+	}
+}
+
 /****************************************************************************************/
 // Old error functions
 
@@ -217,11 +259,11 @@ void _MError(int File,int Line,char *Txt)
 	STARTNA(__LINE__, 0)
 	PL_ERMError=1;
 	DoneError = true;
-	/*if(ErrString.str == LuaErrorString)
+	if(ErrString.str == LuaErrorString)
 	{
 		LuaLastError(Txt);
 		RETURNV
-	}*/
+	}
 
 	if(PL_ERMErrDis) RETURNV
 	//if(Txt==0){
@@ -231,8 +273,8 @@ void _MError(int File,int Line,char *Txt)
 		Txt = (WoGType ? "неизвестна" : "unknown");
 	}
 	char *ErrorStr = (WoGType
-		? "Ошибка в скрипте ERM.\n\tFile: %s\n\tLine : %i\n\tПричина:\n\t%s\n\nСохранить дамп ERM переменных в LOGS/WOGERMLOG.TXT (длит. процедура)?"
-		: "ERM script Error.\n\tFile: %s\n\tLine : %i\n\tReason:\n\t%s\n\nSave all ERM vars to WOGERMLOG.TXT (may take time)?"
+		? "Ошибка в скрипте ERM.\n\tFile: %s\n\tLine : %i\n\tПричина:\n\t%s\n\nСохранить дамп ERM переменных в LOGS/WOGVARLOG.TXT (длит. процедура)?"
+		: "ERM script Error.\n\tFile: %s\n\tLine : %i\n\tReason:\n\t%s\n\nSave all ERM vars to WOGVARLOG.TXT (may take time)?"
 	);
 	
 	char err_mess[ERR_BUFSIZE];
@@ -364,6 +406,9 @@ void DumpERMVars(char *Text, bool NoLuaTraceback)
 		if(ERMLString[i][0]==0) continue;
 		p += sprintf_s(p, p2-p, "z-%i=\"%s\"\n",i+1,ERMLString[i]); 
 	}
-	SaveSetupState(WOGERMLOG,ME_Buf2,strlen(ME_Buf2));
+	p += sprintf_s(p, p2-p, "\n-----------------\n");
+
+	SaveSetupState(WOGVARLOG,ME_Buf2,strlen(ME_Buf2));
 	RETURNV
 }
+
