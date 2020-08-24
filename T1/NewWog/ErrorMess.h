@@ -26,10 +26,10 @@ int UniversalErrorMessage(const char* message, const char* logfilename = NULL, c
 // Predefined error messages
 void ErmSemanticError(_ToDo_* sp, Mes *m, const int& Num);
 void ErmSyntaxError(Mes *m, const int& Ind);
+void LuaErmError(_ToDo_* sp, Mes* m, int Num, char* err_mess);
 // Old error messages
 void _Error(int file,int line);
 void _MError(int file,int line,char *Txt);
 void _TError(int File,int Line,char *Txt);
 void DumpMessage(char *txt,int offset);
 void DumpERMVars(char *Text, bool NoLuaTraceback);
-void LuaErmError(_ToDo_* sp, Mes* m, int Num, char* err_mess);

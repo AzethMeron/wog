@@ -84,6 +84,11 @@ int ERM_Testing(char Cmd,int Num,_ToDo_* sp,Mes *Mp)
 			// Doesn't work
 		} break;
 
+		case 'X':
+		{
+			Apply(&WogLegacyData.val2,sizeof(WogLegacyData.val2),Mp,0);
+		} break;
+
 		default:
 			{ EWrongCommand(); RETURN(0); }
 			break;

@@ -152,6 +152,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\ExpansionERM.cpp"
+				>
+			</File>
+			<File
 				RelativePath="..\\global.cpp"
 				>
 			</File>
@@ -195,6 +199,10 @@
 			</File>
 			<File
 				RelativePath=".\ErrorMess.h"
+				>
+			</File>
+			<File
+				RelativePath=".\ExpansionERM.h"
 				>
 			</File>
 			<File

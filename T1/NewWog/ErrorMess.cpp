@@ -41,7 +41,7 @@ void MakeErmVarNumDescription(char* destination, int length, VarNum& var)
 	case 0: /* set syntax */ {
 		switch(var.Type)
 		{
-		case 0: { if(var.Num == 0) sprintf_s(destination,length,"{%s} value %d, or constant {string} (^string^)", Type[var.Type], var.Num); else sprintf_s(destination,length,"{%s} value %d", Type[var.Type], var.Num); } break;
+		case 0: { if(var.Num == 0) sprintf_s(destination,length,"{%s} value %d, or constant {string} (^^)", Type[var.Type], var.Num); else sprintf_s(destination,length,"{%s} value %d", Type[var.Type], var.Num); } break;
 		case 2: { sprintf_s(destination,length,"{%s}, value %d", Type[var.Type], GetVarVal(&var)); } break;
 		case 7: { if(var.IType == 0) /*Constant-indexed zvar*/ { sprintf_s(destination,length,"{%s%d}, strings aren't displayed here", Type[var.Type], var.Num); } 
 				 else /*Indexed with another variable*/ { sprintf_s(destination,length,"{%s%s%d}, index %s%d=%d, strings aren't displayed here", Type[var.Type], Type[var.IType], var.Num, Type[var.IType], var.Num, GetVarIndex(&var,true)); } } break;
@@ -84,7 +84,7 @@ void MakeErmParamDescription(char* destination, const int& length, Mes *m, const
 {
 	char* message = new char[length];
 	char* buffer = new char[length];
-	sprintf_s(buffer,length,"Parameters (if none, there is syntax error in params)\n"); 
+	sprintf_s(buffer,length,"Parameters (if none, syntax error occured)\n"); 
 	std::swap(message,buffer);
 	for(int i = 0; i < Num; ++i)
 	{

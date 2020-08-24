@@ -1,6 +1,7 @@
 #pragma once
 
 #include "structs.h"
+#include "NewWog/ExpansionERM.h"
 
 #define VAR_COUNT_V (10000)
 #define VAR_COUNT_LZ (20)
