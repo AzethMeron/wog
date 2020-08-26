@@ -705,7 +705,7 @@ void MakeDarkness(int Owner)
 
 //static int DoesHeroHas(_Hero_ *hr,int type);
 static int FillCurseStruct(_Hero_ *hr);
-static char *_GC_Pics[]={ // шаблоны
+char _GC_Pics[CURSETYPE_NUM][256]={ // шаблоны
 ".\\DATA\\ZVS\\LIB1.RES\\No1.bmp",
 ".\\DATA\\ZVS\\LIB1.RES\\Curse1.bmp",
 ".\\DATA\\ZVS\\LIB1.RES\\Curse2.bmp",
@@ -772,11 +772,13 @@ static char *_GC_Pics[]={ // шаблоны
 ".\\DATA\\ZVS\\LIB1.RES\\Curse63.bmp",
 ".\\DATA\\ZVS\\LIB1.RES\\Curse64.bmp",
 ".\\DATA\\ZVS\\LIB1.RES\\Curse65.bmp",
-".\\DATA\\ZVS\\LIB1.RES\\Curse66.bmp",
-".\\DATA\\ZVS\\LIB1.RES\\Curse67.bmp",
-".\\DATA\\ZVS\\LIB1.RES\\Curse68.bmp",
-".\\DATA\\ZVS\\LIB1.RES\\Curse69.bmp",
-".\\DATA\\ZVS\\LIB1.RES\\Curse70.bmp",
+//".\\DATA\\ZVS\\LIB1.RES\\Curse66.bmp",
+//".\\DATA\\ZVS\\LIB1.RES\\Curse67.bmp",
+//".\\DATA\\ZVS\\LIB1.RES\\Curse68.bmp",
+//".\\DATA\\ZVS\\LIB1.RES\\Curse69.bmp",
+//".\\DATA\\ZVS\\LIB1.RES\\Curse70.bmp",
+
+"",
 };
 static char _GC_Length[100][50];
 static char *GC_Pics[100];
@@ -902,16 +904,14 @@ void BlessesDescr(_MouseStr_ *ms, _Hero_ *hp)
 //004E1F6F E82CD41100     call   HEROES3.005FF3A0
 
 ////////////////////////////////////
-// Проклятия
-#define CURSENUM 1000
 //#define GODMONTSTRT   (150+9+1) // после привидения
 //#define GODMONTNUM     4        // количество богов
 static struct _GodCurse_{
-	int  Type;     // тип проклятия, 0=свободно
-	int  HeroInd;  // герой-хозяин
-	int  StartDay; // день, когда появился у героя
-	int  Length;   // длительность действия
-	int  CurseVal; // Значение параметра наказания
+	int  Type;     // тип проклятия, 0=свободно, "Type of curse, 0=free"
+	int  HeroInd;  // герой-хозяин, "hero-host"
+	int  StartDay; // день, когда появился у героя, "the day curse was applied"
+	int  Length;   // длительность действия, "Duration of curse"
+	int  CurseVal; // Значение параметра наказания, "Power of curse"
 	int  Backup[2];
 } CurseInfo[CURSENUM];
 
@@ -971,7 +971,9 @@ int FindFreeCurse()
 	RETURN(-1)
 }
 
+// object entrance prohibited table. 
 static int DHVC_Table[][3]={
+// curse_id, ob_type, ob_subtype 
 {22,109,-1}, // Water Wheel
 {23,17,-1},  // Dwelling
 {23,20,-1},  // Dwelling
@@ -1021,7 +1023,7 @@ static int DHVC_Table[][3]={
 {61,49,-1},  // Well
 {62,111,-1}, // WP
 //...
-{0,0,0}
+{0,0,0} // there must be it, otherwise segfault
 };
 int DoesHeroHasVisitCurse(int hn, int type,int stype)
 {

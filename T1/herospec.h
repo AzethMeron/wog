@@ -1,5 +1,10 @@
 #pragma once
 
+// Curses & Blessings macros
+#define CURSENUM 1000 // Maximum amount of Curses that can be applied to all heroes (combined) at one time
+#define CURSETYPE_NUM 100 // Maximum amount of CurseTypes
+////////////////////////////
+
 #include "structs.h"
 struct _HeroSpecCus_{
 	int   Used;
