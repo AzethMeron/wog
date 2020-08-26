@@ -1,8 +1,14 @@
 #pragma once
 
-// Curses & Blessings macros
+// Curses & Blessings 
 #define CURSENUM 1000 // Maximum amount of Curses that can be applied to all heroes (combined) at one time
 #define CURSETYPE_NUM 100 // Maximum amount of CurseTypes
+#define CURSE_BLOCKS 200 // number of entries in object-blocking array
+extern struct _CurseType_ {
+	char PicName[64];
+	char Desc[256];
+} CurseType[CURSETYPE_NUM]; // index in table = Type
+extern int DHVC_Table[CURSE_BLOCKS][3];
 ////////////////////////////
 
 #include "structs.h"

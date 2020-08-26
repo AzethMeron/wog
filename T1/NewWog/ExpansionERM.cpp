@@ -2,6 +2,8 @@
 #include "../structs.h"
 #include "../b1.h"
 #include "../erm.h"
+#include "../herospec.h"
+#include "../string.h"
 #include "ExpansionERM.h"
 #include <cmath>
 
@@ -88,5 +90,29 @@ int LoadLegacyData()
 	// Loading data
 	if(Loader(&LegacyGenericData,sizeof(LegacyGenericData))) RETURN(1);
 	RETURN(0);
+}
+/****************************************************************************************/
+
+/************************************ CURSE SUPPORT ************************************/
+int ERM_CurseSetup(char Cmd,int Num,_ToDo_* sp,Mes *Mp)
+{
+	STARTNA(__LINE__, 0)
+	int index = GetVarVal(&sp->Par[0]);
+	if(index < 1 || index >= CURSETYPE_NUM){ MError2("incorrect curse/blessing index."); RETURN(0) }
+	switch(Cmd)
+	{
+		case 'P': // Get/set picture
+		{
+			StrMan::Apply(CurseType[index].PicName,Mp,0,sizeof(CurseType[index].PicName));
+		} break;
+		case 'D': // Get/set description
+		{
+			StrMan::Apply(CurseType[index].Desc,Mp,0, sizeof(CurseType[index].Desc));
+		} break;
+		default:
+			{ EWrongCommand(); RETURN(0); }
+			break;
+	}
+	RETURN(1);
 }
 /****************************************************************************************/

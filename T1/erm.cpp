@@ -4848,6 +4848,7 @@ struct _ERM_Addition_{
 	{'go',0,0},
 // WoG Legacy
 	{'UU',ERM_Testing,2},
+	{'CR',ERM_CurseSetup,1},
 	
 	{0,0}
 };
