@@ -971,7 +971,7 @@ void WriteVarUsed(void)
 		if(ERMFunUsed[i]&0x40){ *cp++=' '; *cp++='*'; }
 		*cp++=0x0D; *cp++=0x0A;
 	}
-	if(SaveSetupState("ERMVarsUsed.LOG",VarUsedLog,strlen(VarUsedLog))){
+	if(SaveSetupState(ERMVARUSED,VarUsedLog,strlen(VarUsedLog))){
 		Message(/*ITxt(125,1,&WoGTexts)*/"Cannot write LOG file",1);
 	}
 	RETURNV
@@ -10615,7 +10615,9 @@ int SaveERM(void)
 // 3.59
 	if(Saver(&TextConstVars,sizeof(TextConstVars))) RETURN(1)
 	if(Saver(&GrailEnabled,sizeof(GrailEnabled))) RETURN(1)
-	if(Saver(&WogLegacyData,sizeof(WogLegacyData))) RETURN(1)
+// Legacy - moved to ExpansionERM.cpp
+	if(SaveLegacyData()) RETURN(1)
+
 
 ////  v=CalculateScopes();
 ////  if(Saver(&v,sizeof(v))) return 1;
@@ -10828,7 +10830,7 @@ int LoadERM(int /*ver*/)
 	if(Loader(&GrailEnabled,sizeof(GrailEnabled))) RETURN(1)
 	for (int i = 0; i < 9; i++)
 		UpdateGrailEnabled(i);
-	if(Loader(&WogLegacyData,sizeof(WogLegacyData))) RETURN(1)
+	if(LoadLegacyData()) RETURN(1)
 
 
 ////  FreeAllScopes();

@@ -12,6 +12,7 @@
 #define WOGCRASHDUMP ("woglogs/WOGCRASHDUMP.DMP")
 #define WOGCRASHLOG ("woglogs/WOGCRASHLOG.TXT")
 #define WOGVARLOG ("woglogs/WOGVARLOG.TXT")
+#define ERMVARUSED ("woglogs/ERMVarsUsed.LOG")
 
 // Composite, back-end tools
 void MakeErmVarNumDescription(char* destination, int length, VarNum& var);

@@ -7224,9 +7224,7 @@ void Add2Send(void)
 		for(i=0;i<len;i++) S2D_Buf[last+i]=buf[i];
 		last+=len;
 
-		len = sizeof(WogLegacyData); // Accquire length of data - in bytes
-		buf = (Byte*)&WogLegacyData; // Assign pointer to your data
-		if((last+len)>100000) break; // Exit if too much data
+		SendLegacyData(&len,&buf); if((last+len)>100000) break; // Exit if too much data
 		*((int *)&S2D_Buf[last])=len; last+=sizeof(int); // Save length in buffer (int type) 
 		for(i=0;i<len;i++) S2D_Buf[last+i]=buf[i]; // Save every byte
 		last+=len;
@@ -7310,7 +7308,7 @@ void Get4Receive(Byte *Buf)
 		if(first>last) break;
 
 		len=*(int *)&Buf[first]; first+=sizeof(int); 
-		{ Byte* WogData = (Byte*) &WogLegacyData; for(int i = 0; i < len; ++i) WogData[i] = Buf[first+i]; } 
+		ReceiveLegacyData(len,&Buf[first]);
 		first+=len;
 		if(first>last) break;
 
