@@ -214,7 +214,7 @@ struct Mes{
     // "first for quick access"
     long  i;    
     
-	// Receiver might have 1 string in parameters
+	// Command itself
     _Mes_ m;
     
 	//  VarNum Efl [16][2];
