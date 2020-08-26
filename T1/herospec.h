@@ -1,8 +1,8 @@
 #pragma once
 
 // Curses & Blessings 
-#define CURSENUM 1000 // Maximum amount of Curses that can be applied to all heroes (combined) at one time
-#define CURSETYPE_NUM 100 // Maximum amount of CurseTypes
+#define CURSENUM (1000) // Maximum amount of Curses that can be applied to all heroes (combined) at one time
+#define CURSETYPE_NUM (100+1) // Maximum amount of CurseTypes (Type 0 is dummy. so effectively it's indexed from 1)
 #define CURSE_BLOCKS 200 // number of entries in object-blocking array
 extern struct _CurseType_ {
 	char PicName[64];

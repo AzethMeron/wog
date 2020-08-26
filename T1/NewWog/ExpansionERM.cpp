@@ -94,6 +94,55 @@ int LoadLegacyData()
 /****************************************************************************************/
 
 /************************************ CURSE SUPPORT ************************************/
+int FindCurseBlockObject(int index, int type, int subtype) // -1 means not found
+{
+	for(int i = 0; i < CURSE_BLOCKS; ++i)
+	{
+		if(DHVC_Table[i][0] != index) continue;
+		if(DHVC_Table[i][1] != type) continue;
+		if(DHVC_Table[i][2] != subtype) continue;
+		return i;
+	}
+	return -1;
+}
+int FindEndOfBlockedObjects() // find first {0,0,0}
+{
+	for(int i = 0; i < CURSE_BLOCKS; ++i)
+	{
+		if(DHVC_Table[i][0] != 0) continue;
+		return i;
+	}
+	return -1;
+}
+int AddCurseBlockObject(int index, int type, int subtype)
+{
+	int entry = FindCurseBlockObject(index,type,subtype);
+	if(entry != -1) return 0;
+	entry = FindEndOfBlockedObjects();
+	if(entry == -1) return 1;
+	DHVC_Table[entry][0] = index;
+	DHVC_Table[entry][1] = type;
+	DHVC_Table[entry][2] = subtype;
+	if(entry < CURSE_BLOCKS-1) 
+	{
+		DHVC_Table[entry+1][0] = 0;
+		DHVC_Table[entry+1][1] = 0;
+		DHVC_Table[entry+1][2] = 0;
+	}
+	return 0;
+}
+void RemoveCurseBlockObject(int index, int type, int subtype)
+{
+	int entry = FindCurseBlockObject(index,type,subtype);
+	if(entry == -1) return;
+	int end = FindEndOfBlockedObjects(); 
+	if(end == -1) end = CURSE_BLOCKS;
+	for(int i = 0; i < 3; ++i)
+	{
+		DHVC_Table[entry][i] = DHVC_Table[end-1][i];
+		DHVC_Table[end-1][i] = 0;
+	}
+}
 int ERM_CurseSetup(char Cmd,int Num,_ToDo_* sp,Mes *Mp)
 {
 	STARTNA(__LINE__, 0)
@@ -103,12 +152,63 @@ int ERM_CurseSetup(char Cmd,int Num,_ToDo_* sp,Mes *Mp)
 	{
 		case 'P': // Get/set picture
 		{
+			CHECK_ParamsNum(1);
 			StrMan::Apply(CurseType[index].PicName,Mp,0,sizeof(CurseType[index].PicName));
 		} break;
+
 		case 'D': // Get/set description
 		{
+			CHECK_ParamsNum(1);
 			StrMan::Apply(CurseType[index].Desc,Mp,0, sizeof(CurseType[index].Desc));
 		} break;
+
+		case 'B': // Forbid entering objects
+		{
+			CHECK_ParamsNum(3);
+			int type=0, subtype=0;
+			if(Apply(&type,sizeof(type),Mp,0)) { MError2("Cannot get parameter: Type"); RETURN(0); }
+			if(Apply(&subtype,sizeof(type),Mp,1)) { MError2("Cannot get parameter: Subtype"); RETURN(0); }
+			if(type==63 && subtype != 0) { MError2("Cannot forbid entrance to WoG objects"); RETURN(0); } 
+			int disabled = 0; if(FindCurseBlockObject(index,type,subtype)!=-1) disabled = 1;
+			if(!Apply(&disabled,sizeof(disabled),Mp,2))
+			{
+				if(disabled == 1)
+				{
+					if(AddCurseBlockObject(index,type,subtype)) { MError2("Too many entries in objects-blocked-by-curse array"); RETURN(0);}
+				} else if(disabled == 0)
+				{
+					RemoveCurseBlockObject(index,type,subtype);
+				} else { MError2("unknown operation:"); RETURN(0);}
+			}
+		} break;
+
+		case 'X': // Log Curses/Blesses
+		{
+			CHECK_ParamsNum(2);
+			char filename[64];
+			if(StrMan::Apply(filename,Mp,0,256) == 0) { MError2("Cannot get parameter: logfile name"); RETURN(0);}
+			int skip_empty_entries = 1;
+			if(Apply(&skip_empty_entries,sizeof(skip_empty_entries),Mp,1)) { MError2("Cannot get parameter: skip empty entries"); RETURN(0); }
+			FILE* file = fopen(filename,"at");
+			if(file == NULL) { MError2("Cannot open logfile"); RETURN(0);}
+			else
+			{
+				fprintf(file, "Logging all initialised Curses/Blesses\n");
+				for(int i = 1; i < CURSETYPE_NUM; ++i)
+				{
+					if(skip_empty_entries) if(!strcmp(CurseType[i].PicName,"")) continue;
+					fprintf(file,"Type %d, PictureName '%s', Description '%s'\n",i,CurseType[i].PicName,CurseType[i].Desc);
+				}
+				fprintf(file, "Logging all entries in Objects blocked by Curses\n");
+				for(int i = 0; i < CURSE_BLOCKS; ++i)
+				{
+					if(skip_empty_entries) if(DHVC_Table[i][0]==0) continue;
+					fprintf(file,"Curse index %d, Object type %d, Object subtype %d\n",DHVC_Table[i][0],DHVC_Table[i][1],DHVC_Table[i][2]);
+				}
+				fclose(file);
+			}
+		} break;
+
 		default:
 			{ EWrongCommand(); RETURN(0); }
 			break;

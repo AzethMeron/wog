@@ -1182,7 +1182,7 @@ int ERM_Curse(Mes &M, int Num, int hn)
 	if(M.n[3]==3 && !M.VarI[1].Check && !M.VarI[2].Check)
 		RETURN(AddCurse(0, 0, 0, 3, hn));
 
-	int cr = M.n[0];
+	int cr = M.n[0]; if(cr < 1 || cr >= CURSETYPE_NUM) { MError2("incorrect curse/bless number"); RETURN(1); }
 	int i = DoesHeroHas(hn, cr);
 	if (i < 0)
 	{
@@ -1334,22 +1334,35 @@ void ResetCurse(void)
 		CurseInfo[i].CurseVal=0;
 		CurseInfo[i].Length=0;
 	}
+
+	bool end = false;
 	for(i = 0; i < CURSE_BLOCKS; ++i)
 	{
-		if(o358_DHVC_Table[i][0] == 0) break;
+		if(o358_DHVC_Table[i][0] == 0) end = true;
 		for(int j = 0; j < 3; ++j)
 		{
-			DHVC_Table[i][j] = o358_DHVC_Table[i][j];
+			if(!end) DHVC_Table[i][j] = o358_DHVC_Table[i][j];
+			else DHVC_Table[i][j] = 0;
 		}
 	}
+
+	end = false;
 	for(i = 0; i < CURSETYPE_NUM; ++i)
 	{
-		if(!strcmp(o358_GC_Pics[i],"")) break;
-		sprintf_s(CurseType[i].PicName,sizeof(CurseType[i].PicName), "%s", o358_GC_Pics[i]);
-		if(i>40){
-			sprintf_s(CurseType[i].Desc,sizeof(CurseType[i].Desc), "%s", ITxt(90+i,0,&Strings) );
-		}else{
-			sprintf_s(CurseType[i].Desc,sizeof(CurseType[i].Desc), "%s", ITxt(80+i,0,&Strings) );
+		if(!strcmp(o358_GC_Pics[i],"")) end = true;
+		if(!end)
+		{
+			sprintf_s(CurseType[i].PicName,sizeof(CurseType[i].PicName), "%s", o358_GC_Pics[i]);
+			if(i>40){
+				sprintf_s(CurseType[i].Desc,sizeof(CurseType[i].Desc), "%s", ITxt(90+i,0,&Strings) );
+			}else{
+				sprintf_s(CurseType[i].Desc,sizeof(CurseType[i].Desc), "%s", ITxt(80+i,0,&Strings) );
+			}
+		}
+		else
+		{
+			sprintf_s(CurseType[i].PicName,sizeof(CurseType[i].PicName), "");
+			sprintf_s(CurseType[i].Desc,sizeof(CurseType[i].Desc), "");
 		}
 	}
 
