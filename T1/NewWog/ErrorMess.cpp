@@ -224,11 +224,10 @@ void LuaErmError(_ToDo_* sp, Mes* m, int Num, char* err_mess)
 	MakeErmErrorMessage(message,4096,sp,m,Num, traceback);
 
 	char error_message[ERR_BUFSIZE];
-	sprintf_s(error_message,ERR_BUFSIZE,"%s\n\n%s\nSave all ERM vars to WOGVARLOG.TXT (may take time)?",err_mess,message);
-	if(UniversalErrorMessage(error_message,WOGERMLOG,2) == MESSAGE_YES)
-	{
-		DumpERMVars(err_mess,false); 
-	}
+	//sprintf_s(error_message,ERR_BUFSIZE,"%s\n\n%s\nSave all ERM vars to WOGVARLOG.TXT (may take time)?",err_mess,message);
+	sprintf_s(error_message,ERR_BUFSIZE,"%s\n\n%s\n",err_mess,message);
+	/*if(UniversalErrorMessage(error_message,WOGERMLOG,2) == MESSAGE_YES) {	DumpERMVars(err_mess,false); } // Commented because there is no need for dump if it's Lua*/
+	UniversalErrorMessage(error_message,WOGERMLOG,1);
 }
 
 /****************************************************************************************/

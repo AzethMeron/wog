@@ -6,3 +6,4 @@
 
 #define __FILENUM__ 33
 
+DataToBeSaved WogLegacyData; 

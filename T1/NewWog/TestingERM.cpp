@@ -71,7 +71,7 @@ int ERM_Testing(char Cmd,int Num,_ToDo_* sp,Mes *Mp)
 			if(Apply(&output,4,Mp,3) == 0) { MError2("Cannot set parameter 4 - output value"); RETURN(0)}
 		} break;
 
-		// Black market receiver - TODO, doesn't work now
+		// Black market receiver - TODO, doesn't work now 
 		case 'M':
 		{
 			CHECK_ParamsNum(2);

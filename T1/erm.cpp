@@ -32,8 +32,6 @@
 #include "NewWog/ErrorMess.h"
 #include "NewWog/ExpansionERM.h"
 
-DataToBeSaved WogLegacyData; 
-
 bool IsLuaCall = false;
 
 _Cmd_     *Heap;
