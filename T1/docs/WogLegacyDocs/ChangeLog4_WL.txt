@@ -10,6 +10,57 @@ New command for receiver UX
 		# - string, z-var or ^^ constant. Maximum size: 256 chars.
 UX:D allows to display error message using internal tools. Might be useful for debugging. Works with UN:P904 and UN:P905
 
+!!CR#1:
+	#1 - index (type) of Curse/Bless (1..100)
+	if command doesn't use index, you can omit
+:P$; Picture of Curse
+	$ - get/set picture path, might be zvar or ^^ constant
+	Limit of characters: 64
+	Path is relative to main directory of Heroes 3. All 3.58f curses are 44x44 pixels BMP files
+:D$; Description of Curse
+	$ - get/set description, might be zvar or ^^ constant
+	Limit of characters: 256
+:B#1/#2/$; Get/set hardcoded "Cannot visit an object on the map"
+	#1 - object type
+	#2 - object subtype
+	$ = 0 means visiting object enabled
+	$ = 1 means visiting object disabled (cannot visit)
+	One curse might forbid entrance to multiple objects
+:F?$; Find free "type" of curse
+	$ - index (type) get-only
+	-1 if not found
+:X#1/#2; Log curse data
+	#1 - string, name of file to log
+	#2 - skip empty entries (1) or log everything (0)
+	this one won't be used by anybody anymore, probably
+All changes are saved in savefile, but are NOT send to remote PC during combat. So if you want to make curse matter in combat, beware that HE:Y might NOT show correct value on remote PC. Using HE-10 or HE-20 will NOT help here. You have to send data using IP receiver.
+
+Curse support expanded once again. Now you can add custom curses/blesses as rewards/penalty for Sphinx riddle.
+Additionally this serves as unified way to create "blesses" and "curses" pool.
+CR:R#1/?$2/?$3; Get random curse/bless
+	#1 - bless (1) or curse (0) pool
+	$2 - index (type) of curse/bless
+	$3 - (optional) randomly chosen Value (Power) of curse/bless
+CR#1:S#2/?$; Check if curse of given index (type) is within pool
+	#1 - curse type
+	#2 - bless (1) or curse (0) pool
+	$ - present (1) or not (0)
+	This allows you to check whether given cursetype is indeed curse, or bless. Actually can be both :)
+CR#1:S#2/0; Exclude from curse pool
+	#1 - curse type
+	#2 - bless (1) or curse (0) pool
+	This way you can remove curse from given pool, making it unavailable for CR:R and Sphinx.
+	You can't remove all curses from either pool - there always must be atleast 1.
+CR#1:S#2/1/#3/#4; Add to pool
+	#1 - curse type
+	#2 - bless (1) or curse (0) pool
+	#3 - minimum value
+	#4 - maximum value
+	Makes curse available for CR:R and Sphinx. 
+	Min/max values is range of Power Value for curse. Sphinx loss value from that rande, aswell as CR:R.
+You can try to remove curse from pool it doesn't belong to - it's ignored.
+If you add curse to pool it's already in, it doesn't create new entry but overrides previous one
+
 [+] In Lua/ERM you can use ".pre" ".firstpre" ".post" instead of ".?" ".first?" ".$".
 [+] In Lua/ERM trigger type (pre, firstpost) letter case no longer matters. You can use "FirstPost", or "FiRsTpOsT".
 [-+] AI:M and AI:W, when used with base value, accepts ONLY get syntax. 

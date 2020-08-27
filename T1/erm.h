@@ -1,6 +1,7 @@
 #pragma once
 
 #include "structs.h"
+#include "herospec.h"
 #include "NewWog/ExpansionERM.h"
 
 #define VAR_COUNT_V (10000)
@@ -183,3 +184,5 @@ void DlgCallBack(int dlg,int item,int action);
 char *GetErmText(Mes *Mp,int ind);
 
 
+extern short int AS_CBad[CURSETYPE_NUM][3];
+extern short int AS_CGood[CURSETYPE_NUM][3];

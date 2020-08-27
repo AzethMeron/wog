@@ -143,27 +143,106 @@ void RemoveCurseBlockObject(int index, int type, int subtype)
 		DHVC_Table[end-1][i] = 0;
 	}
 }
+
+int FindBlessSphinx(short int index)
+{
+	for(int i = 1; i <= AS_CGood[0][0]; ++i)
+	{
+		if(index==AS_CGood[i][0]) return i;
+	}
+	return -1;
+}
+void RemoveBlessSphinx(short int index)
+{
+	short int bless_index = FindBlessSphinx(index);
+	if(bless_index==-1) return; // exit if there is no such bless
+	int end = AS_CGood[0][0];
+	if(end == 1) { UniversalErrorMessage("Cannot remove all blessings from sphinx database"); return; }
+	for(int i = 0; i < 3; ++i)
+	{
+		AS_CGood[bless_index][i] = AS_CGood[end][i];
+		AS_CGood[end][i] = 0;
+	}
+	--AS_CGood[0][0]; 
+}
+int AddBlessSphinx(short int index, short int min, short int max)
+{
+	short int bless_index = FindBlessSphinx(index);
+	if(bless_index==-1)
+	{
+		bless_index = AS_CGood[0][0] + 1;
+		if(bless_index >= CURSETYPE_NUM) { return 1; } 
+		++AS_CGood[0][0];
+	}
+	AS_CGood[bless_index][0] = index;
+	AS_CGood[bless_index][1] = min;
+	if(max >= min) AS_CGood[bless_index][2] = max;
+	else { AS_CGood[bless_index][2] = min; return 1; }
+	return 0;
+}
+
+int FindCurseSphinx(short int index)
+{
+	for(int i = 1; i <= AS_CBad[0][0]; ++i)
+	{
+		if(index==AS_CBad[i][0]) return i;
+	}
+	return -1;
+}
+void RemoveCurseSphinx(short int index)
+{
+	short int curse_index = FindCurseSphinx(index);
+	if(curse_index==-1) return;
+	int end = AS_CBad[0][0];
+	if(end == 1) { UniversalErrorMessage("Cannot remove all curses from sphinx database"); return; }
+	for(int i = 0; i < 3; ++i)
+	{
+		AS_CBad[curse_index][i] = AS_CBad[end][i];
+		AS_CBad[end][i] = 0;
+	}
+	--AS_CBad[0][0];
+}
+int AddCurseSphinx(short int index, short int min, short int max)
+{
+	short int curse_index = FindCurseSphinx(index);
+	if(curse_index==-1)
+	{
+		curse_index = AS_CBad[0][0] + 1;
+		if(curse_index >= CURSETYPE_NUM) { return 1; } 
+		++AS_CBad[0][0];
+	}
+	AS_CBad[curse_index][0] = index;
+	AS_CBad[curse_index][1] = min;
+	if(max >= min) AS_CBad[curse_index][2] = max;
+	else { AS_CBad[curse_index][2] = min; return 1; }
+	return 0;
+}
+
 int ERM_CurseSetup(char Cmd,int Num,_ToDo_* sp,Mes *Mp)
 {
 	STARTNA(__LINE__, 0)
-	int index = GetVarVal(&sp->Par[0]);
-	if(index < 1 || index >= CURSETYPE_NUM){ MError2("incorrect curse/blessing index."); RETURN(0) }
 	switch(Cmd)
 	{
 		case 'P': // Get/set picture
 		{
+			int index = GetVarVal(&sp->Par[0]);
+			if(index < 1 || index >= CURSETYPE_NUM){ MError2("incorrect curse/blessing index(type)."); RETURN(0) }
 			CHECK_ParamsNum(1);
 			StrMan::Apply(CurseType[index].PicName,Mp,0,sizeof(CurseType[index].PicName));
 		} break;
 
 		case 'D': // Get/set description
 		{
+			int index = GetVarVal(&sp->Par[0]);
+			if(index < 1 || index >= CURSETYPE_NUM){ MError2("incorrect curse/blessing index(type)."); RETURN(0) }
 			CHECK_ParamsNum(1);
 			StrMan::Apply(CurseType[index].Desc,Mp,0, sizeof(CurseType[index].Desc));
 		} break;
 
 		case 'B': // Forbid entering objects
 		{
+			int index = GetVarVal(&sp->Par[0]);
+			if(index < 1 || index >= CURSETYPE_NUM){ MError2("incorrect curse/blessing index(type)."); RETURN(0) }
 			CHECK_ParamsNum(3);
 			int type=0, subtype=0;
 			if(Apply(&type,sizeof(type),Mp,0)) { MError2("Cannot get parameter: Type"); RETURN(0); }
@@ -175,10 +254,93 @@ int ERM_CurseSetup(char Cmd,int Num,_ToDo_* sp,Mes *Mp)
 				if(disabled == 1)
 				{
 					if(AddCurseBlockObject(index,type,subtype)) { MError2("Too many entries in objects-blocked-by-curse array"); RETURN(0);}
-				} else if(disabled == 0)
-				{
+				} else if(disabled == 0) {
 					RemoveCurseBlockObject(index,type,subtype);
 				} else { MError2("unknown operation:"); RETURN(0);}
+			}
+		} break;
+
+		case 'F': // Find free cursetype
+		{
+			Message(Random(1,1));
+			CHECK_ParamsNum(1);
+			int found = -1;
+			for(int i = 1; i < CURSETYPE_NUM; ++i)
+			{ if(!strcmp(CurseType[i].PicName,"")) if(!strcmp(CurseType[i].Desc,"")) { found = i; break; } }
+			if(Apply(&found,sizeof(found),Mp,0) == 0) { MError2("Cannot set output value"); RETURN(0); }
+		} break;
+
+		case 'R': // Get random curse/bless
+		{
+			CHECK_ParamsMin(2);
+			int bless = 0;
+			Apply(&bless,sizeof(bless),Mp,0);
+			int rand_type = -1;
+			int rand_val = -1;
+			if(bless == 1) // bless
+			{
+				int maxnum = AS_CGood[0][0];
+				int rand_ind = 1; if(maxnum > 1) rand_ind = Random(1,maxnum);
+				rand_type = AS_CGood[rand_ind][0];
+				if(AS_CGood[rand_ind][1] == AS_CGood[rand_ind][2]) rand_val = AS_CGood[rand_ind][1];
+				else rand_val = Random(AS_CGood[rand_ind][1],AS_CGood[rand_ind][2]);
+			}
+			else if(bless == 0)
+			{
+				int maxnum = AS_CBad[0][0];
+				int rand_ind = 1; if(maxnum > 1) rand_ind = Random(1,maxnum);
+				rand_type = AS_CBad[rand_ind][0];
+				if(AS_CBad[rand_ind][1] == AS_CBad[rand_ind][2]) rand_val = AS_CBad[rand_ind][1];
+				else rand_val = Random(AS_CBad[rand_ind][1],AS_CBad[rand_ind][2]);
+			}
+			else
+			{
+				MError2("Invalid parameter value: bless/curse"); RETURN(0);
+			}
+			if(Apply(&rand_type,sizeof(rand_type),Mp,1) == 0) { MError2("Cannot set output value"); RETURN(0); }
+			if(Num==3) if(Apply(&rand_val,sizeof(rand_val),Mp,2) == 0) { MError2("Cannot set output value"); RETURN(0); }
+		} break;
+
+		case 'S': // Sphinx support
+		{
+			int index = GetVarVal(&sp->Par[0]);
+			if(index < 1 || index >= CURSETYPE_NUM){ MError2("incorrect curse/blessing index(type)."); RETURN(0) }
+			int bless = -1;
+			if(Apply(&bless,sizeof(bless),Mp,0)) { MError2("Cannot get parameter: bless or curse"); RETURN(0); }
+			switch(bless)
+			{
+				case 1: // bless
+				{
+					int command = 0; if(FindBlessSphinx(index)!=-1) command = 1;
+					Apply(&command,sizeof(command),Mp,1);
+					if(command==0) { RemoveBlessSphinx(index); }
+					if(command==1) if(Mp->VarI[1].Check!=1) if(Num!=4) { MError2("Cannot add blessing without specified Min and Max value"); RETURN(0); };
+					if(Num!=4 || command==0) break;
+					short int min, max;
+					if(Apply(&min,sizeof(min),Mp,2)) { MError2("Cannot get parameter: minimum value"); RETURN(0); }
+					if(Apply(&max,sizeof(max),Mp,3)) { MError2("Cannot get parameter: maximum value"); RETURN(0); }
+					if(max < min) { MError2("Maximum value CANNOT be ower than Minimum"); RETURN(0); }
+					if(command==1) { if(AddBlessSphinx(index,min,max)) { MError2("Cannot add more blessings for sphinx"); RETURN(0); } }
+				} break;
+
+				case 0: // curse
+				{
+					int command = 0; if(FindCurseSphinx(index)!=-1) command = 1;
+					Apply(&command,sizeof(command),Mp,1);
+					if(command==0) { RemoveCurseSphinx(index); }
+					if(command==1) if(Mp->VarI[1].Check!=1) if(Num!=4) { MError2("Cannot add curse without specified Min and Max value"); RETURN(0); };
+					if(Num!=4 || command==0) break;
+					short int min, max;
+					if(Apply(&min,sizeof(min),Mp,2)) { MError2("Cannot get parameter: minimum value"); RETURN(0); }
+					if(Apply(&max,sizeof(max),Mp,3)) { MError2("Cannot get parameter: maximum value"); RETURN(0); }
+					if(max < min) { MError2("Maximum value CANNOT be ower than Minimum"); RETURN(0); }
+					if(command==1) { if(AddCurseSphinx(index,min,max)) { MError2("Cannot add more blessings for sphinx"); RETURN(0); } }
+				} break;
+			
+				default:
+				{
+					MError2("Invalid parameter: bless or curse"); RETURN(0); 
+				} break;
 			}
 		} break;
 
@@ -204,6 +366,18 @@ int ERM_CurseSetup(char Cmd,int Num,_ToDo_* sp,Mes *Mp)
 				{
 					if(skip_empty_entries) if(DHVC_Table[i][0]==0) continue;
 					fprintf(file,"Curse index %d, Object type %d, Object subtype %d\n",DHVC_Table[i][0],DHVC_Table[i][1],DHVC_Table[i][2]);
+				}
+				fprintf(file, "Logging all entries in Sphinx Curses\n");
+				for(int i = 1; i < CURSETYPE_NUM; ++i)
+				{
+					if(skip_empty_entries) if(AS_CBad[i][0]==0) continue;
+					fprintf(file,"Curse index %d, Min %d, Max %d\n",AS_CBad[i][0],AS_CBad[i][1],AS_CBad[i][2]);
+				}
+				fprintf(file, "Logging all entries in Sphinx Blessings\n");
+				for(int i = 1; i < CURSETYPE_NUM; ++i)
+				{
+					if(skip_empty_entries) if(AS_CGood[i][0]==0) continue;
+					fprintf(file,"Bless index %d, Min %d, Max %d\n",AS_CGood[i][0],AS_CGood[i][1],AS_CGood[i][2]);
 				}
 				fclose(file);
 			}
