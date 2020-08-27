@@ -316,11 +316,21 @@ int ERM_CurseSetup(char Cmd,int Num,_ToDo_* sp,Mes *Mp)
 					if(command==0) { RemoveBlessSphinx(index); }
 					if(command==1) if(Mp->VarI[1].Check!=1) if(Num!=4) { MError2("Cannot add blessing without specified Min and Max value"); RETURN(0); };
 					if(Num!=4 || command==0) break;
-					short int min, max;
-					if(Apply(&min,sizeof(min),Mp,2)) { MError2("Cannot get parameter: minimum value"); RETURN(0); }
-					if(Apply(&max,sizeof(max),Mp,3)) { MError2("Cannot get parameter: maximum value"); RETURN(0); }
-					if(max < min) { MError2("Maximum value CANNOT be ower than Minimum"); RETURN(0); }
-					if(command==1) { if(AddBlessSphinx(index,min,max)) { MError2("Cannot add more blessings for sphinx"); RETURN(0); } }
+					short int min=0, max=0;
+					if(Mp->VarI[2].Check==1 && Mp->VarI[3].Check==1)
+					{
+						int ind = FindBlessSphinx(index);
+						if(ind!= -1) { min = AS_CGood[ind][1]; max = AS_CGood[ind][2]; } 
+						if(Apply(&min,sizeof(min),Mp,2)==0) { MError2("Cannot mix get and set syntax"); RETURN(0); }
+						if(Apply(&max,sizeof(max),Mp,3)==0) { MError2("Cannot mix get and set syntax"); RETURN(0); }
+					}
+					else
+					{
+						if(Apply(&min,sizeof(min),Mp,2)) { MError2("Cannot get parameter: minimum value"); RETURN(0); }
+						if(Apply(&max,sizeof(max),Mp,3)) { MError2("Cannot get parameter: maximum value"); RETURN(0); }
+						if(max < min) { MError2("Maximum value CANNOT be lower than Minimum"); RETURN(0); }
+						if(command==1) { if(AddBlessSphinx(index,min,max)) { MError2("Cannot add more blessings for sphinx"); RETURN(0); } }
+					}
 				} break;
 
 				case 0: // curse
@@ -330,11 +340,21 @@ int ERM_CurseSetup(char Cmd,int Num,_ToDo_* sp,Mes *Mp)
 					if(command==0) { RemoveCurseSphinx(index); }
 					if(command==1) if(Mp->VarI[1].Check!=1) if(Num!=4) { MError2("Cannot add curse without specified Min and Max value"); RETURN(0); };
 					if(Num!=4 || command==0) break;
-					short int min, max;
-					if(Apply(&min,sizeof(min),Mp,2)) { MError2("Cannot get parameter: minimum value"); RETURN(0); }
-					if(Apply(&max,sizeof(max),Mp,3)) { MError2("Cannot get parameter: maximum value"); RETURN(0); }
-					if(max < min) { MError2("Maximum value CANNOT be ower than Minimum"); RETURN(0); }
-					if(command==1) { if(AddCurseSphinx(index,min,max)) { MError2("Cannot add more blessings for sphinx"); RETURN(0); } }
+					short int min=0, max=0;
+					if(Mp->VarI[2].Check==1 && Mp->VarI[3].Check==1)
+					{
+						int ind = FindCurseSphinx(index);
+						if(ind!= -1) { min = AS_CBad[ind][1]; max = AS_CBad[ind][2]; } 
+						if(Apply(&min,sizeof(min),Mp,2)==0) { MError2("Cannot mix get and set syntax"); RETURN(0); }
+						if(Apply(&max,sizeof(max),Mp,3)==0) { MError2("Cannot mix get and set syntax"); RETURN(0); }
+					}
+					else
+					{
+						if(Apply(&min,sizeof(min),Mp,2)) { MError2("Cannot get parameter: minimum value"); RETURN(0); }
+						if(Apply(&max,sizeof(max),Mp,3)) { MError2("Cannot get parameter: maximum value"); RETURN(0); }
+						if(max < min) { MError2("Maximum value CANNOT be lower than Minimum"); RETURN(0); }
+						if(command==1) { if(AddCurseSphinx(index,min,max)) { MError2("Cannot add more blessings for sphinx"); RETURN(0); } }
+					}
 				} break;
 			
 				default:

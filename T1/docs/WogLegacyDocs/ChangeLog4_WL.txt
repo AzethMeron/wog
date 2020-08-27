@@ -46,6 +46,13 @@ CR#1:S#2/?$; Check if curse of given index (type) is within pool
 	#2 - bless (1) or curse (0) pool
 	$ - present (1) or not (0)
 	This allows you to check whether given cursetype is indeed curse, or bless. Actually can be both :)
+CR#1:S#2/?$3/?$4/?$5; Check if curse of given index (type) is within pool - Extended syntax
+	#1 - curse type
+	#2 - bless (1) or curse (0) pool
+	$3 - present (1) or not
+	$4 - minimal value
+	$5 - maximum value
+	Note that if parameter $3=0 (curse isn't in this pool) $4 and $5 are undefined (should be 0, but remember to check nonetheless)
 CR#1:S#2/0; Exclude from curse pool
 	#1 - curse type
 	#2 - bless (1) or curse (0) pool
