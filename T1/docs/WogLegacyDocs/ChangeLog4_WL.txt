@@ -76,6 +76,7 @@ If you add curse to pool it's already in, it doesn't create new entry but overri
 [+] Logs moved to woglogs/ folder. Remember to make it in release!
 [+] We have now LuaLog, WOGERMLOG, WOGVARLOG, WOGCRASHLOG and WOGCRASHDUMP. A lot, but it makes sense.
 [+] Added struct that's automatically saved to (and loaded from) savefile. Proven to work in singleplayer, doesn't know if it works in multi. Doesn't support MP battles for sure (yet)
+[ ] I've tried to separate Curses from herospec, but it isn't done properly yet. Although it DOES compile
 [ ] I kinda don't understand purpose of h3std, so i've moved everything to h3wog EXCEPT txt files. So all text files can be put in h3std for easier translation,
 [ ] Many Lua/ERM errors are managed by C code and doesn't cause crash. Additionally allows me to immediately show argument and parameter values. 
 [ ] Old saves will NOT work.

@@ -28,7 +28,7 @@
 #include "erm_lua.h"
 #include "global.h"
 
-#include "NewWog/TestingERM.h"
+#include "NewWog/Curse.h"
 #include "NewWog/ErrorMess.h"
 #include "NewWog/ExpansionERM.h"
 
@@ -9514,49 +9514,6 @@ _norm:
 	push 0x4F6C00
 	ret
 }}
-
-#define SPHMOVEPOINTS 0x500
-void ApplySphinx(int GM_ai,_Hero_ *Hr,_MapItem_ * /*Mi*/)
-{
-	STARTNA(__LINE__, 0)
-	int num,val,len,P_n;
-	num=Random(0,TXTSphinx.sn-1);
-	if(Hr->Movement<SPHMOVEPOINTS){ // есть свободные движения у Героя
-		if(GM_ai){
-			Message(ITxt(18,0,&Strings),1);
-			RETURNV
-		}
-	}
-	Hr->Movement-=SPHMOVEPOINTS; if(Hr->Movement<0) Hr->Movement=0;
-	if(GM_ai){
-		if(SphinxReq(num)) P_n=1; else P_n=0;
-	}else{
-		P_n=1; // AI
-//    Mi->SetUp&=0xFFFFFFFE; // visited
-	}
-	if(P_n){
-		num=AS_CGood[0][0]; num=Random(1,num);
-		if(AS_CGood[num][1]==AS_CGood[num][2]) val=AS_CGood[num][1];
-		else val=Random(AS_CGood[num][1],AS_CGood[num][2]);
-		num=AS_CGood[num][0];
-	}else{
-		num=AS_CBad[0][0]; num=Random(1,num);
-		if(AS_CBad[num][1]==AS_CBad[num][2]) val=AS_CBad[num][1];
-		else val=Random(AS_CBad[num][1],AS_CBad[num][2]);
-		num=AS_CBad[num][0];
-	}
-	len=Random(1,7);
-	if(AddCurse(num,val,len,2,Hr->Number)){ Error(); RETURNV }
-	if(GM_ai){
-		if(P_n){
-			Message(ITxt(190,0,&Strings),1);
-		}else{
-			Message(ITxt(191,0,&Strings),1);
-		}
-	}
-	RedrawMap();
-	RETURNV
-}
 
 void MagicWonder(_Hero_ *hp)
 {

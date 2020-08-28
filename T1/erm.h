@@ -2,6 +2,7 @@
 
 #include "structs.h"
 #include "herospec.h"
+#include "NewWog/Curse.h"
 #include "NewWog/ExpansionERM.h"
 
 #define VAR_COUNT_V (10000)
@@ -106,7 +107,6 @@ void HintWindow();
 int WeekOf(void);
 int MonthOf(void);
 int MonthOf2(void);
-void ApplySphinx(int GM_ai,_Hero_ *Hr,_MapItem_ * /*Mi*/);
 void MagicWonder(_Hero_ *hp);
 void BACall(Dword n,_Hero_ *hp);
 void HeroMove(_Hero_ *hp, int NewX, int NewY, int NewL);

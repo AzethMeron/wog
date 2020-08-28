@@ -1,16 +1,5 @@
 #pragma once
 
-// Curses & Blessings 
-#define CURSENUM (1000) // Maximum amount of Curses that can be applied to all heroes (combined) at one time
-#define CURSETYPE_NUM (100+1) // Maximum amount of CurseTypes (Type 0 is dummy. so effectively it's indexed from 1)
-#define CURSE_BLOCKS 200 // number of entries in object-blocking array
-extern struct _CurseType_ {
-	char PicName[64];
-	char Desc[256];
-} CurseType[CURSETYPE_NUM]; // index in table = Type
-extern int DHVC_Table[CURSE_BLOCKS][3];
-////////////////////////////
-
 #include "structs.h"
 struct _HeroSpecCus_{
 	int   Used;
@@ -44,21 +33,12 @@ void __stdcall HeroCheck(int NewX,int NewY,int Level,int Owner,int Radius,int Fl
 void MakeDarkness(int Owner);
 int NewSpecPrepare(void);
 int NewSpecPrepare2(void);
-void NewSpecShow(void);
-void BlessesDescr(_MouseStr_ *ms, _Hero_ *hp);
-//////////////////////////
-int AddCurse(int cr,int val,int len,int flag,int hi);
-int ERM_Curse(Mes &M, int Num, int hn);
-int DoesHeroHas(int hn,int type);
-int DoesHeroHasVisitCurse(int hn, int type,int stype);
-//////////////////////////
-int SaveCurse(void);
-int LoadCurse(int ver);
+int SaveHeroData(void);
+int LoadHeroData(int ver);
 void ResetCurse(void);
-void DaylyCurse(int Owner);
+void NewSpecShow(void);
 void PutBackHeroInfo(void);
 void RefreshHeroPic(void);
 void InitHeroLocal(void);
 // 3.58
 int ChooseArt(_Hero_ *hp,int Remove);
-

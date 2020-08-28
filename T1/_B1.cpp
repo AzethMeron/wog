@@ -3428,7 +3428,7 @@ void SaveManager(void)
 		if(SaveMapMon()) break; // fixed size
 		if(SaveAnimations()) break;  // fixed size
 		if(SaveERM()) break; // fixed size
-		if(SaveCurse()) break; // fixed size
+		if(SaveHeroData()) break; // fixed size
 		if(SaveB1()) break; // fixed size
 		if(SaveWM()) break; // fixed size
 		if(SaveMP3()) break; // fixed size
@@ -3488,7 +3488,7 @@ void LoadManager(void)
 		if(LoadMapMon(ver)) break;
 		if(LoadAnimations(ver)) break;
 		if(LoadERM(ver)) break;
-		if(LoadCurse(ver)) break;
+		if(LoadHeroData(ver)) break;
 		if(LoadB1(ver)) break;
 		if(LoadWM(ver)) break;
 		if(LoadMP3(ver)) break;

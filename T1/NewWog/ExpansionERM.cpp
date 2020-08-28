@@ -93,314 +93,78 @@ int LoadLegacyData()
 }
 /****************************************************************************************/
 
-/************************************ CURSE SUPPORT ************************************/
-int FindCurseBlockObject(int index, int type, int subtype) // -1 means not found
+double round( double fValue )
 {
-	for(int i = 0; i < CURSE_BLOCKS; ++i)
-	{
-		if(DHVC_Table[i][0] != index) continue;
-		if(DHVC_Table[i][1] != type) continue;
-		if(DHVC_Table[i][2] != subtype) continue;
-		return i;
-	}
-	return -1;
-}
-int FindEndOfBlockedObjects() // find first {0,0,0}
-{
-	for(int i = 0; i < CURSE_BLOCKS; ++i)
-	{
-		if(DHVC_Table[i][0] != 0) continue;
-		return i;
-	}
-	return -1;
-}
-int AddCurseBlockObject(int index, int type, int subtype)
-{
-	int entry = FindCurseBlockObject(index,type,subtype);
-	if(entry != -1) return 0;
-	entry = FindEndOfBlockedObjects();
-	if(entry == -1) return 1;
-	DHVC_Table[entry][0] = index;
-	DHVC_Table[entry][1] = type;
-	DHVC_Table[entry][2] = subtype;
-	if(entry < CURSE_BLOCKS-1) 
-	{
-		DHVC_Table[entry+1][0] = 0;
-		DHVC_Table[entry+1][1] = 0;
-		DHVC_Table[entry+1][2] = 0;
-	}
-	return 0;
-}
-void RemoveCurseBlockObject(int index, int type, int subtype)
-{
-	int entry = FindCurseBlockObject(index,type,subtype);
-	if(entry == -1) return;
-	int end = FindEndOfBlockedObjects(); 
-	if(end == -1) end = CURSE_BLOCKS;
-	for(int i = 0; i < 3; ++i)
-	{
-		DHVC_Table[entry][i] = DHVC_Table[end-1][i];
-		DHVC_Table[end-1][i] = 0;
-	}
+    return fValue < 0 ? ceil( fValue - 0.5 )
+        : floor( fValue + 0.5 );
 }
 
-int FindBlessSphinx(short int index)
-{
-	for(int i = 1; i <= AS_CGood[0][0]; ++i)
-	{
-		if(index==AS_CGood[i][0]) return i;
-	}
-	return -1;
-}
-void RemoveBlessSphinx(short int index)
-{
-	short int bless_index = FindBlessSphinx(index);
-	if(bless_index==-1) return; // exit if there is no such bless
-	int end = AS_CGood[0][0];
-	if(end == 1) { UniversalErrorMessage("Cannot remove all blessings from sphinx database"); return; }
-	for(int i = 0; i < 3; ++i)
-	{
-		AS_CGood[bless_index][i] = AS_CGood[end][i];
-		AS_CGood[end][i] = 0;
-	}
-	--AS_CGood[0][0]; 
-}
-int AddBlessSphinx(short int index, short int min, short int max)
-{
-	short int bless_index = FindBlessSphinx(index);
-	if(bless_index==-1)
-	{
-		bless_index = AS_CGood[0][0] + 1;
-		if(bless_index >= CURSETYPE_NUM) { return 1; } 
-		++AS_CGood[0][0];
-	}
-	AS_CGood[bless_index][0] = index;
-	AS_CGood[bless_index][1] = min;
-	if(max >= min) AS_CGood[bless_index][2] = max;
-	else { AS_CGood[bless_index][2] = min; return 1; }
-	return 0;
-}
-
-int FindCurseSphinx(short int index)
-{
-	for(int i = 1; i <= AS_CBad[0][0]; ++i)
-	{
-		if(index==AS_CBad[i][0]) return i;
-	}
-	return -1;
-}
-void RemoveCurseSphinx(short int index)
-{
-	short int curse_index = FindCurseSphinx(index);
-	if(curse_index==-1) return;
-	int end = AS_CBad[0][0];
-	if(end == 1) { UniversalErrorMessage("Cannot remove all curses from sphinx database"); return; }
-	for(int i = 0; i < 3; ++i)
-	{
-		AS_CBad[curse_index][i] = AS_CBad[end][i];
-		AS_CBad[end][i] = 0;
-	}
-	--AS_CBad[0][0];
-}
-int AddCurseSphinx(short int index, short int min, short int max)
-{
-	short int curse_index = FindCurseSphinx(index);
-	if(curse_index==-1)
-	{
-		curse_index = AS_CBad[0][0] + 1;
-		if(curse_index >= CURSETYPE_NUM) { return 1; } 
-		++AS_CBad[0][0];
-	}
-	AS_CBad[curse_index][0] = index;
-	AS_CBad[curse_index][1] = min;
-	if(max >= min) AS_CBad[curse_index][2] = max;
-	else { AS_CBad[curse_index][2] = min; return 1; }
-	return 0;
-}
-
-int ERM_CurseSetup(char Cmd,int Num,_ToDo_* sp,Mes *Mp)
+// Argument type: 0 - none. It changes frequently
+int ERM_Testing(char Cmd,int Num,_ToDo_* sp,Mes *Mp)
 {
 	STARTNA(__LINE__, 0)
+	//Dword MixPos=GetDinMixPos(sp);
+	//_MapItem_ *mip=GetMapItem2(MixPos);
 	switch(Cmd)
 	{
-		case 'P': // Get/set picture
+		// Show pointer value
+		case 'P':
 		{
-			int index = GetVarVal(&sp->Par[0]);
-			if(index < 1 || index >= CURSETYPE_NUM){ MError2("incorrect curse/blessing index(type)."); RETURN(0) }
+			Message(Format("(Internal) Pointer value: %lu", pointer));
+		} break;
+
+		// Get square root of value. No support for float variables
+		case 'R':
+		{
+			CHECK_ParamsNum(3)
+			int value = 0;
+			if(Apply(&value,4,Mp,0)) { MError2("Cannot get parameter 1 - value to be rooted"); RETURN(0); }
+			int modifier = 0;
+			if(Apply(&modifier,4,Mp,1)) { MError2("Cannot get parameter 2 - modifier"); RETURN(0); }
+			int output = int( \
+				sqrt(double(value)) * double(modifier) \
+				);
+			if(Apply(&output,4,Mp,2) == 0) { MError2("Cannot set parameter 3 - output value"); RETURN(0)}
+		} break;
+
+		// Call any trigger - note it is bad idea, cuz it doesn't make ANY other changes
+		case 'C':
+		{
 			CHECK_ParamsNum(1);
-			StrMan::Apply(CurseType[index].PicName,Mp,0,sizeof(CurseType[index].PicName));
+			unsigned long ptr = 0;
+			if(Apply(&ptr,sizeof(ptr),Mp,0)) { MError2("Cannot get parameter 1 - pointer"); RETURN(0); }
+			pointer=ptr;
+			ProcessERM();
 		} break;
 
-		case 'D': // Get/set description
+		// Calculate logaritm (n-based) of value
+		case 'L':
 		{
-			int index = GetVarVal(&sp->Par[0]);
-			if(index < 1 || index >= CURSETYPE_NUM){ MError2("incorrect curse/blessing index(type)."); RETURN(0) }
-			CHECK_ParamsNum(1);
-			StrMan::Apply(CurseType[index].Desc,Mp,0, sizeof(CurseType[index].Desc));
+			CHECK_ParamsNum(4)
+			int base = 0;
+			if(Apply(&base,4,Mp,0)) { MError2("Cannot get parameter 1 - logbase"); RETURN(0); }
+			int value = 0;
+			if(Apply(&value,4,Mp,1)) { MError2("Cannot get parameter 2 - value to be logarithmed"); RETURN(0); }
+			int modifier = 0;
+			if(Apply(&modifier,4,Mp,2)) { MError2("Cannot get parameter 3 - modifier"); RETURN(0); }
+			double temp1 = log( double(value) );
+			double temp2 = log( double(base) );
+			temp1 = temp1 / temp2;
+			int output = round(temp1 * double(modifier));
+			if(Apply(&output,4,Mp,3) == 0) { MError2("Cannot set parameter 4 - output value"); RETURN(0)}
 		} break;
 
-		case 'B': // Forbid entering objects
-		{
-			int index = GetVarVal(&sp->Par[0]);
-			if(index < 1 || index >= CURSETYPE_NUM){ MError2("incorrect curse/blessing index(type)."); RETURN(0) }
-			CHECK_ParamsNum(3);
-			int type=0, subtype=0;
-			if(Apply(&type,sizeof(type),Mp,0)) { MError2("Cannot get parameter: Type"); RETURN(0); }
-			if(Apply(&subtype,sizeof(type),Mp,1)) { MError2("Cannot get parameter: Subtype"); RETURN(0); }
-			if(type==63 && subtype != 0) { MError2("Cannot forbid entrance to WoG objects"); RETURN(0); } 
-			int disabled = 0; if(FindCurseBlockObject(index,type,subtype)!=-1) disabled = 1;
-			if(!Apply(&disabled,sizeof(disabled),Mp,2))
-			{
-				if(disabled == 1)
-				{
-					if(AddCurseBlockObject(index,type,subtype)) { MError2("Too many entries in objects-blocked-by-curse array"); RETURN(0);}
-				} else if(disabled == 0) {
-					RemoveCurseBlockObject(index,type,subtype);
-				} else { MError2("unknown operation:"); RETURN(0);}
-			}
-		} break;
-
-		case 'F': // Find free cursetype
-		{
-			Message(Random(1,1));
-			CHECK_ParamsNum(1);
-			int found = -1;
-			for(int i = 1; i < CURSETYPE_NUM; ++i)
-			{ if(!strcmp(CurseType[i].PicName,"")) if(!strcmp(CurseType[i].Desc,"")) { found = i; break; } }
-			if(Apply(&found,sizeof(found),Mp,0) == 0) { MError2("Cannot set output value"); RETURN(0); }
-		} break;
-
-		case 'R': // Get random curse/bless
-		{
-			CHECK_ParamsMin(2);
-			int bless = 0;
-			Apply(&bless,sizeof(bless),Mp,0);
-			int rand_type = -1;
-			int rand_val = -1;
-			if(bless == 1) // bless
-			{
-				int maxnum = AS_CGood[0][0];
-				int rand_ind = 1; if(maxnum > 1) rand_ind = Random(1,maxnum);
-				rand_type = AS_CGood[rand_ind][0];
-				if(AS_CGood[rand_ind][1] == AS_CGood[rand_ind][2]) rand_val = AS_CGood[rand_ind][1];
-				else rand_val = Random(AS_CGood[rand_ind][1],AS_CGood[rand_ind][2]);
-			}
-			else if(bless == 0)
-			{
-				int maxnum = AS_CBad[0][0];
-				int rand_ind = 1; if(maxnum > 1) rand_ind = Random(1,maxnum);
-				rand_type = AS_CBad[rand_ind][0];
-				if(AS_CBad[rand_ind][1] == AS_CBad[rand_ind][2]) rand_val = AS_CBad[rand_ind][1];
-				else rand_val = Random(AS_CBad[rand_ind][1],AS_CBad[rand_ind][2]);
-			}
-			else
-			{
-				MError2("Invalid parameter value: bless/curse"); RETURN(0);
-			}
-			if(Apply(&rand_type,sizeof(rand_type),Mp,1) == 0) { MError2("Cannot set output value"); RETURN(0); }
-			if(Num==3) if(Apply(&rand_val,sizeof(rand_val),Mp,2) == 0) { MError2("Cannot set output value"); RETURN(0); }
-		} break;
-
-		case 'S': // Sphinx support
-		{
-			int index = GetVarVal(&sp->Par[0]);
-			if(index < 1 || index >= CURSETYPE_NUM){ MError2("incorrect curse/blessing index(type)."); RETURN(0) }
-			int bless = -1;
-			if(Apply(&bless,sizeof(bless),Mp,0)) { MError2("Cannot get parameter: bless or curse"); RETURN(0); }
-			switch(bless)
-			{
-				case 1: // bless
-				{
-					int command = 0; if(FindBlessSphinx(index)!=-1) command = 1;
-					Apply(&command,sizeof(command),Mp,1);
-					if(command==0) { RemoveBlessSphinx(index); }
-					if(command==1) if(Mp->VarI[1].Check!=1) if(Num!=4) { MError2("Cannot add blessing without specified Min and Max value"); RETURN(0); };
-					if(Num!=4 || command==0) break;
-					short int min=0, max=0;
-					if(Mp->VarI[2].Check==1 && Mp->VarI[3].Check==1)
-					{
-						int ind = FindBlessSphinx(index);
-						if(ind!= -1) { min = AS_CGood[ind][1]; max = AS_CGood[ind][2]; } 
-						if(Apply(&min,sizeof(min),Mp,2)==0) { MError2("Cannot mix get and set syntax"); RETURN(0); }
-						if(Apply(&max,sizeof(max),Mp,3)==0) { MError2("Cannot mix get and set syntax"); RETURN(0); }
-					}
-					else
-					{
-						if(Apply(&min,sizeof(min),Mp,2)) { MError2("Cannot get parameter: minimum value"); RETURN(0); }
-						if(Apply(&max,sizeof(max),Mp,3)) { MError2("Cannot get parameter: maximum value"); RETURN(0); }
-						if(max < min) { MError2("Maximum value CANNOT be lower than Minimum"); RETURN(0); }
-						if(command==1) { if(AddBlessSphinx(index,min,max)) { MError2("Cannot add more blessings for sphinx"); RETURN(0); } }
-					}
-				} break;
-
-				case 0: // curse
-				{
-					int command = 0; if(FindCurseSphinx(index)!=-1) command = 1;
-					Apply(&command,sizeof(command),Mp,1);
-					if(command==0) { RemoveCurseSphinx(index); }
-					if(command==1) if(Mp->VarI[1].Check!=1) if(Num!=4) { MError2("Cannot add curse without specified Min and Max value"); RETURN(0); };
-					if(Num!=4 || command==0) break;
-					short int min=0, max=0;
-					if(Mp->VarI[2].Check==1 && Mp->VarI[3].Check==1)
-					{
-						int ind = FindCurseSphinx(index);
-						if(ind!= -1) { min = AS_CBad[ind][1]; max = AS_CBad[ind][2]; } 
-						if(Apply(&min,sizeof(min),Mp,2)==0) { MError2("Cannot mix get and set syntax"); RETURN(0); }
-						if(Apply(&max,sizeof(max),Mp,3)==0) { MError2("Cannot mix get and set syntax"); RETURN(0); }
-					}
-					else
-					{
-						if(Apply(&min,sizeof(min),Mp,2)) { MError2("Cannot get parameter: minimum value"); RETURN(0); }
-						if(Apply(&max,sizeof(max),Mp,3)) { MError2("Cannot get parameter: maximum value"); RETURN(0); }
-						if(max < min) { MError2("Maximum value CANNOT be lower than Minimum"); RETURN(0); }
-						if(command==1) { if(AddCurseSphinx(index,min,max)) { MError2("Cannot add more blessings for sphinx"); RETURN(0); } }
-					}
-				} break;
-			
-				default:
-				{
-					MError2("Invalid parameter: bless or curse"); RETURN(0); 
-				} break;
-			}
-		} break;
-
-		case 'X': // Log Curses/Blesses
+		// Black market receiver - TODO, doesn't work now 
+		case 'M':
 		{
 			CHECK_ParamsNum(2);
-			char filename[64];
-			if(StrMan::Apply(filename,Mp,0,256) == 0) { MError2("Cannot get parameter: logfile name"); RETURN(0);}
-			int skip_empty_entries = 1;
-			if(Apply(&skip_empty_entries,sizeof(skip_empty_entries),Mp,1)) { MError2("Cannot get parameter: skip empty entries"); RETURN(0); }
-			FILE* file = fopen(filename,"at");
-			if(file == NULL) { MError2("Cannot open logfile"); RETURN(0);}
-			else
-			{
-				fprintf(file, "Logging all initialised Curses/Blesses\n");
-				for(int i = 1; i < CURSETYPE_NUM; ++i)
-				{
-					if(skip_empty_entries) if(!strcmp(CurseType[i].PicName,"")) continue;
-					fprintf(file,"Type %d, PictureName '%s', Description '%s'\n",i,CurseType[i].PicName,CurseType[i].Desc);
-				}
-				fprintf(file, "Logging all entries in Objects blocked by Curses\n");
-				for(int i = 0; i < CURSE_BLOCKS; ++i)
-				{
-					if(skip_empty_entries) if(DHVC_Table[i][0]==0) continue;
-					fprintf(file,"Curse index %d, Object type %d, Object subtype %d\n",DHVC_Table[i][0],DHVC_Table[i][1],DHVC_Table[i][2]);
-				}
-				fprintf(file, "Logging all entries in Sphinx Curses\n");
-				for(int i = 1; i < CURSETYPE_NUM; ++i)
-				{
-					if(skip_empty_entries) if(AS_CBad[i][0]==0) continue;
-					fprintf(file,"Curse index %d, Min %d, Max %d\n",AS_CBad[i][0],AS_CBad[i][1],AS_CBad[i][2]);
-				}
-				fprintf(file, "Logging all entries in Sphinx Blessings\n");
-				for(int i = 1; i < CURSETYPE_NUM; ++i)
-				{
-					if(skip_empty_entries) if(AS_CGood[i][0]==0) continue;
-					fprintf(file,"Bless index %d, Min %d, Max %d\n",AS_CGood[i][0],AS_CGood[i][1],AS_CGood[i][2]);
-				}
-				fclose(file);
-			}
+			int slot;
+			if(Apply(&slot,4,Mp,0)) { MError2("Cannot get parameter 1 - slot"); RETURN(0); }
+			Dword MixPos=GetDinMixPos(sp);
+			_MapItem_ *mip=GetMapItem2(MixPos);
+			_BlackMarketInfo_ *ob = (_BlackMarketInfo_*) mip;
+			Apply(&ob->art[slot] ,4,Mp,1);
+			// Doesn't work
 		} break;
 
 		default:
@@ -409,4 +173,3 @@ int ERM_CurseSetup(char Cmd,int Num,_ToDo_* sp,Mes *Mp)
 	}
 	RETURN(1);
 }
-/****************************************************************************************/

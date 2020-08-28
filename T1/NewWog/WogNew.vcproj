@@ -140,6 +140,10 @@
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
 			>
 			<File
+				RelativePath=".\Curse.cpp"
+				>
+			</File>
+			<File
 				RelativePath="..\\dxproxy.cpp"
 				>
 			</File>
@@ -176,10 +180,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\TestingERM.cpp"
-				>
-			</File>
-			<File
 				RelativePath="..\\town.cpp"
 				>
 			</File>
@@ -189,6 +189,14 @@
 			Filter="h;hpp;hxx;hm;inl;inc;xsd"
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
 			>
+			<File
+				RelativePath=".\Curse.h"
+				>
+			</File>
+			<File
+				RelativePath=".\Curse_Hardcoded.h"
+				>
+			</File>
 			<File
 				RelativePath="..\\dxproxy.h"
 				>
@@ -239,10 +247,6 @@
 			</File>
 			<File
 				RelativePath="..\string.h"
-				>
-			</File>
-			<File
-				RelativePath=".\TestingERM.h"
 				>
 			</File>
 			<File

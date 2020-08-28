@@ -10,13 +10,8 @@
 //#include "classes.h"
 #include "b1.h"
 #include "CrExpo.h"
+#include "NewWog/Curse.h"
 #define  __FILENUM__ 2
-
-struct _CurseType_ CurseType[CURSETYPE_NUM];
-int DHVC_Table[CURSE_BLOCKS][3];
-
-short int AS_CBad[CURSETYPE_NUM][3];
-short int AS_CGood[CURSETYPE_NUM][3];
 
 struct _HeroSpecWoG_{
 	int    Ind; // +1
@@ -709,16 +704,6 @@ void MakeDarkness(int Owner)
 	RETURNV
 }
 
-//static int DoesHeroHas(_Hero_ *hr,int type);
-static int FillCurseStruct(_Hero_ *hr);
-static char _GC_Length[100][50];
-static char *GC_Pics[64]; // Pointers to pictures (paths)
-static char *GC_Descr[256]; // Pointers to descriptions
-static char *GC_Length[100];
-// 71 "Will last for another %s turns."
-// 72 "Will last forever :-)"
-static _CurseShow CurseShow={GC_Pics,GC_Descr,GC_Length};
-
 // 3.58 artifact left
 static char _Art_Pics[64][60]; // шаблоны
 static char _Art_Ind[64];
@@ -782,38 +767,6 @@ int ChooseArt(_Hero_ *hp,int Remove)
 	}
 	RETURN(art)
 }
-/////////
-_ZPrintf_ Descr1;
-void BlessesDescr(_MouseStr_ *ms, _Hero_ *hp)
-{
-	if (ms->Item != 151 && ms->Item != 152)
-		return;
-
-	STARTNA(__LINE__, 0)
-	char *str;
-	if (ms->Item == 151){
-		int gt=DoesHeroGot(hp);
-		if(gt==0){ 
-			str=ITxt(53,0,&Strings);
-		}else{
-			Zsprintf2(&Descr1,ITxt(54,0,&Strings),(Dword)ITxt(55+gt-GODMONTSTRT,0,&Strings),
-								 GetGodBonus(hp->Number,0));
-			str=Descr1.Str;
-		}
-	}
-	if (ms->Item == 152){
-		int cr=DoesHeroHas(hp->Number,0);
-		if(cr==-1 || ms->Flags & 512){ 
-			str=ITxt(70,0,&Strings);
-		}else{
-			FillCurseStruct(hp);
-			ShowCurse(&CurseShow);
-			RETURNV
-		}  
-	}
-	Message(str, ((ms->Flags & 512) ? 4 : 1));
-	RETURNV
-}
 
 // Рисует картинку - название специализации
 //004E1F2F 8B15708B6900   mov    edx,[00698B70] -> текущий герой
@@ -834,345 +787,13 @@ void BlessesDescr(_MouseStr_ *ms, _Hero_ *hp)
 //004E1F68 C745F028746900 mov    dword ptr [ebp-10],00697428
 //004E1F6F E82CD41100     call   HEROES3.005FF3A0
 
-////////////////////////////////////
-//#define GODMONTSTRT   (150+9+1) // после привидения
-//#define GODMONTNUM     4        // количество богов
-static struct _GodCurse_{
-	int  Type;     // тип проклятия, 0=свободно, "Type of curse, 0=free"
-	int  HeroInd;  // герой-хозяин, "hero-host"
-	int  StartDay; // день, когда появился у героя, "the day curse was applied"
-	int  Length;   // длительность действия, "Duration of curse"
-	int  CurseVal; // Значение параметра наказания, "Power of curse"
-	int  Backup[2];
-} CurseInfo[CURSENUM];
-
-static _ZPrintf_ FCS_tmp;
-static int FillCurseStruct(_Hero_ *hr)
-{
-	STARTNA(__LINE__, 0)
-	int i,j,cnum;
-	if(hr==0) RETURN(-1)
-	for(i=0,j=0;i<CURSENUM;i++){
-		if(CurseInfo[i].Type==0) continue;
-		if(CurseInfo[i].HeroInd!=hr->Number) continue;
-		cnum=CurseInfo[i].Type;
-		if(j>=99){ Error(); RETURN(0) }
-		GC_Pics[j] = CurseType[cnum].PicName;
-		GC_Descr[j] = CurseType[cnum].Desc;
-		if(CurseInfo[i].Length==9999){ // вечно
-			StrCopy(_GC_Length[j],50,ITxt(72,0,&Strings));
-			GC_Length[j]=_GC_Length[j];
-		}else{
-			Zsprintf2(&FCS_tmp,ITxt(71,0,&Strings),
-				(Dword) CurseInfo[i].CurseVal,
-				(Dword)(CurseInfo[i].StartDay+CurseInfo[i].Length-GetCurDate()));
-			StrCopy(_GC_Length[j],50,FCS_tmp.Str);
-			GC_Length[j]=_GC_Length[j];
-		}
-		++j;
-	}
-	GC_Pics[j]=0;
-	RETURN(0)
-}
-
-// ищет
-int DoesHeroHas(int hn,int type)
-{
-	STARTNA(__LINE__, 0)
-	for(int i=0;i<CURSENUM;i++){
-		if(CurseInfo[i].Type==0) continue;
-		if(type!=0){
-			if(CurseInfo[i].Type!=type) continue;
-		}
-		if(CurseInfo[i].HeroInd==hn) RETURN(i)
-	}
-	RETURN(-1)
-}
-
-int FindFreeCurse()
-{
-	STARTNA(__LINE__, 0)
-	for(int i=0;i<CURSENUM;i++){
-		if(CurseInfo[i].Type==0) RETURN(i)
-	}
-	RETURN(-1)
-}
-
-int DoesHeroHasVisitCurse(int hn, int type,int stype)
-{
-	STARTNA(__LINE__, 0)
-	int cn;
-	if((type==63)&&(stype>0)) RETURN(-1) // ERM object cannot be prohibited
-	for(int i=0;;i++){
-		cn=DHVC_Table[i][0];
-		if(cn==0) break;
-		if(DHVC_Table[i][1]==type){
-			if((DHVC_Table[i][2]==stype)||(DHVC_Table[i][2]==-1)) goto found;
-		}
-	}
-	RETURN(-1) // не нашли такого типа
-found:  
-	RETURN(DoesHeroHas(hn,cn))
-}
-
-char LockGroupSize[14];
-
-void NeedLockGroupSize()
-{
-	FillMemory(LockGroupSize, sizeof(LockGroupSize), 0);
-	for (int i = 0; i < 19; i++)
-		LockGroupSize[LockGroups(i)]++;
-}
-
-static char* _AddCurse(int hn,int cr,int *val,int ind)
-{
-	STARTNA(__LINE__, 0)
-	int i,j,n;
-	_Hero_ *hp=GetHeroStr(hn);
-	_GodCurse_ *cu = &CurseInfo[ind];
-	NeedLockGroupSize();
-	switch(cr){
-		case CURSE_BLIND:
-			break;
-		case CURSE_SLOCK:
-			i = *val;
-			if (i == -1)
-			{
-				for (n = -1, j = 0; j <= 8; j++)
-					if (hp->LockedSlot[j] < LockGroupSize[j])
-						n++;
-				if (n < 0)  RETURN("all slots are already locked.")
-				n = Random(0,n);
-				for (j = 0; j <= 8; j++)
-					if (hp->LockedSlot[j] < LockGroupSize[j] && --n < 0)
-						break;
-				*val = i = j;
-			}
-			else
-			{
-				if (hp->LockedSlot[i] >= LockGroupSize[i])  RETURN("the slot is already locked.")
-			}
-			// now lock it
-			n = ++hp->LockedSlot[i];
-			for (j = 18; j >= 0; j--)
-				if ((LockGroups(j) == i) && (hp->IArt[j][0] == -1) && (--n <= 0))
-					break;
-
-			if (j < 0) // need to remove an art
-			{
-				j = 0;
-				while (LockGroups(j) != i || hp->IArt[j][0] == -1)  j++;
-				cu->Backup[0] = hp->IArt[j][0];
-				cu->Backup[1] = hp->IArt[j][1];
-				hp->IArt[j][0] = hp->IArt[j][1] = -1;
-			}
-			else
-			{
-				cu->Backup[0] = cu->Backup[1] = -1;
-			}
-			break;
-	}
-	RETURN(0)
-}
-
-static int _DelCurse(int hn,int cr,int ind)
-{
-	STARTNA(__LINE__, 0)
-	_Hero_     *hp = GetHeroStr(hn);
-	_GodCurse_ *cu = &CurseInfo[ind];
-	int  val = cu->CurseVal;
-	int  i,j;
-
-	cu->Type=0;
-	cu->HeroInd=0;
-	cu->StartDay=0;
-	cu->Length=0;
-	cu->CurseVal=0;
-
-	switch(cr){
-		case CURSE_BLIND:
-			ShowArea(hp->x,hp->y,hp->l,hp->Owner,2);
-			RedrawMap();
-			break;
-		case CURSE_SLOCK:
-			i = val;
-			--hp->LockedSlot[i];
-			if (cu->Backup[0] != -1) // return art
-			{
-				j = 0;
-				while (LockGroups(j) != i || hp->IArt[j][0] != -1)
-					if (++j > 18){ MError("Curse error - unable to find place for artifact"); RETURN(0) }
-				hp->IArt[j][0] = cu->Backup[0];
-				hp->IArt[j][1] = cu->Backup[1];
-			}
-			break;
-	}
-	RETURN(0)
-}
-
-int AddCurse(int cr,int val,int len,int flag,int hi)
-{
-	STARTNA(__LINE__, 0)
-	int i;
-	if(hi<0 || hi>=HERNUM) RETURN(0)
-	if(flag==3){ // удалить все
-		for(i=0;i<CURSENUM;i++){
-			cr=CurseInfo[i].Type;
-			if(cr==0) continue;
-			if(CurseInfo[i].HeroInd!=hi) continue;
-			if(_DelCurse(hi,cr,i)){ Error(); RETURN(-1) }// почему-то не удалилось
-		}
-		RETURN(0)
-	}
-	if (flag != 2) { MError("assertion failed in AddCurse"); RETURN(-1) }
-	for(i=0;i<CURSENUM;i++){
-		if(CurseInfo[i].Type!=cr) continue;
-		if(CurseInfo[i].HeroInd!=hi) continue;
-		CurseInfo[i].Length+=len;
-		CurseInfo[i].CurseVal = max(val, CurseInfo[i].CurseVal);
-		RETURN(0)
-	}  
-	for(i=0;i<CURSENUM;i++){
-		if(CurseInfo[i].Type!=0) continue;
-		if(_AddCurse(hi,cr,&val,i)) RETURN(0) // почему-то не добавилось
-		CurseInfo[i].Type=cr;
-		CurseInfo[i].HeroInd=hi;
-		CurseInfo[i].StartDay=GetCurDate();
-		CurseInfo[i].Length=len;
-		CurseInfo[i].CurseVal=val;
-		RETURN(0)
-	}
-	RETURN(-1)
-}
-
-int ERM_Curse(Mes &M, int Num, int hn)
-{
-	STARTNA(__LINE__, 0)
-	if(Num<3){ EWrongParamsNum(); RETURN(1) }
-	if(Num<4)  M.n[3] = 1;
-	if(M.n[3]<0 || M.n[3]>3){ MError2("wrong action kind (0...3)."); RETURN(1) }
-	if(M.n[3]==3 && !M.VarI[1].Check && !M.VarI[2].Check)
-		RETURN(AddCurse(0, 0, 0, 3, hn));
-
-	int cr = M.n[0]; if(cr < 1 || cr >= CURSETYPE_NUM) { MError2("incorrect curse/bless number"); RETURN(1); }
-	int i = DoesHeroHas(hn, cr);
-	if (i < 0)
-	{
-		i = FindFreeCurse();
-		if (i < 0) { MError2("too many curses."); RETURN(1) }
-	}
-	
-	int val = CurseInfo[i].CurseVal, len = max(CurseInfo[i].StartDay + CurseInfo[i].Length - GetCurDate(), 0);
-	int baseLen = len;
-	if (M.n[3] == 2)  // for backward compatibility with possible strange scripts
-	{
-		if(M.f[1]) val = 0;
-		if(M.f[2]) len = 0;
-	}
-	if (Apply(&val, 4, &M, 1) | Apply(&len, 4, &M, 2))  RETURN(0)  // get syntax
-	
-	if (M.n[3] == 2)  // add/sub
-	{
-		len += baseLen;
-		val += CurseInfo[i].CurseVal;
-	}
-	if (M.n[3] == 0 || len <= 0)  // delete
-	{
-		if ((CurseInfo[i].Length != 0) && _DelCurse(hn, cr, i)) { Error(); RETURN(1) }
-		RETURN(0)
-	}
-	if (cr == CURSE_SLOCK && (val < -1 || val > 13)){ MError2("wrong slot number (-1...13)"); RETURN(1) }
-	if (cr == CURSE_SLOCK && val != CurseInfo[i].CurseVal && CurseInfo[i].Length != 0)
-		if (_DelCurse(hn, cr, i))
-			{	Error(); RETURN(1) }
-
-	if (CurseInfo[i].Length == 0)
-	{
-		char* err = _AddCurse(hn, cr, &val, i);
-		if (err){ MError2(err); RETURN(1) }
-	}
-	CurseInfo[i].Type = cr;
-	CurseInfo[i].HeroInd = hn;
-	CurseInfo[i].CurseVal = val;
-	CurseInfo[i].Length = len;
-	CurseInfo[i].StartDay = GetCurDate();
-	RETURN(0)
-}
-
-void DaylyCurse(int Owner)
-{
-	STARTNA(__LINE__, 0)
-	int     i,day,cr,val,hn,v;
-	_Hero_ *hr;
-	day=GetCurDate();
-	for(i=0;i<CURSENUM;i++){
-		cr=CurseInfo[i].Type;
-		if(cr==0) continue;
-		val=CurseInfo[i].CurseVal;
-		hn=CurseInfo[i].HeroInd;
-		hr=GetHeroStr(hn);
-		if(hr->Owner!=Owner) continue;
-		if((CurseInfo[i].StartDay+CurseInfo[i].Length)<day){ // закончилось
-			if(_DelCurse(hn,cr,i)){ Error(); RETURNV }// почему-то не удалилось
-			continue;
-		}
-		switch(cr){
-			case CURSE_NMONY : AddRes(Owner,6,-val); break;
-			case CURSE_NMANA : v=(int)hr->SpPoints-val; if(v<0) v=0; hr->SpPoints=(Word)v; break;
-			case CURSE_PMANA : v=(int)hr->SpPoints+val; if(v>900) v=900; hr->SpPoints=(Word)v; break;
-			case CURSE_PEXP  : hr->Exp+=val; AddExp(hr); break;
-			case CURSE_SLOW  : hr->Movement-=val; break;
-			case CURSE_SPEED : hr->Movement+=val; break;
-			case CURSE_PR1345: AddRes(Owner,1,val); AddRes(Owner,3,val); AddRes(Owner,4,val); AddRes(Owner,5,val); break;
-			case CURSE_PR02  : AddRes(Owner,0,val); AddRes(Owner,2,val); break;
-			case CURSE_PR0   : AddRes(Owner,0,val); break; // дерево
-			case CURSE_PR2   : AddRes(Owner,2,val); break; // руда
-			case CURSE_PR5   : AddRes(Owner,5,val); break; // Самоцветы
-			case CURSE_PR1   : AddRes(Owner,1,val); break; // Ртуть
-			case CURSE_PR3   : AddRes(Owner,3,val); break; // Сера
-			case CURSE_PR4   : AddRes(Owner,4,val); break; // Кристаллы
-			case CURSE_PR6   : AddRes(Owner,6,val); break; // Золото
-		}
-	}
-	// бонусы существ
-	for(i=0;i<HERNUM;i++){
-		hr=GetHeroStr(i);
-		if(hr->Owner!=Owner) continue;
-		if(CheckForCreature(hr,151)==1){ // алмазный дракон
-			AddRes(Owner,5,1);
-		}
-		MagicWonder(hr);
-	}
-	RETURNV
-}
-
-int LuaGetHeroGod(lua_State *L)
-{
-	int gt = DoesHeroGot((_Hero_*)lua_tointeger(L, 1));
-	if(gt){
-		lua_pushinteger(L, gt - GODMONTSTRT);
-		return 1;
-	}
-	return 0;
-}
-
-int LuaHeroHasBlessCurse(lua_State *L)
-{
-	lua_pushboolean(L, DoesHeroHas(((_Hero_*)lua_tointeger(L, 1))->Number, 0) >= 0);
-	return 1;
-}
-
 ////////////////////
-int SaveCurse(void)
+int SaveHeroData(void)
 {
 	STARTNA(__LINE__, 0)
 	int i;
 	if(Saver("LCRS",4)) RETURN(1)
-	if(Saver(CurseType,sizeof(CurseType))) RETURN(1)
-	if(Saver(DHVC_Table,sizeof(DHVC_Table))) RETURN(1)
-	if(Saver(CurseInfo,sizeof(CurseInfo))) RETURN(1)
-	if(Saver(AS_CBad,sizeof(AS_CBad))) RETURN(1)
-	if(Saver(AS_CGood,sizeof(AS_CGood))) RETURN(1)
+	if(SaveCursesData()) RETURN(1)
 /// 24.11.01 3.52
 	for(i=0;i<HERNUM;i++){
 		HeroSpecCus[i].HPSLoaded=0;
@@ -1183,17 +804,13 @@ int SaveCurse(void)
 	RETURN(0)
 }
 
-int LoadCurse(int /*ver*/)
+int LoadHeroData(int /*ver*/)
 {
 	STARTNA(__LINE__, 0)
 	char buf[4]; if(Loader(buf,4)) RETURN(1)
 	if(buf[0]!='L'||buf[1]!='C'||buf[2]!='R'||buf[3]!='S')
 			{MError("LoadCurse cannot start loading"); RETURN(1) }
-	if(Loader(CurseType,sizeof(CurseType))) RETURN(1)
-	if(Loader(DHVC_Table,sizeof(DHVC_Table))) RETURN(1)
-	if(Loader(CurseInfo,sizeof(CurseInfo))) RETURN(1)
-	if(Loader(AS_CBad,sizeof(AS_CBad))) RETURN(1)
-	if(Loader(AS_CGood,sizeof(AS_CGood))) RETURN(1)
+	if(LoadCursesData()) RETURN(1)
 	if(Loader(HeroSpecCus,sizeof(HeroSpecCus))) RETURN(1)
 	RefreshHeroPic();
 	RETURN(0)
@@ -1243,154 +860,6 @@ __declspec( naked ) void FixBioBug(void)
 */
 
 
-/* FORMERLY HARDCODED DATA */
-short int o_AS_CGood[CURSETYPE_NUM][3]={ {12,0,0}, 
-									 {5,1,3},{7,1,3},{9,50,200},{15,1,6},{16,1,6},
-									 {17,1,2},{18,1,2},{19,1,2},{20,1,2},{21,100,500},
-									 {64,1,4},{65,100,500}};
-short int o_AS_CBad[CURSETYPE_NUM][3]={ {48,0,0}, 
-									 {1,0,0},{2,-1,-1},{3,0,0},{4,100,500},{6,1,3},
-									 {8,0,0},{10,100,300},{22,0,0},{23,0,0},{24,0,0},
-									 {25,0,0},{26,0,0},{27,0,0},{28,0,0},{29,0,0},
-									 {30,0,0},{31,0,0},{32,0,0},{33,0,0},{34,0,0},
-									 {35,0,0},{36,0,0},{37,0,0},{38,0,0},{39,0,0},
-									 {40,0,0},{41,0,0},{42,0,0},{43,0,0},{44,0,0},
-									 {45,0,0},{46,0,0},{47,0,0},{48,0,0},{49,0,0},
-									 {50,0,0},{51,0,0},{52,0,0},{53,0,0},{54,0,0},
-									 {55,0,0},{56,0,0},{57,0,0},{58,0,0},{59,0,0},
-									 {60,0,0},{61,0,0},{62,0,0}};
-
-// Old object entrance prohibited table
-int o358_DHVC_Table[CURSE_BLOCKS][3]={
-// curse_id, ob_type, ob_subtype 
-{22,109,-1}, // Water Wheel
-{23,17,-1},  // Dwelling
-{23,20,-1},  // Dwelling
-{23,216,-1}, // Dwelling
-{23,217,-1}, // Dwelling
-{23,218,-1}, // Dwelling
-{24,4,-1},   // Arena
-{25,61,-1},  // Axis
-{26,32,-1},  // Magic Garden
-{27,100,-1}, // Learning Stone
-{28,41,-1},  // Libr
-{29,23,-1},  // Marletto
-{30,51,-1},  // Merc camp A+1
-{31,47,-1},  // 
-{32,104,-1}, // Univer
-{33,107,-1}, //
-{34,113,-1}, // Witch Hut
-{35,103,-1}, // Cave
-{36,101,-1}, // Chest
-{37,55,-1},  // Mystic Garden
-{38,79,-1},  // All Resources
-{39,97,-1},  // 
-{40,31,-1},  // 
-{41,84,-1},  // Crypt
-{42,35,-1},  // Fort on Hill
-{43,88,-1},  // Shrine
-{43,89,-1},  // Shrine
-{43,90,-1},  // Shrine
-{44,42,-1},  // Lighthous
-{45,13,1},   // Maps
-{46,13,2},   // Maps
-{47,13,0},   // Maps
-{48,7,-1},   // Market
-{49,43,-1},  // Teleporter
-{49,44,-1},  // Teleporter
-{50,57,-1},  // Obelisk
-{51,60,-1},  // 
-{52,99,-1},  // Post
-{53,63,0},   // Piramid
-{54,62,-1},  // Prison
-{55,58,-1},  // 
-{56,80,-1},  // Charch
-{57,81,-1},  // Scholar
-{58,94,-1},  // Stable
-{59,102,-1}, // L.Tree
-{60,95,-1},  // Tavern
-{61,49,-1},  // Well
-{62,111,-1}, // WP
-//...
-{0,0,0} // there must be it, otherwise segfault
-};
-
-char o358_GC_Pics[CURSETYPE_NUM][64]={ // Old pictures
-"DATA\\ZVS\\LIB1.RES\\No1.bmp",
-"DATA\\ZVS\\LIB1.RES\\Curse1.bmp",
-"DATA\\ZVS\\LIB1.RES\\Curse2.bmp",
-"DATA\\ZVS\\LIB1.RES\\Curse3.bmp",
-"DATA\\ZVS\\LIB1.RES\\Curse4.bmp",
-"DATA\\ZVS\\LIB1.RES\\Curse5.bmp",
-"DATA\\ZVS\\LIB1.RES\\Curse6.bmp",
-"DATA\\ZVS\\LIB1.RES\\Curse7.bmp",
-"DATA\\ZVS\\LIB1.RES\\Curse8.bmp",
-"DATA\\ZVS\\LIB1.RES\\Curse9.bmp",
-"DATA\\ZVS\\LIB1.RES\\Curse10.bmp",
-"DATA\\ZVS\\LIB1.RES\\Curse11.bmp",
-"DATA\\ZVS\\LIB1.RES\\Curse12.bmp",
-"DATA\\ZVS\\LIB1.RES\\Curse13.bmp",
-"DATA\\ZVS\\LIB1.RES\\Curse14.bmp",
-"DATA\\ZVS\\LIB1.RES\\Curse15.bmp",
-"DATA\\ZVS\\LIB1.RES\\Curse16.bmp",
-"DATA\\ZVS\\LIB1.RES\\Curse17.bmp",
-"DATA\\ZVS\\LIB1.RES\\Curse18.bmp",
-"DATA\\ZVS\\LIB1.RES\\Curse19.bmp",
-"DATA\\ZVS\\LIB1.RES\\Curse20.bmp",
-"DATA\\ZVS\\LIB1.RES\\Curse21.bmp",
-"DATA\\ZVS\\LIB1.RES\\Curse22.bmp",
-"DATA\\ZVS\\LIB1.RES\\Curse23.bmp",
-"DATA\\ZVS\\LIB1.RES\\Curse24.bmp",
-"DATA\\ZVS\\LIB1.RES\\Curse25.bmp",
-"DATA\\ZVS\\LIB1.RES\\Curse26.bmp",
-"DATA\\ZVS\\LIB1.RES\\Curse27.bmp",
-"DATA\\ZVS\\LIB1.RES\\Curse28.bmp",
-"DATA\\ZVS\\LIB1.RES\\Curse29.bmp",
-"DATA\\ZVS\\LIB1.RES\\Curse30.bmp",
-"DATA\\ZVS\\LIB1.RES\\Curse31.bmp",
-"DATA\\ZVS\\LIB1.RES\\Curse32.bmp",
-"DATA\\ZVS\\LIB1.RES\\Curse33.bmp",
-"DATA\\ZVS\\LIB1.RES\\Curse34.bmp",
-"DATA\\ZVS\\LIB1.RES\\Curse35.bmp",
-"DATA\\ZVS\\LIB1.RES\\Curse36.bmp",
-"DATA\\ZVS\\LIB1.RES\\Curse37.bmp",
-"DATA\\ZVS\\LIB1.RES\\Curse38.bmp",
-"DATA\\ZVS\\LIB1.RES\\Curse39.bmp",
-"DATA\\ZVS\\LIB1.RES\\Curse40.bmp",
-"DATA\\ZVS\\LIB1.RES\\Curse41.bmp",
-"DATA\\ZVS\\LIB1.RES\\Curse42.bmp",
-"DATA\\ZVS\\LIB1.RES\\Curse43.bmp",
-"DATA\\ZVS\\LIB1.RES\\Curse44.bmp",
-"DATA\\ZVS\\LIB1.RES\\Curse45.bmp",
-"DATA\\ZVS\\LIB1.RES\\Curse46.bmp",
-"DATA\\ZVS\\LIB1.RES\\Curse47.bmp",
-"DATA\\ZVS\\LIB1.RES\\Curse48.bmp",
-"DATA\\ZVS\\LIB1.RES\\Curse49.bmp",
-"DATA\\ZVS\\LIB1.RES\\Curse50.bmp",
-"DATA\\ZVS\\LIB1.RES\\Curse51.bmp",
-"DATA\\ZVS\\LIB1.RES\\Curse52.bmp",
-"DATA\\ZVS\\LIB1.RES\\Curse53.bmp",
-"DATA\\ZVS\\LIB1.RES\\Curse54.bmp",
-"DATA\\ZVS\\LIB1.RES\\Curse55.bmp",
-"DATA\\ZVS\\LIB1.RES\\Curse56.bmp",
-"DATA\\ZVS\\LIB1.RES\\Curse57.bmp",
-"DATA\\ZVS\\LIB1.RES\\Curse58.bmp",
-"DATA\\ZVS\\LIB1.RES\\Curse59.bmp",
-"DATA\\ZVS\\LIB1.RES\\Curse60.bmp",
-"DATA\\ZVS\\LIB1.RES\\Curse61.bmp",
-"DATA\\ZVS\\LIB1.RES\\Curse62.bmp",
-"DATA\\ZVS\\LIB1.RES\\Curse63.bmp",
-"DATA\\ZVS\\LIB1.RES\\Curse64.bmp",
-"DATA\\ZVS\\LIB1.RES\\Curse65.bmp",
-//".\\DATA\\ZVS\\LIB1.RES\\Curse66.bmp",
-//".\\DATA\\ZVS\\LIB1.RES\\Curse67.bmp",
-//".\\DATA\\ZVS\\LIB1.RES\\Curse68.bmp",
-//".\\DATA\\ZVS\\LIB1.RES\\Curse69.bmp",
-//".\\DATA\\ZVS\\LIB1.RES\\Curse70.bmp",
-
-"",//must be there, otherwise segfault
-};
-
 void ResetCurse(void)
 {
 	STARTNA(__LINE__, 0)
@@ -1403,53 +872,7 @@ void ResetCurse(void)
 		CurseInfo[i].Length=0;
 	}
 
-	// Reinitialising object blocked by curses
-	bool end = false;
-	for(i = 0; i < CURSE_BLOCKS; ++i)
-	{
-		if(o358_DHVC_Table[i][0] == 0) end = true;
-		for(int j = 0; j < 3; ++j)
-		{
-			if(!end) DHVC_Table[i][j] = o358_DHVC_Table[i][j];
-			else DHVC_Table[i][j] = 0;
-		}
-	}
-
-	// Reinitialising curse pictures and description
-	end = false;
-	for(i = 0; i < CURSETYPE_NUM; ++i)
-	{
-		if(!strcmp(o358_GC_Pics[i],"")) end = true;
-		if(!end)
-		{
-			sprintf_s(CurseType[i].PicName,sizeof(CurseType[i].PicName), "%s", o358_GC_Pics[i]);
-			if(i>40){
-				sprintf_s(CurseType[i].Desc,sizeof(CurseType[i].Desc), "%s", ITxt(90+i,0,&Strings) );
-			}else{
-				sprintf_s(CurseType[i].Desc,sizeof(CurseType[i].Desc), "%s", ITxt(80+i,0,&Strings) );
-			}
-		}
-		else
-		{
-			sprintf_s(CurseType[i].PicName,sizeof(CurseType[i].PicName), "");
-			sprintf_s(CurseType[i].Desc,sizeof(CurseType[i].Desc), "");
-		}
-	}
-
-	// Reinitialising sphinx reward/penalty
-	bool end_good=false, end_bad=false;
-	for(i = 0; i < CURSETYPE_NUM; ++i)
-	{
-		if(i > o_AS_CGood[0][0]) end_good=true;
-		if(i > o_AS_CBad[0][0]) end_bad=true;
-		for(int j = 0; j < 3; ++j)
-		{
-			if(!end_good) AS_CGood[i][j] = o_AS_CGood[i][j];
-			else AS_CGood[i][j] = 0;
-			if(!end_bad) AS_CBad[i][j] = o_AS_CBad[i][j];
-			else AS_CBad[i][j] = 0;
-		}
-	}
+	ResetCursesData();
 
 /*
 	_HeroInfo_    *hp=GetHIBase();
