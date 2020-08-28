@@ -191,8 +191,8 @@ void ErmSemanticError(_ToDo_* sp, Mes *m, const int& Num) // Marker
 	char last = m->m.s[m->m.l];
 	m->m.s[m->m.l] = 0;
 
-	char message[4096];
-	MakeErmErrorMessage(message,4096,sp,m,Num,LuaPushERMInfo(sp->Self.s,false));
+	char message[ERR_BUFSIZE];
+	MakeErmErrorMessage(message,ERR_BUFSIZE,sp,m,Num,LuaPushERMInfo(sp->Self.s,false));
 	UniversalErrorMessage(message,WOGERMLOG);
 
 	// ???
@@ -221,7 +221,7 @@ void LuaErmError(_ToDo_* sp, Mes* m, int Num, char* err_mess)
 	ParseLuaTraceback(traceback,ERR_BUFSIZE,lua_tostring(Lua, -1),strlen(lua_tostring(Lua, -1)));
 	lua_pop(Lua, 1);
 
-	MakeErmErrorMessage(message,4096,sp,m,Num, traceback);
+	MakeErmErrorMessage(message,ERR_BUFSIZE,sp,m,Num, traceback);
 
 	char error_message[ERR_BUFSIZE];
 	//sprintf_s(error_message,ERR_BUFSIZE,"%s\n\n%s\nSave all ERM vars to WOGVARLOG.TXT (may take time)?",err_mess,message);
