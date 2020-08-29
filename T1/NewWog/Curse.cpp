@@ -27,7 +27,7 @@ static char *GC_Length[100]; // String containg "length", like this
 // 72 "Will last forever :-)"
 /***********************************************************************************/
 
-/*********************** LOCAL FUNCTION - CREATE CURSE DIALOG **********************/
+/*********************** OLD FUNCTION - CREATE CURSE DIALOG ************************/
 static _CurseShow CurseShow={GC_Pics,GC_Descr,GC_Length};
 _ZPrintf_ Descr1;
 void BlessesDescr(_MouseStr_ *ms, _Hero_ *hp)
