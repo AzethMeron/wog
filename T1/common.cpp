@@ -5438,7 +5438,7 @@ void __fastcall PEr::Del(int level)
 		if (i != level)
 		{
 			FILE* f;
-			if(!fopen_s(&f, "UnclosedStackLevels.txt", "at"))
+			if(!fopen_s(&f, UNCLOSEDSTACKLEVELS, "at"))
 			{
 				if (i < level){
 					i = level;

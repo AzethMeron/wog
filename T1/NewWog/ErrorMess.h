@@ -13,6 +13,7 @@
 #define WOGCRASHLOG ("woglogs/WOGCRASHLOG.TXT")
 #define WOGVARLOG ("woglogs/WOGVARLOG.TXT")
 #define ERMVARUSED ("woglogs/ERMVarsUsed.LOG")
+#define UNCLOSEDSTACKLEVELS ("woglogs/UnclosedStackLevels.txt")
 
 // Composite, back-end tools
 void MakeErmVarNumDescription(char* destination, int length, VarNum& var);
