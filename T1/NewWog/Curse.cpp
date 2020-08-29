@@ -11,22 +11,24 @@
 
 #define __FILENUM__ 30
 
-struct _CurseType_ CurseType[CURSETYPE_NUM];
-int DHVC_Table[CURSE_BLOCKS][3];
-short int AS_CBad[CURSETYPE_NUM][3];
-short int AS_CGood[CURSETYPE_NUM][3];
-_GodCurse_ CurseInfo[CURSENUM];
+struct _CurseType_ CurseType[CURSETYPE_NUM]; // Types of curses
+int DHVC_Table[CURSE_BLOCKS][3]; // Blocked objets
+short int AS_CBad[CURSETYPE_NUM][3]; // Sphinx pool - curses
+short int AS_CGood[CURSETYPE_NUM][3]; // Sphinx pool - blessings
+_GodCurse_ CurseInfo[CURSENUM]; //  Curses granted to heros
 
-//static int DoesHeroHas(_Hero_ *hr,int type);
+// 
 static int FillCurseStruct(_Hero_ *hr);
 static char _GC_Length[100][50];
 static char *GC_Pics[64]; // Pointers to pictures (paths)
 static char *GC_Descr[256]; // Pointers to descriptions
-static char *GC_Length[100];
+static char *GC_Length[100]; // String containg "length", like this
 // 71 "Will last for another %s turns."
 // 72 "Will last forever :-)"
-static _CurseShow CurseShow={GC_Pics,GC_Descr,GC_Length};
+/***********************************************************************************/
 
+/*********************** LOCAL FUNCTION - CREATE CURSE DIALOG **********************/
+static _CurseShow CurseShow={GC_Pics,GC_Descr,GC_Length};
 _ZPrintf_ Descr1;
 void BlessesDescr(_MouseStr_ *ms, _Hero_ *hp)
 {
@@ -58,7 +60,6 @@ void BlessesDescr(_MouseStr_ *ms, _Hero_ *hp)
 	Message(str, ((ms->Flags & 512) ? 4 : 1));
 	RETURNV
 }
-
 static _ZPrintf_ FCS_tmp;
 static int FillCurseStruct(_Hero_ *hr)
 {
@@ -87,7 +88,9 @@ static int FillCurseStruct(_Hero_ *hr)
 	GC_Pics[j]=0;
 	RETURN(0)
 }
+/***********************************************************************************/
 
+/********************** OLD FUNCTIONS, MANAGE CURSES ON HEROS **********************/
 // ищет
 int DoesHeroHas(int hn,int type)
 {
@@ -101,7 +104,6 @@ int DoesHeroHas(int hn,int type)
 	}
 	RETURN(-1)
 }
-
 int FindFreeCurse()
 {
 	STARTNA(__LINE__, 0)
@@ -110,7 +112,6 @@ int FindFreeCurse()
 	}
 	RETURN(-1)
 }
-
 int DoesHeroHasVisitCurse(int hn, int type,int stype)
 {
 	STARTNA(__LINE__, 0)
@@ -127,7 +128,6 @@ int DoesHeroHasVisitCurse(int hn, int type,int stype)
 found:  
 	RETURN(DoesHeroHas(hn,cn))
 }
-
 char LockGroupSize[14];
 void NeedLockGroupSize()
 {
@@ -135,7 +135,6 @@ void NeedLockGroupSize()
 	for (int i = 0; i < 19; i++)
 		LockGroupSize[LockGroups(i)]++;
 }
-
 static char* _AddCurse(int hn,int cr,int *val,int ind)
 {
 	STARTNA(__LINE__, 0)
@@ -186,7 +185,6 @@ static char* _AddCurse(int hn,int cr,int *val,int ind)
 	}
 	RETURN(0)
 }
-
 // Remove curse from hero
 static int _DelCurse(int hn,int cr,int ind)
 {
@@ -222,7 +220,6 @@ static int _DelCurse(int hn,int cr,int ind)
 	}
 	RETURN(0)
 }
-
 // Add curse to hero
 int AddCurse(int cr,int val,int len,int flag,int hi)
 {
@@ -258,7 +255,6 @@ int AddCurse(int cr,int val,int len,int flag,int hi)
 	}
 	RETURN(-1)
 }
-
 // Daily effect of curse
 void DaylyCurse(int Owner)
 {
@@ -306,7 +302,6 @@ void DaylyCurse(int Owner)
 	}
 	RETURNV
 }
-
 int LuaGetHeroGod(lua_State *L)
 {
 	int gt = DoesHeroGot((_Hero_*)lua_tointeger(L, 1));
@@ -316,14 +311,14 @@ int LuaGetHeroGod(lua_State *L)
 	}
 	return 0;
 }
-
 int LuaHeroHasBlessCurse(lua_State *L)
 {
 	lua_pushboolean(L, DoesHeroHas(((_Hero_*)lua_tointeger(L, 1))->Number, 0) >= 0);
 	return 1;
 }
+/***********************************************************************************/
 
-/************************************ CURSE SUPPORT ************************************/
+/******************** LOCAL FUNCTION - MANAGE BLOCKS FOR OBJECT ********************/
 int FindCurseBlockObject(int index, int type, int subtype) // -1 means not found
 {
 	for(int i = 0; i < CURSE_BLOCKS; ++i)
@@ -373,7 +368,9 @@ void RemoveCurseBlockObject(int index, int type, int subtype)
 		DHVC_Table[end-1][i] = 0;
 	}
 }
+/***********************************************************************************/
 
+/*********************** LOCAL FUNCTION - MANAGE SPHINX POOLS **********************/
 int FindBlessSphinx(short int index)
 {
 	for(int i = 1; i <= AS_CGood[0][0]; ++i)
@@ -410,7 +407,6 @@ int AddBlessSphinx(short int index, short int min, short int max)
 	else { AS_CGood[bless_index][2] = min; return 1; }
 	return 0;
 }
-
 int FindCurseSphinx(short int index)
 {
 	for(int i = 1; i <= AS_CBad[0][0]; ++i)
@@ -447,10 +443,9 @@ int AddCurseSphinx(short int index, short int min, short int max)
 	else { AS_CBad[curse_index][2] = min; return 1; }
 	return 0;
 }
+/***********************************************************************************/
 
-
-/****************************************************************************************/
-
+/*********************************** SAVING DATA ***********************************/
 int SaveCursesData()
 {
 	STARTNA(__LINE__, 0)
@@ -462,13 +457,12 @@ int SaveCursesData()
 	if(Saver(AS_CGood,sizeof(AS_CGood))) RETURN(1)
 	RETURN(0)
 }
-
 int LoadCursesData(int)
 {
 	STARTNA(__LINE__, 0)
 	char buf[4]; if(Loader(buf,4)) RETURN(1)
 	if(buf[0]!='C'||buf[1]!='R'||buf[2]!='S'||buf[3]!='E')
-			{MError("LoadCurse cannot start loading"); RETURN(1) }
+			{MError("LoadCuresData cannot start loading"); RETURN(1) }
 	if(Loader(CurseType,sizeof(CurseType))) RETURN(1)
 	if(Loader(DHVC_Table,sizeof(DHVC_Table))) RETURN(1)
 	if(Loader(CurseInfo,sizeof(CurseInfo))) RETURN(1)
@@ -476,9 +470,16 @@ int LoadCursesData(int)
 	if(Loader(AS_CGood,sizeof(AS_CGood))) RETURN(1)
 	RETURN(0)
 }
-
 void ResetCursesData()
 {
+	STARTNA(__LINE__, 0)
+	for(int i=0;i<CURSENUM;i++){
+		CurseInfo[i].Type=0;
+		CurseInfo[i].HeroInd=0;
+		CurseInfo[i].StartDay=0;
+		CurseInfo[i].CurseVal=0;
+		CurseInfo[i].Length=0;
+	}
 	// Reinitialising object blocked by curses
 	bool end = false;
 	for(int i = 0; i < CURSE_BLOCKS; ++i)
@@ -526,8 +527,11 @@ void ResetCursesData()
 			else AS_CBad[i][j] = 0;
 		}
 	}
+	RETURNV
 }
+/******************************************************************************/
 
+/*********************************** SPHINX ***********************************/
 #define SPHMOVEPOINTS 0x500
 void ApplySphinx(int GM_ai,_Hero_ *Hr,_MapItem_ * /*Mi*/)
 {
@@ -570,7 +574,9 @@ void ApplySphinx(int GM_ai,_Hero_ *Hr,_MapItem_ * /*Mi*/)
 	RedrawMap();
 	RETURNV
 }
+/******************************************************************************/
 
+/******************************* ERM GRANT CURSE ******************************/
 int ERM_Curse(Mes &M, int Num, int hn) // HE:Y
 {
 	STARTNA(__LINE__, 0)
@@ -624,7 +630,9 @@ int ERM_Curse(Mes &M, int Num, int hn) // HE:Y
 	CurseInfo[i].StartDay = GetCurDate();
 	RETURN(0)
 }
+/******************************************************************************/
 
+/******************************* ERM SETUP CURSE ******************************/
 int ERM_CurseSetup(char Cmd,int Num,_ToDo_* sp,Mes *Mp)
 {
 	STARTNA(__LINE__, 0)
@@ -816,3 +824,4 @@ int ERM_CurseSetup(char Cmd,int Num,_ToDo_* sp,Mes *Mp)
 	}
 	RETURN(1);
 }
+/******************************************************************************/

@@ -15,7 +15,9 @@
 #include "monsters.h"
 #include "global.h"
 #include "string.h"
-#include "NewWoG/RepeatableBattle.h"
+#include "NewWog/RepeatableBattle.h"
+#include "NewWog/ExpansionERM.h"
+#include "NewWog/Curse.h"
 #define __FILENUM__ 6
 
 //static Byte *BACall_Mon=0;

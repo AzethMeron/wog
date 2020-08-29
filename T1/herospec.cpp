@@ -10,6 +10,7 @@
 //#include "classes.h"
 #include "b1.h"
 #include "CrExpo.h"
+#include "NewWog/Curse.h"
 #define  __FILENUM__ 2
 
 struct _HeroSpecWoG_{
@@ -856,37 +857,7 @@ __declspec( naked ) void FixBioBug(void)
 }
 */
 
-
 void ResetHeroData(void)
 {
-	STARTNA(__LINE__, 0)
-	int i;
-	for(i=0;i<CURSENUM;i++){
-		CurseInfo[i].Type=0;
-		CurseInfo[i].HeroInd=0;
-		CurseInfo[i].StartDay=0;
-		CurseInfo[i].CurseVal=0;
-		CurseInfo[i].Length=0;
-	}
 
-/*
-	_HeroInfo_    *hp=GetHIBase();
-	for(i=0;i<HERNUM;i++){
-		hp[i].HPLName=HeroInfoBack[i].HPLName;
-		hp[i].HPSName=HeroInfoBack[i].HPSName;
-	}
-*/
-// нельзя здесь иниц.
-/*
-	for(i=0;i<HERNUM;i++){
-		HeroSpecCus[i].Used=0;
-		for(j=0;j<24;j++){
-			HeroSpecCus[i].HPSName[j]=0;
-			HeroSpecCus[i].HPLName[j]=0;
-		}
-		HeroSpecCus[i].HPSLoaded=0;
-		HeroSpecCus[i].HPLLoaded=0;
-	}
-*/
-	RETURNV
 }

@@ -2,8 +2,8 @@
 
 #include "structs.h"
 #include "herospec.h"
-#include "NewWog/Curse.h"
-#include "NewWog/ExpansionERM.h"
+//#include "NewWog/Curse.h"
+//#include "NewWog/ExpansionERM.h"
 
 #define VAR_COUNT_V (10000)
 #define VAR_COUNT_LZ (20)
@@ -182,7 +182,3 @@ int Call_Function(int ind,int *var,int num);
 void TLCall(Dword timesec);
 void DlgCallBack(int dlg,int item,int action);
 char *GetErmText(Mes *Mp,int ind);
-
-
-extern short int AS_CBad[CURSETYPE_NUM][3];
-extern short int AS_CGood[CURSETYPE_NUM][3];

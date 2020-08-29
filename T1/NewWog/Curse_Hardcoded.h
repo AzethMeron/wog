@@ -18,7 +18,7 @@ const short int o_AS_CBad[CURSETYPE_NUM][3]={ {48,0,0},
 
 
 // Old object entrance prohibited table
-const int o_DHVC_Table[CURSE_BLOCKS][3]={
+const short int o_DHVC_Table[CURSE_BLOCKS][3]={
 // curse_id, ob_type, ob_subtype 
 {22,109,-1}, // Water Wheel
 {23,17,-1},  // Dwelling

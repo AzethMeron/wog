@@ -10,6 +10,7 @@
 #include "artifact.h"
 //#include "wogsetup.h"
 #include "CrExpo.h"
+#include "NewWog/Curse.h"
 #define __FILENUM__ 12
 
 static TxtFile    NPCTexts;
