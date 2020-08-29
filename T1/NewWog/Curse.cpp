@@ -130,7 +130,6 @@ found:
 }
 
 char LockGroupSize[14];
-
 void NeedLockGroupSize()
 {
 	FillMemory(LockGroupSize, sizeof(LockGroupSize), 0);
@@ -189,6 +188,7 @@ static char* _AddCurse(int hn,int cr,int *val,int ind)
 	RETURN(0)
 }
 
+// Remove curse from hero
 static int _DelCurse(int hn,int cr,int ind)
 {
 	STARTNA(__LINE__, 0)
@@ -224,6 +224,7 @@ static int _DelCurse(int hn,int cr,int ind)
 	RETURN(0)
 }
 
+// Add curse to hero
 int AddCurse(int cr,int val,int len,int flag,int hi)
 {
 	STARTNA(__LINE__, 0)
@@ -259,60 +260,7 @@ int AddCurse(int cr,int val,int len,int flag,int hi)
 	RETURN(-1)
 }
 
-int ERM_Curse(Mes &M, int Num, int hn) // HE:Y
-{
-	STARTNA(__LINE__, 0)
-	if(Num<3){ EWrongParamsNum(); RETURN(1) }
-	if(Num<4)  M.n[3] = 1;
-	if(M.n[3]<0 || M.n[3]>3){ MError2("wrong action kind (0...3)."); RETURN(1) }
-	if(M.n[3]==3 && !M.VarI[1].Check && !M.VarI[2].Check)
-		RETURN(AddCurse(0, 0, 0, 3, hn));
-
-	int cr = M.n[0]; if(cr < 1 || cr >= CURSETYPE_NUM) { MError2("incorrect curse/bless number"); RETURN(1); }
-	int i = DoesHeroHas(hn, cr);
-	if (i < 0)
-	{
-		i = FindFreeCurse();
-		if (i < 0) { MError2("too many curses."); RETURN(1) }
-	}
-	
-	int val = CurseInfo[i].CurseVal, len = max(CurseInfo[i].StartDay + CurseInfo[i].Length - GetCurDate(), 0);
-	int baseLen = len;
-	if (M.n[3] == 2)  // for backward compatibility with possible strange scripts
-	{
-		if(M.f[1]) val = 0;
-		if(M.f[2]) len = 0;
-	}
-	if (Apply(&val, 4, &M, 1) | Apply(&len, 4, &M, 2))  RETURN(0)  // get syntax
-	
-	if (M.n[3] == 2)  // add/sub
-	{
-		len += baseLen;
-		val += CurseInfo[i].CurseVal;
-	}
-	if (M.n[3] == 0 || len <= 0)  // delete
-	{
-		if ((CurseInfo[i].Length != 0) && _DelCurse(hn, cr, i)) { Error(); RETURN(1) }
-		RETURN(0)
-	}
-	if (cr == CURSE_SLOCK && (val < -1 || val > 13)){ MError2("wrong slot number (-1...13)"); RETURN(1) }
-	if (cr == CURSE_SLOCK && val != CurseInfo[i].CurseVal && CurseInfo[i].Length != 0)
-		if (_DelCurse(hn, cr, i))
-			{	Error(); RETURN(1) }
-
-	if (CurseInfo[i].Length == 0)
-	{
-		char* err = _AddCurse(hn, cr, &val, i);
-		if (err){ MError2(err); RETURN(1) }
-	}
-	CurseInfo[i].Type = cr;
-	CurseInfo[i].HeroInd = hn;
-	CurseInfo[i].CurseVal = val;
-	CurseInfo[i].Length = len;
-	CurseInfo[i].StartDay = GetCurDate();
-	RETURN(0)
-}
-
+// Daily effect of curse
 void DaylyCurse(int Owner)
 {
 	STARTNA(__LINE__, 0)
@@ -499,6 +447,183 @@ int AddCurseSphinx(short int index, short int min, short int max)
 	if(max >= min) AS_CBad[curse_index][2] = max;
 	else { AS_CBad[curse_index][2] = min; return 1; }
 	return 0;
+}
+
+
+/****************************************************************************************/
+
+int SaveCursesData()
+{
+	STARTNA(__LINE__, 0)
+	if(Saver("CRSE",4)) RETURN(1)
+	if(Saver(CurseType,sizeof(CurseType))) RETURN(1)
+	if(Saver(DHVC_Table,sizeof(DHVC_Table))) RETURN(1)
+	if(Saver(CurseInfo,sizeof(CurseInfo))) RETURN(1)
+	if(Saver(AS_CBad,sizeof(AS_CBad))) RETURN(1)
+	if(Saver(AS_CGood,sizeof(AS_CGood))) RETURN(1)
+	RETURN(0)
+}
+
+int LoadCursesData(int)
+{
+	STARTNA(__LINE__, 0)
+	char buf[4]; if(Loader(buf,4)) RETURN(1)
+	if(buf[0]!='C'||buf[1]!='R'||buf[2]!='S'||buf[3]!='E')
+			{MError("LoadCurse cannot start loading"); RETURN(1) }
+	if(Loader(CurseType,sizeof(CurseType))) RETURN(1)
+	if(Loader(DHVC_Table,sizeof(DHVC_Table))) RETURN(1)
+	if(Loader(CurseInfo,sizeof(CurseInfo))) RETURN(1)
+	if(Loader(AS_CBad,sizeof(AS_CBad))) RETURN(1)
+	if(Loader(AS_CGood,sizeof(AS_CGood))) RETURN(1)
+	RETURN(0)
+}
+
+void ResetCursesData()
+{
+	// Reinitialising object blocked by curses
+	bool end = false;
+	for(int i = 0; i < CURSE_BLOCKS; ++i)
+	{
+		if(o_DHVC_Table[i][0] == 0) end = true;
+		for(int j = 0; j < 3; ++j)
+		{
+			if(!end) DHVC_Table[i][j] = o_DHVC_Table[i][j];
+			else DHVC_Table[i][j] = 0;
+		}
+	}
+
+	// Reinitialising curse pictures and description
+	end = false;
+	for(int i = 0; i < CURSETYPE_NUM; ++i)
+	{
+		if(!strcmp(o_GC_Pics[i],"")) end = true;
+		if(!end)
+		{
+			sprintf_s(CurseType[i].PicName,sizeof(CurseType[i].PicName), "%s", o_GC_Pics[i]);
+			if(i>40){
+				sprintf_s(CurseType[i].Desc,sizeof(CurseType[i].Desc), "%s", ITxt(90+i,0,&Strings) );
+			}else{
+				sprintf_s(CurseType[i].Desc,sizeof(CurseType[i].Desc), "%s", ITxt(80+i,0,&Strings) );
+			}
+		}
+		else
+		{
+			sprintf_s(CurseType[i].PicName,sizeof(CurseType[i].PicName), "");
+			sprintf_s(CurseType[i].Desc,sizeof(CurseType[i].Desc), "");
+		}
+	}
+
+	// Reinitialising sphinx reward/penalty
+	bool end_good=false, end_bad=false;
+	for(int i = 0; i < CURSETYPE_NUM; ++i)
+	{
+		if(i > o_AS_CGood[0][0]) end_good=true;
+		if(i > o_AS_CBad[0][0]) end_bad=true;
+		for(int j = 0; j < 3; ++j)
+		{
+			if(!end_good) AS_CGood[i][j] = o_AS_CGood[i][j];
+			else AS_CGood[i][j] = 0;
+			if(!end_bad) AS_CBad[i][j] = o_AS_CBad[i][j];
+			else AS_CBad[i][j] = 0;
+		}
+	}
+}
+
+#define SPHMOVEPOINTS 0x500
+void ApplySphinx(int GM_ai,_Hero_ *Hr,_MapItem_ * /*Mi*/)
+{
+	STARTNA(__LINE__, 0)
+	int num,val,len,P_n;
+	num=Random(0,TXTSphinx.sn-1);
+	if(Hr->Movement<SPHMOVEPOINTS){ // ĺńňü ńâîáîäíűĺ äâčćĺíč˙ ó Ăĺđî˙
+		if(GM_ai){
+			Message(ITxt(18,0,&Strings),1);
+			RETURNV
+		}
+	}
+	Hr->Movement-=SPHMOVEPOINTS; if(Hr->Movement<0) Hr->Movement=0;
+	if(GM_ai){
+		if(SphinxReq(num)) P_n=1; else P_n=0;
+	}else{
+		P_n=1; // AI
+//    Mi->SetUp&=0xFFFFFFFE; // visited
+	}
+	if(P_n){
+		num=AS_CGood[0][0]; num=Random(1,num);
+		if(AS_CGood[num][1]==AS_CGood[num][2]) val=AS_CGood[num][1];
+		else val=Random(AS_CGood[num][1],AS_CGood[num][2]);
+		num=AS_CGood[num][0];
+	}else{
+		num=AS_CBad[0][0]; num=Random(1,num);
+		if(AS_CBad[num][1]==AS_CBad[num][2]) val=AS_CBad[num][1];
+		else val=Random(AS_CBad[num][1],AS_CBad[num][2]);
+		num=AS_CBad[num][0];
+	}
+	len=Random(1,7);
+	if(AddCurse(num,val,len,2,Hr->Number)){ Error(); RETURNV }
+	if(GM_ai){
+		if(P_n){
+			Message(ITxt(190,0,&Strings),1);
+		}else{
+			Message(ITxt(191,0,&Strings),1);
+		}
+	}
+	RedrawMap();
+	RETURNV
+}
+
+int ERM_Curse(Mes &M, int Num, int hn) // HE:Y
+{
+	STARTNA(__LINE__, 0)
+	if(Num<3){ EWrongParamsNum(); RETURN(1) }
+	if(Num<4)  M.n[3] = 1;
+	if(M.n[3]<0 || M.n[3]>3){ MError2("wrong action kind (0...3)."); RETURN(1) }
+	if(M.n[3]==3 && !M.VarI[1].Check && !M.VarI[2].Check)
+		RETURN(AddCurse(0, 0, 0, 3, hn));
+
+	int cr = M.n[0]; if(cr < 1 || cr >= CURSETYPE_NUM) { MError2("incorrect curse/bless number"); RETURN(1); }
+	int i = DoesHeroHas(hn, cr);
+	if (i < 0)
+	{
+		i = FindFreeCurse();
+		if (i < 0) { MError2("too many curses."); RETURN(1) }
+	}
+	
+	int val = CurseInfo[i].CurseVal, len = max(CurseInfo[i].StartDay + CurseInfo[i].Length - GetCurDate(), 0);
+	int baseLen = len;
+	if (M.n[3] == 2)  // for backward compatibility with possible strange scripts
+	{
+		if(M.f[1]) val = 0;
+		if(M.f[2]) len = 0;
+	}
+	if (Apply(&val, 4, &M, 1) | Apply(&len, 4, &M, 2))  RETURN(0)  // get syntax
+	
+	if (M.n[3] == 2)  // add/sub
+	{
+		len += baseLen;
+		val += CurseInfo[i].CurseVal;
+	}
+	if (M.n[3] == 0 || len <= 0)  // delete
+	{
+		if ((CurseInfo[i].Length != 0) && _DelCurse(hn, cr, i)) { Error(); RETURN(1) }
+		RETURN(0)
+	}
+	if (cr == CURSE_SLOCK && (val < -1 || val > 13)){ MError2("wrong slot number (-1...13)"); RETURN(1) }
+	if (cr == CURSE_SLOCK && val != CurseInfo[i].CurseVal && CurseInfo[i].Length != 0)
+		if (_DelCurse(hn, cr, i))
+			{	Error(); RETURN(1) }
+
+	if (CurseInfo[i].Length == 0)
+	{
+		char* err = _AddCurse(hn, cr, &val, i);
+		if (err){ MError2(err); RETURN(1) }
+	}
+	CurseInfo[i].Type = cr;
+	CurseInfo[i].HeroInd = hn;
+	CurseInfo[i].CurseVal = val;
+	CurseInfo[i].Length = len;
+	CurseInfo[i].StartDay = GetCurDate();
+	RETURN(0)
 }
 
 int ERM_CurseSetup(char Cmd,int Num,_ToDo_* sp,Mes *Mp)
@@ -691,119 +816,4 @@ int ERM_CurseSetup(char Cmd,int Num,_ToDo_* sp,Mes *Mp)
 			break;
 	}
 	RETURN(1);
-}
-/****************************************************************************************/
-
-int SaveCursesData()
-{
-	if(Saver(CurseType,sizeof(CurseType))) return 1;
-	if(Saver(DHVC_Table,sizeof(DHVC_Table))) return 1;
-	if(Saver(CurseInfo,sizeof(CurseInfo))) return 1;
-	if(Saver(AS_CBad,sizeof(AS_CBad))) return 1;
-	if(Saver(AS_CGood,sizeof(AS_CGood))) return 1;
-	return 0;
-}
-
-int LoadCursesData()
-{
-	if(Loader(CurseType,sizeof(CurseType))) return 1;
-	if(Loader(DHVC_Table,sizeof(DHVC_Table))) return 1;
-	if(Loader(CurseInfo,sizeof(CurseInfo))) return 1;
-	if(Loader(AS_CBad,sizeof(AS_CBad))) return 1;
-	if(Loader(AS_CGood,sizeof(AS_CGood))) return 1;
-	return 0;
-}
-
-void ResetCursesData()
-{
-	// Reinitialising object blocked by curses
-	bool end = false;
-	for(int i = 0; i < CURSE_BLOCKS; ++i)
-	{
-		if(o_DHVC_Table[i][0] == 0) end = true;
-		for(int j = 0; j < 3; ++j)
-		{
-			if(!end) DHVC_Table[i][j] = o_DHVC_Table[i][j];
-			else DHVC_Table[i][j] = 0;
-		}
-	}
-
-	// Reinitialising curse pictures and description
-	end = false;
-	for(int i = 0; i < CURSETYPE_NUM; ++i)
-	{
-		if(!strcmp(o_GC_Pics[i],"")) end = true;
-		if(!end)
-		{
-			sprintf_s(CurseType[i].PicName,sizeof(CurseType[i].PicName), "%s", o_GC_Pics[i]);
-			if(i>40){
-				sprintf_s(CurseType[i].Desc,sizeof(CurseType[i].Desc), "%s", ITxt(90+i,0,&Strings) );
-			}else{
-				sprintf_s(CurseType[i].Desc,sizeof(CurseType[i].Desc), "%s", ITxt(80+i,0,&Strings) );
-			}
-		}
-		else
-		{
-			sprintf_s(CurseType[i].PicName,sizeof(CurseType[i].PicName), "");
-			sprintf_s(CurseType[i].Desc,sizeof(CurseType[i].Desc), "");
-		}
-	}
-
-	// Reinitialising sphinx reward/penalty
-	bool end_good=false, end_bad=false;
-	for(int i = 0; i < CURSETYPE_NUM; ++i)
-	{
-		if(i > o_AS_CGood[0][0]) end_good=true;
-		if(i > o_AS_CBad[0][0]) end_bad=true;
-		for(int j = 0; j < 3; ++j)
-		{
-			if(!end_good) AS_CGood[i][j] = o_AS_CGood[i][j];
-			else AS_CGood[i][j] = 0;
-			if(!end_bad) AS_CBad[i][j] = o_AS_CBad[i][j];
-			else AS_CBad[i][j] = 0;
-		}
-	}
-}
-
-#define SPHMOVEPOINTS 0x500
-void ApplySphinx(int GM_ai,_Hero_ *Hr,_MapItem_ * /*Mi*/)
-{
-	STARTNA(__LINE__, 0)
-	int num,val,len,P_n;
-	num=Random(0,TXTSphinx.sn-1);
-	if(Hr->Movement<SPHMOVEPOINTS){ // ĺńňü ńâîáîäíűĺ äâčćĺíč˙ ó Ăĺđî˙
-		if(GM_ai){
-			Message(ITxt(18,0,&Strings),1);
-			RETURNV
-		}
-	}
-	Hr->Movement-=SPHMOVEPOINTS; if(Hr->Movement<0) Hr->Movement=0;
-	if(GM_ai){
-		if(SphinxReq(num)) P_n=1; else P_n=0;
-	}else{
-		P_n=1; // AI
-//    Mi->SetUp&=0xFFFFFFFE; // visited
-	}
-	if(P_n){
-		num=AS_CGood[0][0]; num=Random(1,num);
-		if(AS_CGood[num][1]==AS_CGood[num][2]) val=AS_CGood[num][1];
-		else val=Random(AS_CGood[num][1],AS_CGood[num][2]);
-		num=AS_CGood[num][0];
-	}else{
-		num=AS_CBad[0][0]; num=Random(1,num);
-		if(AS_CBad[num][1]==AS_CBad[num][2]) val=AS_CBad[num][1];
-		else val=Random(AS_CBad[num][1],AS_CBad[num][2]);
-		num=AS_CBad[num][0];
-	}
-	len=Random(1,7);
-	if(AddCurse(num,val,len,2,Hr->Number)){ Error(); RETURNV }
-	if(GM_ai){
-		if(P_n){
-			Message(ITxt(190,0,&Strings),1);
-		}else{
-			Message(ITxt(191,0,&Strings),1);
-		}
-	}
-	RedrawMap();
-	RETURNV
 }

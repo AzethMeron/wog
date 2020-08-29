@@ -10,7 +10,6 @@
 //#include "classes.h"
 #include "b1.h"
 #include "CrExpo.h"
-#include "NewWog/Curse.h"
 #define  __FILENUM__ 2
 
 struct _HeroSpecWoG_{
@@ -793,7 +792,6 @@ int SaveHeroData(void)
 	STARTNA(__LINE__, 0)
 	int i;
 	if(Saver("LCRS",4)) RETURN(1)
-	if(SaveCursesData()) RETURN(1)
 /// 24.11.01 3.52
 	for(i=0;i<HERNUM;i++){
 		HeroSpecCus[i].HPSLoaded=0;
@@ -810,7 +808,6 @@ int LoadHeroData(int /*ver*/)
 	char buf[4]; if(Loader(buf,4)) RETURN(1)
 	if(buf[0]!='L'||buf[1]!='C'||buf[2]!='R'||buf[3]!='S')
 			{MError("LoadCurse cannot start loading"); RETURN(1) }
-	if(LoadCursesData()) RETURN(1)
 	if(Loader(HeroSpecCus,sizeof(HeroSpecCus))) RETURN(1)
 	RefreshHeroPic();
 	RETURN(0)
@@ -860,7 +857,7 @@ __declspec( naked ) void FixBioBug(void)
 */
 
 
-void ResetCurse(void)
+void ResetHeroData(void)
 {
 	STARTNA(__LINE__, 0)
 	int i;
@@ -871,8 +868,6 @@ void ResetCurse(void)
 		CurseInfo[i].CurseVal=0;
 		CurseInfo[i].Length=0;
 	}
-
-	ResetCursesData();
 
 /*
 	_HeroInfo_    *hp=GetHIBase();

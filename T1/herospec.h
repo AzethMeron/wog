@@ -35,7 +35,7 @@ int NewSpecPrepare(void);
 int NewSpecPrepare2(void);
 int SaveHeroData(void);
 int LoadHeroData(int ver);
-void ResetCurse(void);
+void ResetHeroData(void);
 void NewSpecShow(void);
 void PutBackHeroInfo(void);
 void RefreshHeroPic(void);

@@ -24,6 +24,7 @@
 #include "global.h"
 #include "MONSTRDLL/dll.h"
 #include "TOWNS/towns.h"
+#include "NewWog/Curse.h"
 #define __FILENUM__ 8
 
 #pragma comment(lib, "User32.lib")
@@ -2583,7 +2584,8 @@ void ResetAll(int game = 1)
 		ThisIsNewGame=1; // новая, а не загруженная
 		ResetCastles();
 		ResetMapMon();
-		ResetCurse();
+		ResetHeroData();
+		ResetCursesData();
 		ResetB1();
 		ResetWM();
 	}
@@ -3429,6 +3431,7 @@ void SaveManager(void)
 		if(SaveAnimations()) break;  // fixed size
 		if(SaveERM()) break; // fixed size
 		if(SaveHeroData()) break; // fixed size
+		if(SaveCursesData()) break;
 		if(SaveB1()) break; // fixed size
 		if(SaveWM()) break; // fixed size
 		if(SaveMP3()) break; // fixed size
@@ -3489,6 +3492,7 @@ void LoadManager(void)
 		if(LoadAnimations(ver)) break;
 		if(LoadERM(ver)) break;
 		if(LoadHeroData(ver)) break;
+		if(LoadCursesData(ver)) break;
 		if(LoadB1(ver)) break;
 		if(LoadWM(ver)) break;
 		if(LoadMP3(ver)) break;
