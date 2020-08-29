@@ -1,6 +1,5 @@
 // to be included ONLY in Curse.cpp !!!
 
-/* FORMERLY HARDCODED DATA */
 const short int o_AS_CGood[CURSETYPE_NUM][3]={ {12,0,0}, 
 									 {5,1,3},{7,1,3},{9,50,200},{15,1,6},{16,1,6},
 									 {17,1,2},{18,1,2},{19,1,2},{20,1,2},{21,100,500},
@@ -16,6 +15,7 @@ const short int o_AS_CBad[CURSETYPE_NUM][3]={ {48,0,0},
 									 {50,0,0},{51,0,0},{52,0,0},{53,0,0},{54,0,0},
 									 {55,0,0},{56,0,0},{57,0,0},{58,0,0},{59,0,0},
 									 {60,0,0},{61,0,0},{62,0,0}};
+
 
 // Old object entrance prohibited table
 const int o_DHVC_Table[CURSE_BLOCKS][3]={

@@ -27,7 +27,6 @@ static char *GC_Length[100];
 // 72 "Will last forever :-)"
 static _CurseShow CurseShow={GC_Pics,GC_Descr,GC_Length};
 
-/////////
 _ZPrintf_ Descr1;
 void BlessesDescr(_MouseStr_ *ms, _Hero_ *hp)
 {
