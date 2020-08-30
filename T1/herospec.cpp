@@ -643,7 +643,11 @@ void __stdcall HeroCheck(int NewX,int NewY,int Level,int Owner,int Radius,int Fl
 	STARTNA(__LINE__, 0)
 	//if(WoG){
 		if(DoesHeroHas(Hp->Number,CURSE_BLIND)!=-1) RETURNV
-		if(DoesHeroHas(Hp->Number,CURSE_NSCUT)!=-1) Radius=2;
+		int wl_cscout_index = DoesHeroHas(Hp->Number,CURSE_NSCUT);
+		if(wl_cscout_index != -1) {
+			if(CurseInfo[wl_cscout_index].CurseVal <= 0) { Radius = 2; } // for backcompability
+			else { Radius = CurseInfo[wl_cscout_index].CurseVal; } // new
+		}
 	//}
 	po=Callers[4].forig;
 	__asm{
