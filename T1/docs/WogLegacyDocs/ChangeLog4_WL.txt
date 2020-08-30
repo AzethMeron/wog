@@ -68,6 +68,7 @@ CR#1:S#2/1/#3/#4; Add to pool
 You can try to remove curse from pool it doesn't belong to - it's ignored.
 If you add curse to pool it's already in, it doesn't create new entry but overrides previous one
 
+[+] Scout Curse (type=8) now supports other values. You can temporarily set hero scouting radius by using this curse. For backcompability (and safety) 0 and negative values are interpreted as 2.
 [+] In Lua/ERM you can use ".pre" ".firstpre" ".post" instead of ".?" ".first?" ".$".
 [+] In Lua/ERM trigger type (pre, firstpost) letter case no longer matters. You can use "FirstPost", or "FiRsTpOsT".
 [-+] AI:M and AI:W, when used with base value, accepts ONLY get syntax. 
@@ -75,10 +76,10 @@ If you add curse to pool it's already in, it doesn't create new entry but overri
 [+] BG:Q displays error when used with set syntax
 [+] Logs moved to woglogs/ folder. Remember to make it in release!
 [+] We have now LuaLog, WOGERMLOG, WOGVARLOG, WOGCRASHLOG and WOGCRASHDUMP. A lot, but it makes sense.
-[+] Added struct that's automatically saved to (and loaded from) savefile. Proven to work in singleplayer, doesn't know if it works in multi. Doesn't support MP battles for sure (yet)
-[ ] I've tried to separate Curses from herospec, but it isn't done properly yet. Although it DOES compile
+[+] Added struct that's automatically saved to (and loaded from) savefile. Proven to work in singleplayer, doesn't know if it works in multi. 
+[+] Many Lua/ERM errors are managed by C code and doesn't cause crash. Additionally allows me to immediately show argument and parameter values. 
+[ ] Curses separated from herospec.
 [ ] I kinda don't understand purpose of h3std, so i've moved everything to h3wog EXCEPT txt files. So all text files can be put in h3std for easier translation,
-[ ] Many Lua/ERM errors are managed by C code and doesn't cause crash. Additionally allows me to immediately show argument and parameter values. 
 [ ] Old saves will NOT work.
 
 Self-caused bugs
@@ -87,8 +88,8 @@ Self-caused bugs
 Found bugs:
 [-] When using Lua/ERM, post triggers ($) cause error with _NOGLOBALS macro. I believe game mistake them as macros. Not fixed, but i have added .pre and .post syntax - those works. For example, now you can use OB(11).pre = function() 
 [-+] When using Lua/ERM, BA:B(string) is broken. Not fixed, instead used StrMan::Apply in extended syntax - that does work well
+[-+] Lua/ERM errors can cause segmentation fault, due to accessing EAX=0x03. Replacing those errors with ERM errors fixes that.
 Not-fixed bugs
 [ ] Using BA:B - no matter, old or new syntax - while using HD Mod opens a terminal with filename. Closing this terminal closes the game aswell. Not fixed
 [ ] WoG options - at least, the hardcoded ones - are scrapped when starting WoG map. On other maps works fine. Not fixed
-[ ] Lua/ERM errors can cause segmentation fault, due to accessing EAX=0x03. Replacing those errors with ERM errors fixes that.
 [ ] Dumping values can cause game crash (to be precise: loop responsible for ERM traceback causes crash) Commented both traceback loops.
