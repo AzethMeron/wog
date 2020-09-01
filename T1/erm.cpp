@@ -1463,11 +1463,11 @@ int ERM_UniversalEx(char Cmd,int Num,_ToDo_*,Mes *Mp)
 	{
 		case 'D': // Display error message using internal ERM functions
 		{
-			CHECK_ParamsNum(1);
+			CHECK_ParamsMin(1);
 			char err_content[256];
 			if(StrMan::Apply(err_content,Mp,0,256) == 0) { MError2("-cannot {get} the error message"); RETURN(0); }
 			char message[300];
-			sprintf_s(message,300,"\n{Custom error message}\n%s",err_content);
+			sprintf_s(message,300,"\n{Custom} {error} {message}\n%s",err_content);
 			MError(message);
 			RETURN(0);
 		} break;

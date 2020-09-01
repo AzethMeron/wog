@@ -6,8 +6,9 @@ New syntax for receiver BA
 		1 - dummy parameter, but must be present
 
 New command for receiver UX
-	!!UX:D#;
+	!!UX:D#/...;
 		# - string, z-var or ^^ constant. Maximum size: 256 chars.
+		... - you can add any variables/values here to be displayed
 UX:D allows to display error message using internal tools. Might be useful for debugging. Works with UN:P904 and UN:P905
 
 !!CR#1:
@@ -74,7 +75,7 @@ If you add curse to pool it's already in, it doesn't create new entry but overri
 [-+] AI:M and AI:W, when used with base value, accepts ONLY get syntax. 
 [+] MR:N displays error when used with set syntax. 
 [+] BG:Q displays error when used with set syntax
-[+] Logs moved to woglogs/ folder. Remember to make it in release!
+[+] Logs moved to woglogs/ folder. It's created automatically by exec at setup
 [+] We have now LuaLog, WOGERMLOG, WOGVARLOG, WOGCRASHLOG and WOGCRASHDUMP. A lot, but it makes sense.
 [+] Added struct that's automatically saved to (and loaded from) savefile. Proven to work in singleplayer, doesn't know if it works in multi. 
 [+] Many Lua/ERM errors are managed by C code and doesn't cause crash. Additionally allows me to immediately show argument and parameter values. 
