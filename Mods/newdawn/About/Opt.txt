@@ -1,4 +1,0 @@
-Name$	Text$	Hint$	LongHint$	Content$	Graphic$
-
-category:	Base
-Parag1	dafasdasfsdafsa	fasdfasdfsa	fsaadfafa
