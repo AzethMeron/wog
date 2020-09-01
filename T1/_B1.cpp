@@ -2732,6 +2732,7 @@ void FileLoader(void)
 {
 	__asm pusha
 	STARTNA(__LINE__, 0)
+	if (CreateDirectory("woglogs", NULL) || ERROR_ALREADY_EXISTS == GetLastError()) {} else { Exit(); }
 	if(LoadTXT("ZMESS00.TXT",&Strings)) Exit(); // не может загрузить TXT
 	// выносим внутренние сообщения в файл наружу
 	TxtOutOfExe();
