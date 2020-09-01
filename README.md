@@ -53,6 +53,8 @@ Run it, then switch to WoG window and switch back to the program. It should pick
 
 In addition to sending WOGCRASHDUMP.DMP, WOGCRASHLOG.TXT and WOGERMLOG.TXT don't forget to describe what exactly you did that lead to the issue and send the saved game and map if they're relevant.
 
+Legacy note: all LOG files have been moved to woglogs/ directory. It's best to send whole folder once you face any errors, then remove this directory, 
+
 At some point you may find UnclosedStackLevels.txt file in your WoG folder. Send it to me if you do.
 
 Also, setting No32Bit=0 in [Common] of WoG.ini will let you run WoG windowed in 32-bit screen mode. However, 10-60 minutes into the game it will hang. That's ok, 32 bit mode code is temporary. Baratorch's HD Mod does it much better, so it should be the base of future proper 32 bit mode support.
