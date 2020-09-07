@@ -1,9 +1,21 @@
 // to be included ONLY in Curse.cpp !!!
+// This file keeps all old (3.58f) tables connected to curses and blessings
+// At the begininng of any map, data from there is copied to actual tables used in modern version
+// You can still add new curses/blessings here and it will work fine
 
+// Sphinx pools:
+// o_AS_CGood -> AS_CGood
+// o_AS_CBad -> AS_CBad
+// Note: o_AS_CGood[0][0] = number of blessings/curses in pool, need to be increased/decreased when changing!
+// same goes for o_AS_CBad
+// Struct: [0] = cursetype, [1] = curse minimal value, [2] = curse maximal value
+
+// Sphinx blessings pool
 const short int o_AS_CGood[CURSETYPE_NUM][3]={ {12,0,0}, 
 									 {5,1,3},{7,1,3},{9,50,200},{15,1,6},{16,1,6},
 									 {17,1,2},{18,1,2},{19,1,2},{20,1,2},{21,100,500},
 									 {64,1,4},{65,100,500}};
+// Sphinx curses pool
 const short int o_AS_CBad[CURSETYPE_NUM][3]={ {48,0,0}, 
 									 {1,0,0},{2,-1,-1},{3,0,0},{4,100,500},{6,1,3},
 									 {8,0,0},{10,100,300},{22,0,0},{23,0,0},{24,0,0},
@@ -17,7 +29,9 @@ const short int o_AS_CBad[CURSETYPE_NUM][3]={ {48,0,0},
 									 {60,0,0},{61,0,0},{62,0,0}};
 
 
-// Old object entrance prohibited table
+// Curses prohibit objects on map table: o_DHVC_Table -> DHVC_Tabke
+// Struct: [0] = cursetype, [1] = object type, [2] = object subtype (-1 for any)
+// Last entry in structure must be {0,0,0} otherwise segfault
 const short int o_DHVC_Table[CURSE_BLOCKS][3]={
 // curse_id, ob_type, ob_subtype 
 {22,109,-1}, // Water Wheel
@@ -72,6 +86,9 @@ const short int o_DHVC_Table[CURSE_BLOCKS][3]={
 {0,0,0} // there must be it, otherwise segfault
 };
 
+// Curse and Blessings picture paths, relative to main H3 directory
+// o_GC_Pics -> GC_Pics
+// Last entry must be "", otherwise segfault
 const char o_GC_Pics[CURSETYPE_NUM][64]={ // Old pictures
 "DATA\\ZVS\\LIB1.RES\\No1.bmp",
 "DATA\\ZVS\\LIB1.RES\\Curse1.bmp",

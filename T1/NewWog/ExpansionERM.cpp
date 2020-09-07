@@ -162,8 +162,6 @@ int ERM_Testing(char Cmd,int Num,_ToDo_* sp,Mes *Mp)
 			if(Apply(&slot,4,Mp,0)) { MError2("Cannot get parameter 1 - slot"); RETURN(0); }
 			Dword MixPos=GetDinMixPos(sp);
 			_MapItem_ *mip=GetMapItem2(MixPos);
-			_BlackMarketInfo_ *ob = (_BlackMarketInfo_*) mip;
-			Apply(&ob->art[slot] ,4,Mp,1);
 			// Doesn't work
 		} break;
 

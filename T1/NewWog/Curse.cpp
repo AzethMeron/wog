@@ -121,12 +121,14 @@ int DoesHeroHasVisitCurse(int hn, int type,int stype)
 		cn=DHVC_Table[i][0];
 		if(cn==0) break;
 		if(DHVC_Table[i][1]==type){
-			if((DHVC_Table[i][2]==stype)||(DHVC_Table[i][2]==-1)) goto found;
+			if((DHVC_Table[i][2]==stype)||(DHVC_Table[i][2]==-1))
+			{
+				int output = DoesHeroHas(hn,cn);
+				if(output != -1) { RETURN(output); }
+			}
 		}
 	}
 	RETURN(-1) // не нашли такого типа
-found:  
-	RETURN(DoesHeroHas(hn,cn))
 }
 char LockGroupSize[14];
 void NeedLockGroupSize()
