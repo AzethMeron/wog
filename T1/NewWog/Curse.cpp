@@ -117,7 +117,7 @@ int DoesHeroHasVisitCurse(int hn, int type,int stype)
 	STARTNA(__LINE__, 0)
 	int cn;
 	if((type==63)&&(stype>0)) RETURN(-1) // ERM object cannot be prohibited
-	for(int i=0;;i++){
+	for(int i=0;i < CURSE_BLOCKS;i++){
 		cn=DHVC_Table[i][0];
 		if(cn==0) break;
 		if(DHVC_Table[i][1]==type){
