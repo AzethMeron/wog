@@ -11,6 +11,8 @@ Working with ERM Parser: https://drive.google.com/file/d/1sGtK0E1DeOZMMu59FtbJzi
 
 Map objects, game memory: https://drive.google.com/file/d/1T0sYWGM__jq1Hx8ZMoL8iPjJcE5vTwUa/view?usp=sharing
 
+How WoG was made. Curses: https://drive.google.com/file/d/18lcUWCP8VEkF_i9x3dJA82YPDGPTiG-y/view?usp=sharing
+
 Always up-to-date ERM/Lua Help: https://azethmeron.github.io
 
 (Polish) ERM tutorial: https://drive.google.com/open?id=1L8I4NZUse8CTkazf7BCal9WEhZPrGJPQ&fbclid=IwAR10yjwbRjQhgGfTDaNN34BVghvbe1zJlyVLDTRrKCsG-jMrE-t1bEIb1Ls
