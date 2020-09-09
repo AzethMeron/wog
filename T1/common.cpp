@@ -5611,20 +5611,17 @@ PROC DllImport(const char * dll, const char * proc, bool halt)
 
 _BlackMarketInfo_* GetBlackMarket(Dword object_SetUp)
 {
-	// Based on old ERM script by Altair (very smart Polish guy)
-	// It was done using UN:C - because of this im using int zret instead of pointer
-	// Numerical operations on int-type are different than pointers!
-	// Should be changed later - but works for now sooo
 	STARTNA(__LINE__, 0)
-	int zret;
+	_BlackMarketInfo_* zret=NULL;
 	__asm{
 		mov  eax,BASE
 		mov  eax,[eax]
 		add  eax,0x1F684
 		mov  eax,[eax]
+		mov  ecx,object_SetUp
+		imul ecx,28
+		add  eax,ecx
 		mov  zret,eax
 	}
-	zret = zret + object_SetUp*7*sizeof(Dword); // sizeof(Dword) = 4
-	RETURN((_BlackMarketInfo_*)zret)
+	RETURN(zret)
 }
-
