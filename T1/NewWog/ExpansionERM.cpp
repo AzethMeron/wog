@@ -177,6 +177,13 @@ int ERM_BlackMarket(char Cmd,int Num,_ToDo_* sp,Mes *Mp)
 			if(slot < 0 || slot > 6) { MError2("Incorrect parameter 1 value - slot"); RETURN(0); }
 			Apply(&market->art[slot],sizeof(market->art[slot]),Mp,1);
 		} break;
+		case 'I':
+		{
+			int number_of_black_markets = CalcObjects(7,-1);
+			Dword last_SetUp = mip->SetUp;
+			Apply(&mip->SetUp,sizeof(mip->SetUp),Mp,0);
+			if(mip->SetUp < 0 || mip->SetUp >= number_of_black_markets) { MError2("Wrong index of Black Market"); mip->SetUp=last_SetUp; RETURN(0); }
+		} break;
 		default:
 			{ EWrongCommand(); RETURN(0); } break;
 	}

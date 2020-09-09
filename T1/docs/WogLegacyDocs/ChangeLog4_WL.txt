@@ -69,10 +69,16 @@ CR#1:S#2/1/#3/#4; Add to pool
 You can try to remove curse from pool it doesn't belong to - it's ignored.
 If you add curse to pool it's already in, it doesn't create new entry but overrides previous one
 
-!!MK#1/#2/#3:#4/$ = Black market receiver
+!!MK#1/#2/#3 = Black market receiver
 	#1,#2,#3 - x/y/l, also support indirect syntax
-	#4 - slot (0..6)
+:A#1/$; Get/set artifact in slots
+	#1 - slot (0..6)
 	$ - set/get artifact (Format A1)
+:I$; Get/set index of Black Market's pool
+	$ - index (0 up to Number of Black Markets on Map - 1)
+	You can setup multiple Black Markets to use same pool of artifacts - buying artifact in one will make it unavailable in other one aswell.
+	Technically it's same as OB:C, except it secures type (doesn't work if type <> 7) and index value ( 0 <= index <= number_of_artifacts-1 )
+
 
 [+] Scout Curse (type=8) now supports other values. You can temporarily set hero scouting radius by using this curse. For backcompability (and safety) 0 and negative values are interpreted as 2.
 [+] In Lua/ERM you can use ".pre" ".firstpre" ".post" instead of ".?" ".first?" ".$".
