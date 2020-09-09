@@ -21,3 +21,4 @@ int LoadLegacyData();
 
 // ERM
 int ERM_Testing(char Cmd,int Num,_ToDo_* sp,Mes *Mp);
+int ERM_BlackMarket(char Cmd,int Num,_ToDo_* sp,Mes *Mp);

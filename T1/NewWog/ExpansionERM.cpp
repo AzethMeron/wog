@@ -154,23 +154,31 @@ int ERM_Testing(char Cmd,int Num,_ToDo_* sp,Mes *Mp)
 			if(Apply(&output,4,Mp,3) == 0) { MError2("Cannot set parameter 4 - output value"); RETURN(0)}
 		} break;
 
-		// Black market receiver - TODO, doesn't work now 
-		case 'M':
+		default:
+			{ EWrongCommand(); RETURN(0); }
+			break;
+	}
+	RETURN(1);
+}
+
+int ERM_BlackMarket(char Cmd,int Num,_ToDo_* sp,Mes *Mp)
+{
+	STARTNA(__LINE__, 0)
+	Dword MixPos=GetDinMixPos(sp);
+	_MapItem_ *mip=GetMapItem2(MixPos);
+	if(mip->OType != 7) { MError2("Object isn't Black Market"); RETURN(0); }
+	switch(Cmd)
+	{
+		case 'A':
 		{
-			CHECK_ParamsNum(2);
-			Dword MixPos=GetDinMixPos(sp);
-			_MapItem_ *mip=GetMapItem2(MixPos);
-			if(mip->OType != 7) { MError2("Object isn't Black Market"); RETURN(0); }
 			_BlackMarketInfo_* market = GetBlackMarket(mip->SetUp);
 			int slot;
 			if(Apply(&slot,4,Mp,0)) { MError2("Cannot get parameter 1 - slot"); RETURN(0); }
 			if(slot < 0 || slot > 6) { MError2("Incorrect parameter 1 value - slot"); RETURN(0); }
 			Apply(&market->art[slot],sizeof(market->art[slot]),Mp,1);
 		} break;
-
 		default:
-			{ EWrongCommand(); RETURN(0); }
-			break;
+			{ EWrongCommand(); RETURN(0); } break;
 	}
 	RETURN(1);
 }

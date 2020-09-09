@@ -4850,6 +4850,7 @@ struct _ERM_Addition_{
 // WoG Legacy
 	{'UU',ERM_Testing,2},
 	{'CR',ERM_CurseSetup,1},
+	{'MK',ERM_BlackMarket,2},
 	
 	{0,0}
 };
