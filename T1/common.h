@@ -402,4 +402,4 @@ void ErrorMessage(const char * msg);
 #define SOD_Deref(item) (((int (__fastcall *)(void *))(((int**)item)[0][1]))((void*)item))
 #define timeGetTime ((DWORD (*)())(*(int*)0x63A354))
 
-_BlackMarketInfo_* GetBlackMarket(int object_SetUp);
+_BlackMarketInfo_* GetBlackMarket(Dword object_SetUp);

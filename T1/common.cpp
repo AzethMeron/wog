@@ -5609,7 +5609,7 @@ PROC DllImport(const char * dll, const char * proc, bool halt)
 	return ret;
 }
 
-_BlackMarketInfo_* GetBlackMarket(int object_SetUp)
+_BlackMarketInfo_* GetBlackMarket(Dword object_SetUp)
 {
 	// Based on old ERM script by Altair (very smart Polish guy)
 	// It was done using UN:C - because of this im using int zret instead of pointer
@@ -5624,7 +5624,7 @@ _BlackMarketInfo_* GetBlackMarket(int object_SetUp)
 		mov  eax,[eax]
 		mov  zret,eax
 	}
-	zret = zret + object_SetUp*28;
+	zret = zret + object_SetUp*7*sizeof(Dword); // sizeof(Dword) = 4
 	RETURN((_BlackMarketInfo_*)zret)
 }
 

@@ -357,7 +357,7 @@ struct _PlayerSetup_{
 };
 
 struct _BlackMarketInfo_{
-	int art[7];
+	Dword art[7];
 }; // size = 0x1C
 
 /////////////////////////////
