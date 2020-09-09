@@ -158,11 +158,14 @@ int ERM_Testing(char Cmd,int Num,_ToDo_* sp,Mes *Mp)
 		case 'M':
 		{
 			CHECK_ParamsNum(2);
-			int slot;
-			if(Apply(&slot,4,Mp,0)) { MError2("Cannot get parameter 1 - slot"); RETURN(0); }
 			Dword MixPos=GetDinMixPos(sp);
 			_MapItem_ *mip=GetMapItem2(MixPos);
-			// Doesn't work
+			if(mip->OType != 7) { MError2("Object isn't Black Market"); RETURN(0); }
+			_BlackMarketInfo_* market = GetBlackMarket(mip->SetUp);
+			int slot;
+			if(Apply(&slot,4,Mp,0)) { MError2("Cannot get parameter 1 - slot"); RETURN(0); }
+			if(slot < 0 || slot > 6) { MError2("Incorrect parameter 1 value - slot"); RETURN(0); }
+			Apply(&market->art[slot],sizeof(market->art[slot]),Mp,1);
 		} break;
 
 		default:
