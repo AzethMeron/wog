@@ -2127,6 +2127,7 @@ struct __Copiers{
 //Skeleton Transformer
 	{(Byte *)0x64130C,(Byte *)SkelTrans,sizeof(int)*(MONNUM_0-5)},
 	{(Byte *)&SkelTransAdd[0],(Byte *)&SkelTrans[MONNUM_0-5],sizeof(SkelTransAdd)},
+	{(Byte *)&SkelTrans[0],(Byte *)&SkelTransBackup[0],sizeof(SkelTrans)},
 // Speed up AI thinking (0x00007D00 original)
 // Now through ERM
 //  {(Byte *)"\x00\x10\x00\x00",(Byte *)0x526C9E,4}, //
@@ -3414,14 +3415,14 @@ void SaveManager(void)
 		if((RealCurrentUser==-1)||(IsThis(RealCurrentUser)==0)){
 */
 		if((ActTurn==0)&&(AutoTurn==0)){
-			Message(/*ITxt(28,0,&Strings)*/
+			UniversalErrorMessage(/*ITxt(28,0,&Strings)*/
 				"{WARNING!}\n\nYou cannot write down the game at not your turn.\n"
 				"This may cause a problem when you load it\n"
 				"Game still will be saved, but you are warned!\n\n"
 				"We recommend you now:\n"
 				"- wait until your turn and save the game again;\n"
 				"- ask an active player to save the game at his/her side (through the chat)."
-				,1);
+				,WOGERMLOG,1);
 			if(Saver("ZVZS",4)) break;
 		}else{
 			if(Saver("ZVSS",4)) break;
@@ -3455,7 +3456,7 @@ void SaveManager(void)
 	if(done==0){
 		// не записалось что-то
 //    Message("{Error}:\n\nGame was not saved properly or old version.",1);
-		Message(ITxt(28,0,&Strings),1);
+		UniversalErrorMessage(ITxt(28,0,&Strings),WOGERMLOG,1);
 	}
 	RETURNV
 }
@@ -3473,11 +3474,11 @@ void LoadManager(void)
 		if(buf[0]!='Z') break;
 		if(buf[1]!='V') break;
 		if(buf[2]=='Z'){
-			Message("{WARNING!}\n\nThis game was saved in multiplayer mode (not a hotseat)\n"
+			UniversalErrorMessage("{WARNING!}\n\nThis game was saved in multiplayer mode (not a hotseat)\n"
 				"by a {non-active} player.\n"
 				"The saved game will be loaded but there may be some problems.\n\n"
 				"We recommend you to load another saved game or autosaved one."
-				,1);
+				,WOGERMLOG,1);
 		}else{
 			if(buf[2]!='S') break;
 		}
@@ -3520,7 +3521,7 @@ void LoadManager(void)
 	if(done==0){
 		// не записалось что-то
 //    Message("{Error}:\n\nGame was not loaded properly.",1);
-		Message(ITxt(27,0,&Strings),1);
+		UniversalErrorMessage(ITxt(27,0,&Strings),WOGERMLOG,1);
 	}
 	RETURNV
 }

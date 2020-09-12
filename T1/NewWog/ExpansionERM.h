@@ -7,6 +7,9 @@
 // Should work in battles. Assuming that "sending savefile" works just like save/load, then should work in multiplayer aswell. Brief tests suggest that aswell
 extern struct _LegacyGenericData_ LegacyGenericData; 
 
+// Creatures
+extern int SkelTransBackup[MONNUM];
+
 // Send in remote battle
 void SendLegacyData(int* len, Byte** buf);
 void ReceiveLegacyData(int len, Byte* buf);

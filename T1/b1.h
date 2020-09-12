@@ -40,3 +40,5 @@ int Saver(const void *Po,int Len);
 int Loader(void *Po,int Len);
 int FindManager(Dword po);
 void ResetAll(int game = 1);
+
+extern int SkelTrans[MONNUM];

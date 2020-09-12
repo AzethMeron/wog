@@ -22,4 +22,3 @@ _MapItem_ *GetNearestWay(int x,int y,int l,int xd,int yd,int ld,int *dists,int *
 int SaveAI(void);
 void ResetAI(void);
 int LoadAI(int ver);
-

@@ -6,6 +6,7 @@
 #include "../string.h"
 #include "ExpansionERM.h"
 #include <cmath>
+#include <cstring>
 
 #define __FILENUM__ 33
 
@@ -15,6 +16,8 @@
 struct _LegacyGenericData_ {
 	char ttt;
 } LegacyGenericData;
+
+int SkelTransBackup[MONNUM];
 
 /****************************** MULTIPLAYER BATTLE SUPPORT ******************************/
 #define LegacyDataBufferSize 10000
@@ -80,7 +83,10 @@ int SaveLegacyData()
 	// Header - for safety purposes
 	if(Saver((void*) "JGWL",4)) RETURN(1);
 	// Saving data
-	if(Saver(&LegacyGenericData,sizeof(LegacyGenericData))) RETURN(1);
+	if(Saver(&LegacyGenericData,sizeof(LegacyGenericData))) { RETURN(1); }
+	if(Saver(&SkelTrans,sizeof(SkelTrans))) { RETURN(1); }
+	// End mark
+	if(Saver((void*) "LWGJ",4)) RETURN(1);
 	RETURN(0);
 }
 
@@ -93,14 +99,18 @@ int LoadLegacyData()
 	if(Loader(&head_buf,4)) RETURN(1);
 	if(head_buf[0] != 'J' || head_buf[1] != 'G' || head_buf[2] != 'W' || head_buf[3] != 'L') { MError("Malformed savefile - failed to load Legacy data header"); RETURN(1); }
 	// Loading data
-	if(Loader(&LegacyGenericData,sizeof(LegacyGenericData))) RETURN(1);
+	if(Loader(&LegacyGenericData,sizeof(LegacyGenericData))) { RETURN(1); }
+	if(Loader(&SkelTrans,sizeof(SkelTrans))) { RETURN(1); }
+	// End Mark
+	if(Loader(&head_buf,4)) RETURN(1);
+	if(head_buf[0] != 'L' || head_buf[1] != 'W' || head_buf[2] != 'G' || head_buf[3] != 'J') { MError("Malformed savefile - failed to load Legacy data header"); RETURN(1); }
 	RETURN(0);
 }
 
 void ResetLegacyData()
 {
 	STARTNA(__LINE__, 0)
-
+	memcpy(&SkelTrans[0],&SkelTransBackup[0],sizeof(SkelTrans));
 	RETURNV;
 }
 /****************************************************************************************/
@@ -147,6 +157,16 @@ int ERM_Testing(char Cmd,int Num,_ToDo_* sp,Mes *Mp)
 			if(Apply(&ptr,sizeof(ptr),Mp,0)) { MError2("Cannot get parameter 1 - pointer"); RETURN(0); }
 			pointer=ptr;
 			ProcessERM();
+		} break;
+
+		case 'S':
+		{
+			int cr_type = 0;
+			if(Apply(&cr_type,sizeof(cr_type),Mp,0)) { MError2("Cannot get creature type"); RETURN(0); }
+			if(cr_type < 0 || cr_type >= MONNUM) { MError2("Incorrect creature (source) type"); RETURN(0); }
+			int last_cr = SkelTrans[cr_type];
+			Apply(&SkelTrans[cr_type],sizeof(SkelTrans[cr_type]),Mp,1);
+			if(SkelTrans[cr_type] < 0 || SkelTrans[cr_type] >= MONNUM) { SkelTrans[cr_type] = last_cr; MError2("Incorrect creature (destination) type"); RETURN(0); } 
 		} break;
 
 		// Calculate logaritm (n-based) of value
