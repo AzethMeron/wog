@@ -6494,7 +6494,7 @@ int ProcessMes(_ToDo_ *sp, Mes &M, char Cmd, int Num) // returns 1 in case of er
 				}
 			}
 			break;
-		case 0x4543: // CE
+		case 0x4543: // CE 'CE'
 			{
 				struct _CastleEvent_ *p=(struct _CastleEvent_ *)sp->Pointer;
 				if(Cmd=='M'){
@@ -6545,7 +6545,7 @@ int ProcessMes(_ToDo_ *sp, Mes &M, char Cmd, int Num) // returns 1 in case of er
 				}
 			}
 			break;
-		case 0x4F4D: // MO
+		case 0x4F4D: // MO 'MO'
 			{
 				int mn,v;
 				struct _Monster_  *p=0;
@@ -6599,7 +6599,7 @@ int ProcessMes(_ToDo_ *sp, Mes &M, char Cmd, int Num) // returns 1 in case of er
 				}
 			}
 			break;
-		case 0x5241: // AR
+		case 0x5241: // AR 'AR'
 			{
 				_ArtRes_  *p=0/*(_ArtRes_ *)sp->Pointer*/;
 				 Dword MixPos=GetDinMixPos(sp);
@@ -6617,7 +6617,11 @@ int ProcessMes(_ToDo_ *sp, Mes &M, char Cmd, int Num) // returns 1 in case of er
 					if(p!=0) p=&p[v];
 				}
 				if(Cmd=='V'){//V$ количестро ресурса
-					v=vp->Value; if(Apply(&v,4,&M,0)) break; vp->Value=(Word)v;
+					v=vp->Value; 
+					if(Apply(&v,4,&M,0)) break; 
+					if(v < 0 || (Word)v < 0) break;
+					//if( mp->OType == 5 ) {	}
+					vp->Value=(Word)v;
 					break;
 				}
 				if(p!=0){
