@@ -25,6 +25,7 @@
 #include "MONSTRDLL/dll.h"
 #include "TOWNS/towns.h"
 #include "NewWog/Curse.h"
+#include "NewWog/ExpansionERM.h"
 #define __FILENUM__ 8
 
 #pragma comment(lib, "User32.lib")
@@ -2586,6 +2587,7 @@ void ResetAll(int game = 1)
 		ResetMapMon();
 		ResetHeroData();
 		ResetCursesData();
+		ResetLegacyData();
 		ResetB1();
 		ResetWM();
 	}
@@ -2732,7 +2734,7 @@ void FileLoader(void)
 {
 	__asm pusha
 	STARTNA(__LINE__, 0)
-	if (CreateDirectory("woglogs", NULL) || ERROR_ALREADY_EXISTS == GetLastError()) {} else { Exit(); }
+	if (CreateDirectory("woglogs", NULL) || ERROR_ALREADY_EXISTS == GetLastError()) {} else { UniversalErrorMessage("Cannot create woglogs directory. Most likely lack of permissions"); Exit(); }
 	if(LoadTXT("ZMESS00.TXT",&Strings)) Exit(); // не может загрузить TXT
 	// выносим внутренние сообщения в файл наружу
 	TxtOutOfExe();
