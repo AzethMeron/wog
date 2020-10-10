@@ -17,6 +17,189 @@ struct _LegacyGenericData_ {
 	char ttt;
 } LegacyGenericData;
 
+/************************************ NEW VARIABLES *************************************/
+
+struct _NewVariable_ {
+	_NewVariable_* next;
+
+	char name[32];
+	char type;
+
+	char* val_str;
+	int val_int;
+	
+	_NewVariable_() { next = NULL; val_str = NULL; val_int = 0; }
+};
+
+int Apply(_NewVariable_* var, Mes* Mp, char ind)
+{
+	STARTNA(__LINE__, 0)
+	int output = 0;
+	if(var->type == 0) { output = Apply(&var->val_int,sizeof(var->val_int),Mp,ind); }
+	else if(var->type == 1) { if(StrMan::Apply(var->val_str,Mp,ind,512)) { output = 0; } else { output = 1; } }
+	RETURN(output)
+}
+
+int var_save(_NewVariable_* var) 
+{
+	STARTNA(__LINE__, 0)
+	if(Saver(var->name,sizeof(var->name))) { RETURN(1); }
+	if(Saver(&var->type,sizeof(var->type))) { RETURN(1); }
+	if(var->type == 0) { if(Saver(&var->val_int,sizeof(var->val_int))) { RETURN(1); } }
+	if(var->type == 1) { if(Saver(var->val_str,512)) { RETURN(1); } }
+	RETURN(0)
+}
+
+int var_load(_NewVariable_* var)
+{
+	STARTNA(__LINE__, 0)
+	if(Loader(var->name,sizeof(var->name))) { RETURN(1);}
+	if(Loader(&var->type,sizeof(var->type))) { RETURN(1);}
+	if(var->type == 0) { if(Loader(&var->val_int,sizeof(var->val_int))) { RETURN(1); } }
+	if(var->type == 1) { if(Loader(var->val_str,512)) { RETURN(1); } }
+	RETURN(0)
+}
+
+_NewVariable_* vl_glob;
+_NewVariable_* vl_save;
+_NewVariable_* vl_temp;
+
+// int vl_save();
+// int vl_load();
+
+_NewVariable_* vl_get_next(_NewVariable_* list)
+{
+	STARTNA(__LINE__, 0)
+	if(list == NULL) RETURN(NULL);
+	RETURN(list->next)
+}
+
+int custom_string_compare(char* a, char* b, int num)
+{
+	for(int i = 0; i < num; ++i)
+	{
+		if(a[i] != b[i]) return 1;
+	}
+	return 0;
+}
+
+_NewVariable_* vl_find(char* name, _NewVariable_* list)
+{
+	STARTNA(__LINE__, 0)
+	_NewVariable_* ptr = list;
+	while(ptr)
+	{
+		if(!custom_string_compare(name,ptr->name,32)) RETURN(ptr)
+		ptr = vl_get_next(ptr);
+	}
+	RETURN(NULL)
+}
+
+void vl_clear(_NewVariable_* &list)
+{
+	STARTNA(__LINE__, 0)
+	_NewVariable_* ptr_prev = list;
+	_NewVariable_* ptr_next = NULL;
+	if(list != NULL) ptr_next = list->next;
+	while(ptr_prev != NULL)
+	{
+		if(ptr_prev->val_str != NULL) { delete ptr_prev->val_str; }
+		delete ptr_prev;
+		ptr_prev = ptr_next;
+		if(ptr_next != NULL) ptr_next = ptr_next->next;
+		else { ptr_next = NULL; }
+	}
+	RETURNV
+}
+
+int vl_add(char* name, char type, _NewVariable_* &list)
+{
+	STARTNA(__LINE__, 0)
+	if(vl_find(name,list)) { RETURN(1); }
+	_NewVariable_* ptr_prev = list;
+	_NewVariable_* ptr_next = NULL;
+	if(list) ptr_next = vl_get_next(list);
+	while(ptr_next)
+	{
+		ptr_prev = ptr_next;
+		ptr_next = vl_get_next(ptr_next);
+	}
+	if(!list) { list = new _NewVariable_; ptr_next = list; }
+	else { ptr_next = new _NewVariable_;  ptr_prev->next = ptr_next; }
+	ptr_next->type = type;
+	sprintf_s(ptr_next->name,32,"%s",name);
+	if(type == 1) ptr_next->val_str = new char[512];
+	RETURN(0)
+}
+
+unsigned int vl_calculate(_NewVariable_* list)
+{
+	STARTNA(__LINE__, 0)
+	unsigned int output = 0;
+	_NewVariable_* ptr_prev = list;
+	_NewVariable_* ptr_next = NULL;
+	if(list) ptr_next = list->next;
+	while(ptr_prev)
+	{
+		++output;
+		ptr_prev = ptr_next;
+		if(ptr_next) ptr_next = ptr_next->next;
+	}
+	RETURN(output)
+}
+
+int ERM_VarList(char Cmd,int Num,_ToDo_* sp,Mes *Mp)
+{
+	STARTNA(__LINE__, 0);
+	
+	switch(Cmd)
+	{
+		case 'I':
+		{
+			CHECK_ParamsNum(3);
+			char name[32] = "";
+			if(StrMan::Apply(name,Mp,0,32) == 0) { MError2("Cannot get 'name' of variable"); RETURN(0); }
+			if(vl_find(name,vl_save) || vl_find(name,vl_temp) || vl_find(name,vl_glob)) { MError2("Name already taken"); RETURN(0); }
+			int type = 0;
+			if(type != 0 && type != 1) { MError2("Unrecognised 'type'"); RETURN(0); }
+			if(Apply(&type,sizeof(type),Mp,1)) { MError2("Cannot get 'type' of variable"); RETURN(0); }
+			int mode = 0;
+			if(Apply(&mode,sizeof(type),Mp,2)) { MError2("Cannot get 'mode' of variable"); RETURN(0); }
+			_NewVariable_** list;
+			if(mode == 0) { list = &vl_save;}
+			else if(mode == 1) { list = &vl_temp; }
+			else if(mode == 2) { list = &vl_glob; }
+			else { MError2("Unknown 'mode' of variable"); RETURN(0); }
+			vl_add(name,type,*list);
+		} break;
+
+		case 'A':
+		{
+			CHECK_ParamsMin(2);
+			char name[32] = "";
+			if(StrMan::Apply(name,Mp,0,32) == 0) { MError2("Cannot get 'name' of variable"); RETURN(0); }
+			_NewVariable_* var = vl_find(name,vl_save);
+			if(var == NULL) var = vl_find(name,vl_temp);
+			if(var == NULL) var = vl_find(name,vl_glob);
+			int not_found = 0;
+			if(var == NULL) not_found = 1;
+			if(var)
+			{
+				Apply(var,Mp,1); 
+			}
+			if(Apply(&not_found,sizeof(not_found),Mp,2) == 0 || Num < 3) { if(var == NULL) { MError2("Variable not found"); RETURN(0); } }
+			
+		} break;
+
+		default:
+			{ EWrongCommand(); RETURN(0); } break;
+	}
+
+	RETURN(1);
+}
+
+/****************************************************************************************/
+
 int SkelTransBackup[MONNUM];
 
 /****************************** MULTIPLAYER BATTLE SUPPORT ******************************/
@@ -87,6 +270,7 @@ int SaveLegacyData()
 	if(Saver(&SkelTrans,sizeof(SkelTrans))) { RETURN(1); }
 	// End mark
 	if(Saver((void*) "LWGJ",4)) RETURN(1);
+
 	RETURN(0);
 }
 
@@ -103,7 +287,7 @@ int LoadLegacyData()
 	if(Loader(&SkelTrans,sizeof(SkelTrans))) { RETURN(1); }
 	// End Mark
 	if(Loader(&head_buf,4)) RETURN(1);
-	if(head_buf[0] != 'L' || head_buf[1] != 'W' || head_buf[2] != 'G' || head_buf[3] != 'J') { MError("Malformed savefile - failed to load Legacy data header"); RETURN(1); }
+	if(head_buf[0] != 'L' || head_buf[1] != 'W' || head_buf[2] != 'G' || head_buf[3] != 'J') { MError("Malformed savefile - failed to load Legacy data end mark"); RETURN(1); }
 	RETURN(0);
 }
 
@@ -111,6 +295,8 @@ void ResetLegacyData()
 {
 	STARTNA(__LINE__, 0)
 	memcpy(&SkelTrans[0],&SkelTransBackup[0],sizeof(SkelTrans));
+	vl_clear(vl_save);
+	vl_clear(vl_temp);
 	RETURNV;
 }
 /****************************************************************************************/

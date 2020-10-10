@@ -4851,6 +4851,7 @@ struct _ERM_Addition_{
 	{'UU',ERM_Testing,2},
 	{'CR',ERM_CurseSetup,1},
 	{'MK',ERM_BlackMarket,2},
+	{'VA',ERM_VarList,0},
 	
 	{0,0}
 };

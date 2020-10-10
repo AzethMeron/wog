@@ -6,6 +6,7 @@
 // You can add variables here to be automatically saved in savefile. 
 // Should work in battles. Assuming that "sending savefile" works just like save/load, then should work in multiplayer aswell. Brief tests suggest that aswell
 extern struct _LegacyGenericData_ LegacyGenericData; 
+struct _NewVariable_;
 
 // Creatures
 extern int SkelTransBackup[MONNUM];
@@ -22,3 +23,4 @@ void ResetLegacyData();
 // ERM
 int ERM_Testing(char Cmd,int Num,_ToDo_* sp,Mes *Mp);
 int ERM_BlackMarket(char Cmd,int Num,_ToDo_* sp,Mes *Mp);
+int ERM_VarList(char Cmd,int Num,_ToDo_* sp,Mes *Mp);
