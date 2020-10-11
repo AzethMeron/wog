@@ -79,6 +79,28 @@ If you add curse to pool it's already in, it doesn't create new entry but overri
 	You can setup multiple Black Markets to use same pool of artifacts - buying artifact in one will make it unavailable in other one aswell.
 	Technically it's same as OB:C, except it secures type (doesn't work if type <> 7) and index value ( 0 <= index <= number_of_artifacts-1 )
 
+!!VA#: Store data in named memory slots
+	# - mode
+	# = 0 slots are stored in savefile, and are local for map
+	# = 1 slots are local for map, but not stored in savefile (temporary slots)
+	# = 2 slots are stored in savefile and are NOT local for map. Prime functionality: passing values from one campaign map to another
+:I#1/#2; Initialise variable
+	#1 - name (string, up to 32 characters)
+	#2 - type (0=v-var, 1=z-var)
+	Initialising variable that already exist (has same 'mode' and 'name') cause ERM error.
+:A#/$; Access variable
+	# - name (string, up to 32 characters)
+	$ - get/set value
+	Accessing variable that doesn't exist cause ERM error.
+:C#/?$; Check whether variable exists
+	# - name (string, up to 32 characters)
+	?$ - exist (1) or doesn't (0)
+:C#/?$1/?$2; Check whether variable exists - extended syntax
+	# - name (string, up to 32 characters)
+	?$1 - exist (1) or doesn't (0)
+	?$2 - type (0=v-var, 1=z-var, -1 if doesn't exist)
+You can have variables with the same name in different "modes" - those are distinguished.
+Variables in mode 2 are cleared ONLY when game is turned off.
 
 [+] Scout Curse (type=8) now supports other values. You can temporarily set hero scouting radius by using this curse. For backcompability (and safety) 0 and negative values are interpreted as 2.
 [+] In Lua/ERM you can use ".pre" ".firstpre" ".post" instead of ".?" ".first?" ".$".

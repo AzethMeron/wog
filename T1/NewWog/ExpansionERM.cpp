@@ -63,14 +63,14 @@ int var_load(_NewVariable_* var)
 	if(Loader(var->name,sizeof(var->name))) { RETURN(1);}
 	if(Loader(&var->type,sizeof(var->type))) { RETURN(1);}
 	if(var->type == 0) { if(Loader(&var->val_int,sizeof(var->val_int))) { RETURN(1); } }
-	if(var->type == 1) { var->val_str = new char[512]; if(Loader(var->val_str,512)) { RETURN(1); } }
+	if(var->type == 1) { if(var->val_str == NULL) {var->val_str = new char[512];} if(Loader(var->val_str,512)) { RETURN(1); } }
 	var->next = NULL;
 	RETURN(0)
 }
 
-_NewVariable_* vl_glob;
-_NewVariable_* vl_save;
-_NewVariable_* vl_temp;
+_NewVariable_* vl_glob = NULL;
+_NewVariable_* vl_save = NULL;
+_NewVariable_* vl_temp = NULL;
 
 int custom_string_compare(char* a, char* b, int num)
 {
@@ -153,17 +153,17 @@ int save_vl()
 	unsigned int size_save = vl_calculate(vl_save); 
 	if(Saver(&size_save,sizeof(size_save))) { RETURN(1); }
 	unsigned int size_glob = vl_calculate(vl_glob); 
-	if(Saver(&size_save,sizeof(size_save))) { RETURN(1); }
+	if(Saver(&size_glob,sizeof(size_glob))) { RETURN(1); }
 
 	for(_NewVariable_* ptr = vl_save; ptr; ptr = vl_get_next(ptr))
 	{
 		var_save(ptr);
 	}
 
-	/*for(_NewVariable_* ptr = vl_glob; ptr; ptr = vl_get_next(ptr))
+	for(_NewVariable_* ptr = vl_glob; ptr; ptr = vl_get_next(ptr))
 	{
 		var_save(ptr);
-	}*/
+	}
 	
 	if(Saver("lrav",4)) { RETURN(1); }
 	RETURN(0)
@@ -183,25 +183,26 @@ int load_vl()
 	unsigned int size_glob = 0;
 	if(Loader(&size_glob,sizeof(size_glob))) { RETURN(1); }
 
-	_NewVariable_* last = vl_save;
-	for(_NewVariable_* post_last = vl_save; post_last; post_last = vl_get_next(post_last)) { last = post_last; }
 	for(unsigned int i = 0; i < size_save; ++i)
 	{
 		_NewVariable_* ptr = new _NewVariable_;
 		if(var_load(ptr)) { RETURN(1); }
-		if(last) { last->next = ptr;}
-		else { last = ptr; }
+		ptr->next = vl_save;
+		vl_save = ptr;
 	}
 	
-	/*last = vl_glob;
-	for(_NewVariable_* post_last = vl_glob; post_last; post_last = vl_get_next(post_last)) { last = post_last; }
 	for(unsigned int i = 0; i < size_glob; ++i)
 	{
 		_NewVariable_* ptr = new _NewVariable_;
 		if(var_load(ptr)) { RETURN(1); }
-		if(last) { last->next = ptr;}
-		else { last = ptr; }
-	}*/
+		_NewVariable_* found = vl_find(ptr->name,vl_glob);
+		if(found) { *found = *ptr; delete ptr; }
+		else
+		{
+			ptr->next = vl_glob;
+			vl_glob = ptr;
+		}
+	}
 
 	// End Mark
 	if(Loader(&head_buf,4)) RETURN(1);
@@ -213,25 +214,26 @@ int load_vl()
 int ERM_VarList(char Cmd,int Num,_ToDo_* sp,Mes *Mp)
 {
 	STARTNA(__LINE__, 0);
-	
+
+	int mode = GetVarVal(&sp->Par[0]);
+	_NewVariable_** list = NULL;
+
+	if(mode == 0) { list = &vl_save;}
+	else if(mode == 1) { list = &vl_temp; }
+	else if(mode == 2) { list = &vl_glob; }
+	else { MError2("Unknown 'mode' of variable"); RETURN(0); }
+
 	switch(Cmd)
 	{
 		case 'I':
 		{
-			CHECK_ParamsNum(3);
+			CHECK_ParamsNum(2);
 			char name[32] = "";
 			if(StrMan::Apply(name,Mp,0,32) == 0) { MError2("Cannot get 'name' of variable"); RETURN(0); }
-			if(vl_find(name,vl_save) || vl_find(name,vl_temp) || vl_find(name,vl_glob)) { MError2("Name already taken"); RETURN(0); }
 			int type = 0;
 			if(type != 0 && type != 1) { MError2("Unrecognised 'type'"); RETURN(0); }
 			if(Apply(&type,sizeof(type),Mp,1)) { MError2("Cannot get 'type' of variable"); RETURN(0); }
-			int mode = 0;
-			if(Apply(&mode,sizeof(type),Mp,2)) { MError2("Cannot get 'mode' of variable"); RETURN(0); }
-			_NewVariable_** list;
-			if(mode == 0) { list = &vl_save;}
-			else if(mode == 1) { list = &vl_temp; }
-			else if(mode == 2) { list = &vl_glob; }
-			else { MError2("Unknown 'mode' of variable"); RETURN(0); }
+			if(vl_find(name,*list)) { MError2("Name already taken"); RETURN(0); }
 			vl_add(name,type,*list);
 		} break;
 
@@ -240,9 +242,7 @@ int ERM_VarList(char Cmd,int Num,_ToDo_* sp,Mes *Mp)
 			CHECK_ParamsMin(2);
 			char name[32] = "";
 			if(StrMan::Apply(name,Mp,0,32) == 0) { MError2("Cannot get 'name' of variable"); RETURN(0); }
-			_NewVariable_* var = vl_find(name,vl_save);
-			if(var == NULL) var = vl_find(name,vl_temp);
-			if(var == NULL) var = vl_find(name,vl_glob);
+			_NewVariable_* var = vl_find(name,*list);
 			int not_found = 0;
 			if(var == NULL) not_found = 1;
 			if(var)
@@ -250,7 +250,20 @@ int ERM_VarList(char Cmd,int Num,_ToDo_* sp,Mes *Mp)
 				Apply(var,Mp,1); 
 			}
 			if(Apply(&not_found,sizeof(not_found),Mp,2) == 0 || Num < 3) { if(var == NULL) { MError2("Variable not found"); RETURN(0); } }
-			
+		} break;
+
+		case 'C':
+		{
+			CHECK_ParamsMin(2);
+			char name[32] = "";
+			if(StrMan::Apply(name,Mp,0,32) == 0) { MError2("Cannot get 'name' of variable"); RETURN(0); }
+			int exist = 0;
+			_NewVariable_* ptr = vl_find(name,*list);
+			if(ptr) { exist = 1; }
+			int type = -1;
+			if(ptr) { type = ptr->type; }
+			if(Apply(&exist,sizeof(exist),Mp,1) == 0) { MError2("'Exist' parameter is read-only");   RETURN(1); }
+			if(Num >= 3) if(Apply(&type,sizeof(type),Mp,2) == 0) { MError2("'Type' parameter is read-only"); RETURN(1); }
 		} break;
 
 		default:
