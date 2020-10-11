@@ -99,8 +99,10 @@ If you add curse to pool it's already in, it doesn't create new entry but overri
 	# - name (string, up to 32 characters)
 	?$1 - exist (1) or doesn't (0)
 	?$2 - type (0=v-var, 1=z-var, -1 if doesn't exist)
-You can have variables with the same name in different "modes" - those are distinguished.
+Name must be unique within "mode". You can have variables with the same name in different "modes" though.
+It's best to use "modular" naming convention, to prevent overlapping. For example, name "wog_name" would be WoG variable. Limit is 32 characters, so you have some space for ya.
 Variables in mode 2 are cleared ONLY when game is turned off.
+Variables in mode 1 are cleared anytime map is started or loaded. In MP mode they are (probably) cleared every day! 
 
 [+] Scout Curse (type=8) now supports other values. You can temporarily set hero scouting radius by using this curse. For backcompability (and safety) 0 and negative values are interpreted as 2.
 [+] In Lua/ERM you can use ".pre" ".firstpre" ".post" instead of ".?" ".first?" ".$".
