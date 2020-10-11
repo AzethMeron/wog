@@ -31,6 +31,13 @@ struct _NewVariable_ {
 	_NewVariable_() { next = NULL; val_str = NULL; val_int = 0; }
 };
 
+_NewVariable_* vl_get_next(_NewVariable_* list)
+{
+	STARTNA(__LINE__, 0)
+	if(list == NULL) RETURN(NULL);
+	RETURN(list->next)
+}
+
 int Apply(_NewVariable_* var, Mes* Mp, char ind)
 {
 	STARTNA(__LINE__, 0)
@@ -56,23 +63,14 @@ int var_load(_NewVariable_* var)
 	if(Loader(var->name,sizeof(var->name))) { RETURN(1);}
 	if(Loader(&var->type,sizeof(var->type))) { RETURN(1);}
 	if(var->type == 0) { if(Loader(&var->val_int,sizeof(var->val_int))) { RETURN(1); } }
-	if(var->type == 1) { if(Loader(var->val_str,512)) { RETURN(1); } }
+	if(var->type == 1) { var->val_str = new char[512]; if(Loader(var->val_str,512)) { RETURN(1); } }
+	var->next = NULL;
 	RETURN(0)
 }
 
 _NewVariable_* vl_glob;
 _NewVariable_* vl_save;
 _NewVariable_* vl_temp;
-
-// int vl_save();
-// int vl_load();
-
-_NewVariable_* vl_get_next(_NewVariable_* list)
-{
-	STARTNA(__LINE__, 0)
-	if(list == NULL) RETURN(NULL);
-	RETURN(list->next)
-}
 
 int custom_string_compare(char* a, char* b, int num)
 {
@@ -100,15 +98,14 @@ void vl_clear(_NewVariable_* &list)
 	STARTNA(__LINE__, 0)
 	_NewVariable_* ptr_prev = list;
 	_NewVariable_* ptr_next = NULL;
-	if(list != NULL) ptr_next = list->next;
-	while(ptr_prev != NULL)
+	if(list) ptr_next = list->next;
+	while(ptr_prev)
 	{
-		if(ptr_prev->val_str != NULL) { delete ptr_prev->val_str; }
 		delete ptr_prev;
 		ptr_prev = ptr_next;
-		if(ptr_next != NULL) ptr_next = ptr_next->next;
-		else { ptr_next = NULL; }
+		if(ptr_next) ptr_next = ptr_next->next;
 	}
+	list = NULL;
 	RETURNV
 }
 
@@ -147,6 +144,71 @@ unsigned int vl_calculate(_NewVariable_* list)
 	}
 	RETURN(output)
 }
+
+int save_vl()
+{
+	STARTNA(__LINE__, 0)
+	if(Saver("varl",4)) { RETURN(1); }
+	// data
+	unsigned int size_save = vl_calculate(vl_save); 
+	if(Saver(&size_save,sizeof(size_save))) { RETURN(1); }
+	unsigned int size_glob = vl_calculate(vl_glob); 
+	if(Saver(&size_save,sizeof(size_save))) { RETURN(1); }
+
+	for(_NewVariable_* ptr = vl_save; ptr; ptr = vl_get_next(ptr))
+	{
+		var_save(ptr);
+	}
+
+	/*for(_NewVariable_* ptr = vl_glob; ptr; ptr = vl_get_next(ptr))
+	{
+		var_save(ptr);
+	}*/
+	
+	if(Saver("lrav",4)) { RETURN(1); }
+	RETURN(0)
+}
+
+int load_vl()
+{
+	STARTNA(__LINE__, 0)
+	// header
+	char head_buf[4] = "";
+	if(Loader(&head_buf,4)) RETURN(1);
+	if(head_buf[0] != 'v' || head_buf[1] != 'a' || head_buf[2] != 'r' || head_buf[3] != 'l') { MError("Malformed savefile - failed to load New Var List header"); RETURN(1); }
+	// data
+
+	unsigned int size_save = 0;
+	if(Loader(&size_save,sizeof(size_save))) { RETURN(1); }
+	unsigned int size_glob = 0;
+	if(Loader(&size_glob,sizeof(size_glob))) { RETURN(1); }
+
+	_NewVariable_* last = vl_save;
+	for(_NewVariable_* post_last = vl_save; post_last; post_last = vl_get_next(post_last)) { last = post_last; }
+	for(unsigned int i = 0; i < size_save; ++i)
+	{
+		_NewVariable_* ptr = new _NewVariable_;
+		if(var_load(ptr)) { RETURN(1); }
+		if(last) { last->next = ptr;}
+		else { last = ptr; }
+	}
+	
+	/*last = vl_glob;
+	for(_NewVariable_* post_last = vl_glob; post_last; post_last = vl_get_next(post_last)) { last = post_last; }
+	for(unsigned int i = 0; i < size_glob; ++i)
+	{
+		_NewVariable_* ptr = new _NewVariable_;
+		if(var_load(ptr)) { RETURN(1); }
+		if(last) { last->next = ptr;}
+		else { last = ptr; }
+	}*/
+
+	// End Mark
+	if(Loader(&head_buf,4)) RETURN(1);
+	if(head_buf[0] != 'l' || head_buf[1] != 'r' || head_buf[2] != 'a' || head_buf[3] != 'v') { MError("Malformed savefile - failed to load New Var List end mark"); RETURN(1); }
+	RETURN(0)
+}
+	
 
 int ERM_VarList(char Cmd,int Num,_ToDo_* sp,Mes *Mp)
 {
@@ -268,6 +330,7 @@ int SaveLegacyData()
 	// Saving data
 	if(Saver(&LegacyGenericData,sizeof(LegacyGenericData))) { RETURN(1); }
 	if(Saver(&SkelTrans,sizeof(SkelTrans))) { RETURN(1); }
+	if(save_vl()) { RETURN(1); }
 	// End mark
 	if(Saver((void*) "LWGJ",4)) RETURN(1);
 
@@ -285,6 +348,7 @@ int LoadLegacyData()
 	// Loading data
 	if(Loader(&LegacyGenericData,sizeof(LegacyGenericData))) { RETURN(1); }
 	if(Loader(&SkelTrans,sizeof(SkelTrans))) { RETURN(1); }
+	if(load_vl()) { RETURN(1); }
 	// End Mark
 	if(Loader(&head_buf,4)) RETURN(1);
 	if(head_buf[0] != 'L' || head_buf[1] != 'W' || head_buf[2] != 'G' || head_buf[3] != 'J') { MError("Malformed savefile - failed to load Legacy data end mark"); RETURN(1); }
