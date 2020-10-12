@@ -136,7 +136,7 @@ void vl_remove(char* name, _NewVariable_* &list)
 	_NewVariable_* ptr_next = NULL;
 	if(list) // exception - if first element
 	{
-		if(custom_string_compare(name,list->name,32))
+		if(custom_string_compare(name,list->name,32) == 0)
 		{
 			ptr_next = list->next;
 			if(list->val_str) delete list->val_str;
@@ -150,7 +150,7 @@ void vl_remove(char* name, _NewVariable_* &list)
 		ptr_next = ptr_prev->next;
 		if(ptr_next)
 		{
-			if(custom_string_compare(name,ptr_next->name,32))
+			if(custom_string_compare(name,ptr_next->name,32) == 0)
 			{
 				if(ptr_next->val_str) delete ptr_next->val_str;
 				ptr_prev->next = ptr_next->next;
