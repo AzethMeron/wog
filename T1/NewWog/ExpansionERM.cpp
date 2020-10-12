@@ -129,6 +129,40 @@ int vl_add(char* name, char type, _NewVariable_* &list)
 	RETURN(0)
 }
 
+void vl_remove(char* name, _NewVariable_* &list)
+{
+	STARTNA(__LINE__, 0)
+	_NewVariable_* ptr_prev = list;
+	_NewVariable_* ptr_next = NULL;
+	if(list) // exception - if first element
+	{
+		if(custom_string_compare(name,list->name,32))
+		{
+			ptr_next = list->next;
+			if(list->val_str) delete list->val_str;
+			delete list;
+			list = ptr_next;
+			RETURNV;
+		}
+	}
+	while(ptr_prev) // every other
+	{
+		ptr_next = ptr_prev->next;
+		if(ptr_next)
+		{
+			if(custom_string_compare(name,ptr_next->name,32))
+			{
+				if(ptr_next->val_str) delete ptr_next->val_str;
+				ptr_prev->next = ptr_next->next;
+				delete ptr_next;
+				RETURNV;
+			}
+		}
+		ptr_prev = ptr_next;
+	}
+	RETURNV
+}
+
 unsigned int vl_calculate(_NewVariable_* list)
 {
 	STARTNA(__LINE__, 0)
@@ -196,7 +230,7 @@ int load_vl()
 		_NewVariable_* ptr = new _NewVariable_;
 		if(var_load(ptr)) { RETURN(1); }
 		_NewVariable_* found = vl_find(ptr->name,vl_glob);
-		if(found) { *found = *ptr; delete ptr; }
+		if(found) { if(found->val_str != NULL) { delete found->val_str; found->val_str = NULL; } *found = *ptr; delete ptr; }
 		else
 		{
 			ptr->next = vl_glob;
@@ -250,6 +284,19 @@ int ERM_VarList(char Cmd,int Num,_ToDo_* sp,Mes *Mp)
 				Apply(var,Mp,1); 
 			}
 			if(Apply(&not_found,sizeof(not_found),Mp,2) == 0 || Num < 3) { if(var == NULL) { MError2("Variable not found"); RETURN(0); } }
+		} break;
+
+		case 'E':
+		{
+			vl_clear(*list);			
+		} break;
+
+		case 'R':
+		{
+			CHECK_ParamsNum(1);
+			char name[32] = "";
+			if(StrMan::Apply(name,Mp,0,32) == 0) { MError2("Cannot get 'name' of variable"); RETURN(0); }
+			vl_remove(name,*list);
 		} break;
 
 		case 'C':

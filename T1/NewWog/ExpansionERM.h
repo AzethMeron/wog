@@ -6,7 +6,6 @@
 // You can add variables here to be automatically saved in savefile. 
 // Should work in battles. Assuming that "sending savefile" works just like save/load, then should work in multiplayer aswell. Brief tests suggest that aswell
 extern struct _LegacyGenericData_ LegacyGenericData; 
-struct _NewVariable_;
 
 // Creatures
 extern int SkelTransBackup[MONNUM];
