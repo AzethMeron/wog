@@ -102,6 +102,11 @@ If you add curse to pool it's already in, it doesn't create new entry but overri
 :E; Removed all slots from given mode
 :R#; Remove slot with given name from given mode
 	# - name (string, up to 32 characters)
+:A#1/$/#2; Access data - extended
+	#1 - name (string, up to 32 characters)
+	$ - get/set value
+	#2 - type (0=v-var,1=z-var)
+	Creates new slot instead of showing error if it doesnt exist
 Name must be unique within "mode". You can have variables with the same name in different "modes" though.
 It's best to use "modular" naming convention, to prevent overlapping. For example, name "wog_name" would be WoG variable. Limit is 32 characters, so you have some space for ya.
 Variables in mode 2 are cleared ONLY when game is turned off.
