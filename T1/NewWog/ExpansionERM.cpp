@@ -277,14 +277,18 @@ int ERM_VarList(char Cmd,int Num,_ToDo_* sp,Mes *Mp)
 			char name[32] = "";
 			if(StrMan::Apply(name,Mp,0,32) == 0) { MError2("Cannot get 'name' of variable"); RETURN(0); }
 			_NewVariable_* var = vl_find(name,*list);
-			int not_found = 0;
-			if(var == NULL) not_found = 1;
+			if(Num > 2) { char type = 0; Apply(&type,sizeof(type),Mp,2); if(type != 0 && type != 1) { MError2("Incorrect type"); RETURN(0); } vl_add(name,type,*list); var = vl_find(name,*list); }
 			if(var)
 			{
 				Apply(var,Mp,1); 
 			}
-			if(Apply(&not_found,sizeof(not_found),Mp,2) == 0 || Num < 3) { if(var == NULL) { MError2("Variable not found"); RETURN(0); } }
+			else
+			{
+				MError2("Memory slot not found"); RETURN(0); 
+			}
 		} break;
+
+		case 'U': { Message(vl_calculate(*list));  } break;
 
 		case 'E':
 		{
