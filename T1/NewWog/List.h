@@ -36,6 +36,7 @@ class List
 	
 	public:
 		unsigned int size() const;
+		const char* id_front() const;
 		Type* front() { return top->current; } 
 		Type* find(const char* id);
 		bool push_front(const char* id, Type* ob);
@@ -117,4 +118,12 @@ bool List<Type>::remove(const char* id) // false - there is no object with such 
 		next = next->next;
 	}
 	RETURN(false); // not found - flow should never reach this place
+}
+
+template<typename Type>
+const char* List<Type>::id_front() const
+{
+	STARTNA(__LINE__, 0)
+	if(this->top) { RETURN(this->top->id); }
+	RETURN(NULL);
 }
