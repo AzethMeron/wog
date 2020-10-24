@@ -83,7 +83,6 @@ If you add curse to pool it's already in, it doesn't create new entry but overri
 	# - mode
 	# = 0 slots are stored in savefile, and are local for map
 	# = 1 slots are local for map, but not stored in savefile (temporary slots)
-	# = 2 slots are stored in savefile and are NOT local for map. Prime functionality: passing values from one campaign map to another
 :I#1/#2; Initialise variable
 	#1 - name (string, up to 32 characters)
 	#2 - type (0=v-var, 1=z-var)
@@ -109,7 +108,6 @@ If you add curse to pool it's already in, it doesn't create new entry but overri
 	Creates new slot instead of showing error if it doesnt exist
 Name must be unique within "mode". You can have variables with the same name in different "modes" though.
 It's best to use "modular" naming convention, to prevent overlapping. For example, name "wog_name" would be WoG variable. Limit is 32 characters, so you have some space for ya.
-Variables in mode 2 are cleared ONLY when game is turned off.
 Variables in mode 1 are cleared anytime map is started or loaded. In MP mode they are (probably) cleared every day! 
 
 [+] Scout Curse (type=8) now supports other values. You can temporarily set hero scouting radius by using this curse. For backcompability (and safety) 0 and negative values are interpreted as 2.

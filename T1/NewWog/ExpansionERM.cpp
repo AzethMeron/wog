@@ -18,7 +18,7 @@ struct _LegacyGenericData_ {
 } LegacyGenericData;
 
 /************************************ NEW VARIABLES *************************************/
-
+// should be remade to use list implementation from List.h
 struct _NewVariable_ {
 	_NewVariable_* next;
 
@@ -68,7 +68,6 @@ int var_load(_NewVariable_* var)
 	RETURN(0)
 }
 
-_NewVariable_* vl_glob = NULL;
 _NewVariable_* vl_save = NULL;
 _NewVariable_* vl_temp = NULL;
 
@@ -186,15 +185,8 @@ int save_vl()
 	// data
 	unsigned int size_save = vl_calculate(vl_save); 
 	if(Saver(&size_save,sizeof(size_save))) { RETURN(1); }
-	unsigned int size_glob = vl_calculate(vl_glob); 
-	if(Saver(&size_glob,sizeof(size_glob))) { RETURN(1); }
 
 	for(_NewVariable_* ptr = vl_save; ptr; ptr = vl_get_next(ptr))
-	{
-		var_save(ptr);
-	}
-
-	for(_NewVariable_* ptr = vl_glob; ptr; ptr = vl_get_next(ptr))
 	{
 		var_save(ptr);
 	}
@@ -210,12 +202,10 @@ int load_vl()
 	char head_buf[4] = "";
 	if(Loader(&head_buf,4)) RETURN(1);
 	if(head_buf[0] != 'v' || head_buf[1] != 'a' || head_buf[2] != 'r' || head_buf[3] != 'l') { MError("Malformed savefile - failed to load New Var List header"); RETURN(1); }
+	
 	// data
-
 	unsigned int size_save = 0;
 	if(Loader(&size_save,sizeof(size_save))) { RETURN(1); }
-	unsigned int size_glob = 0;
-	if(Loader(&size_glob,sizeof(size_glob))) { RETURN(1); }
 
 	for(unsigned int i = 0; i < size_save; ++i)
 	{
@@ -223,19 +213,6 @@ int load_vl()
 		if(var_load(ptr)) { RETURN(1); }
 		ptr->next = vl_save;
 		vl_save = ptr;
-	}
-	
-	for(unsigned int i = 0; i < size_glob; ++i)
-	{
-		_NewVariable_* ptr = new _NewVariable_;
-		if(var_load(ptr)) { RETURN(1); }
-		_NewVariable_* found = vl_find(ptr->name,vl_glob);
-		if(found) { if(found->val_str != NULL) { delete found->val_str; found->val_str = NULL; } *found = *ptr; delete ptr; }
-		else
-		{
-			ptr->next = vl_glob;
-			vl_glob = ptr;
-		}
 	}
 
 	// End Mark
@@ -254,7 +231,6 @@ int ERM_VarList(char Cmd,int Num,_ToDo_* sp,Mes *Mp)
 
 	if(mode == 0) { list = &vl_save;}
 	else if(mode == 1) { list = &vl_temp; }
-	else if(mode == 2) { list = &vl_glob; }
 	else { MError2("Unknown 'mode' of variable"); RETURN(0); }
 
 	switch(Cmd)

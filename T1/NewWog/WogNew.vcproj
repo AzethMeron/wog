@@ -164,6 +164,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\Memory.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\RepeatableBattle.cpp"
 				>
 			</File>
@@ -219,6 +223,10 @@
 			</File>
 			<File
 				RelativePath="..\\global_hooks.h"
+				>
+			</File>
+			<File
+				RelativePath=".\List.h"
 				>
 			</File>
 			<File
