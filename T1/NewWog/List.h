@@ -21,7 +21,7 @@ struct ListObject
 	char id[ID_LENGTH];
 	Type* current;
 	ListObject<Type>* next;
-	ListObject<Type>() : id = "" { current = NULL; next = NULL; }
+	ListObject<Type>() { sprintf_s(id,ID_LENGTH,""); current = NULL; next = NULL; }
 };
 
 // Generic list
@@ -36,7 +36,7 @@ class List
 	
 	public:
 		unsigned int size() const;
-		Type* front() { if(top) { return top->current; } else { return NULL; } } 
+		Type* front() { return top->current; } 
 		Type* find(const char* id);
 		bool push_front(const char* id, Type* ob);
 		bool pop_front();
@@ -60,7 +60,7 @@ template<typename Type>
 Type* List<Type>::find(const char* id)
 {
 	STARTNA(__LINE__, 0)
-	for(ListObject<Type>* current = this->front(); current; current = current->next)
+	for(ListObject<Type>* current = top; current; current = current->next)
 	{
 		if(!compare(id,current->id,ID_LENGTH))
 			RETURN(current->current);
