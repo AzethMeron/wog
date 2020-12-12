@@ -164,10 +164,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\Memory.cpp"
-				>
-			</File>
-			<File
 				RelativePath=".\RepeatableBattle.cpp"
 				>
 			</File>
