@@ -9,6 +9,7 @@
 #include <cstring>
 
 #define __FILENUM__ 33
+#include "List.h"
 
 // Structure is send byte after byte. Pointers aren't allowed, though you can use static arrays
 // You can add variables here to be automatically saved in savefile. 
@@ -302,7 +303,7 @@ int ERM_VarList(char Cmd,int Num,_ToDo_* sp,Mes *Mp)
 
 /****************************************************************************************/
 
-int SkelTransBackup[MONNUM];
+//int SkelTransBackup[MONNUM];
 
 /****************************** MULTIPLAYER BATTLE SUPPORT ******************************/
 #define LegacyDataBufferSize 10000
@@ -398,7 +399,6 @@ int LoadLegacyData()
 void ResetLegacyData()
 {
 	STARTNA(__LINE__, 0)
-	memcpy(&SkelTrans[0],&SkelTransBackup[0],sizeof(SkelTrans));
 	vl_clear(vl_save);
 	vl_clear(vl_temp);
 	RETURNV;
@@ -449,7 +449,7 @@ int ERM_Testing(char Cmd,int Num,_ToDo_* sp,Mes *Mp)
 			ProcessERM();
 		} break;
 
-		case 'S':
+		case 'S': // Szkieletornia
 		{
 			int cr_type = 0;
 			if(Apply(&cr_type,sizeof(cr_type),Mp,0)) { MError2("Cannot get creature type"); RETURN(0); }
@@ -493,6 +493,7 @@ int ERM_BlackMarket(char Cmd,int Num,_ToDo_* sp,Mes *Mp)
 	{
 		case 'A':
 		{
+			CHECK_ParamsNum(2);
 			_BlackMarketInfo_* market = GetBlackMarket(mip->SetUp);
 			int slot;
 			if(Apply(&slot,4,Mp,0)) { MError2("Cannot get parameter 1 - slot"); RETURN(0); }
@@ -503,6 +504,7 @@ int ERM_BlackMarket(char Cmd,int Num,_ToDo_* sp,Mes *Mp)
 		} break;
 		case 'I':
 		{
+			CHECK_ParamsNum(1);
 			int number_of_black_markets = CalcObjects(7,-1);
 			Dword last_SetUp = mip->SetUp;
 			Apply(&mip->SetUp,sizeof(mip->SetUp),Mp,0);
@@ -513,3 +515,60 @@ int ERM_BlackMarket(char Cmd,int Num,_ToDo_* sp,Mes *Mp)
 	}
 	RETURN(1);
 }
+
+/****************************************************************************************/
+// Signals
+#define SIGNAL_buffer_size (64)
+bool SIGNAL_entered_block = false;
+char SIGNAL_raised[SIGNAL_buffer_size];
+
+int ERM_Signal(char Cmd,int Num,_ToDo_* sp,Mes *Mp)
+// doesn't fully operational yet
+// Y-vars are not supported properly yet
+{
+	STARTNA(__LINE__, 0)
+
+	switch(Cmd)
+	{
+		case 'R': 
+		{
+			CHECK_ParamsNum(1);
+			// Manage parameter
+			char buffer[SIGNAL_buffer_size];
+			if(StrMan::Apply(buffer,Mp,0,SIGNAL_buffer_size) == 0) { MError2("Cannot get signal"); RETURN(0); }
+			// Raise signal
+			char last_signal[SIGNAL_buffer_size]; // i gave you my heart
+			memcpy(last_signal,SIGNAL_raised,SIGNAL_buffer_size);
+			memcpy(SIGNAL_raised,buffer,SIGNAL_buffer_size);
+			SIGNAL_entered_block = true;
+			int last_ptr = pointer;
+			pointer = 30379;
+			ProcessERM(true);
+			pointer = last_ptr;
+			SIGNAL_entered_block = false;
+			memcpy(SIGNAL_raised,last_signal,SIGNAL_buffer_size);
+		} break;
+
+		case 'G':
+		{
+			CHECK_ParamsNum(1);
+			if(!SIGNAL_entered_block) { MError2("Cannot get raised signal outside of signal trigger"); RETURN(0); }
+			char buffer[SIGNAL_buffer_size];
+			memcpy(buffer,SIGNAL_raised,SIGNAL_buffer_size);
+			if(StrMan::Apply(buffer,Mp,0,SIGNAL_buffer_size)) { MError2("Cannot set signal"); RETURN(0); }
+		} break;
+
+		default:
+			{ EWrongCommand(); RETURN(0); } break;
+	}
+
+	RETURN(1)
+}
+
+/****************************************************************************************/
+
+struct SkelTransPatch {
+	int cr_id;
+	int cr_new;
+	int cr_prev;
+};

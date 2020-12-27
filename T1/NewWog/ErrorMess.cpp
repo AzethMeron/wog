@@ -324,7 +324,7 @@ void DumpERMVars(char *Text, bool NoLuaTraceback)
 	p += sprintf_s(p, p2-p, "WoG Version: %s\n\n", WOG_STRING_VERSION);
 	p += sprintf_s(p, p2-p, "Map Saved with: %s\n\n", MapSavedWoG);
 
-	/*// There's segfault
+	/*// !!! There's segfault
 	if(ErrString.str){
 		p += sprintf_s(p, p2-p, "ERM stack traceback:\n");
 		// this loop itself causes segfault. I've commented both commands inside and nothing changed

@@ -8,7 +8,7 @@
 extern struct _LegacyGenericData_ LegacyGenericData; 
 
 // Creatures
-extern int SkelTransBackup[MONNUM];
+//extern int SkelTransBackup[MONNUM];
 
 // Send in remote battle
 void SendLegacyData(int* len, Byte** buf);
@@ -23,3 +23,4 @@ void ResetLegacyData();
 int ERM_Testing(char Cmd,int Num,_ToDo_* sp,Mes *Mp);
 int ERM_BlackMarket(char Cmd,int Num,_ToDo_* sp,Mes *Mp);
 int ERM_VarList(char Cmd,int Num,_ToDo_* sp,Mes *Mp);
+int ERM_Signal(char Cmd,int Num,_ToDo_* sp,Mes *Mp);

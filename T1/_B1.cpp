@@ -2127,7 +2127,6 @@ struct __Copiers{
 //Skeleton Transformer
 	{(Byte *)0x64130C,(Byte *)SkelTrans,sizeof(int)*(MONNUM_0-5)},
 	{(Byte *)&SkelTransAdd[0],(Byte *)&SkelTrans[MONNUM_0-5],sizeof(SkelTransAdd)},
-	{(Byte *)&SkelTrans[0],(Byte *)&SkelTransBackup[0],sizeof(SkelTrans)},
 // Speed up AI thinking (0x00007D00 original)
 // Now through ERM
 //  {(Byte *)"\x00\x10\x00\x00",(Byte *)0x526C9E,4}, //
