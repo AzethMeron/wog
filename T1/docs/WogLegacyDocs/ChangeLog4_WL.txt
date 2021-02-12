@@ -134,7 +134,7 @@ It's best to use "modular" naming convention, to prevent overlapping. For exampl
 Variables in mode 1 are cleared anytime map is started or loaded. In MP mode they are (probably) cleared every day! 
 
 Self-caused bugs
-[-] options.lua was scrapping Wog Options. Fixed, but you need to manually change constant value in both C++ header and Lua file.
+[-] options.lua was scrapping Wog Options. Now fixed, options.lua has access to value of PL_WONUM, so no need to manually change it every time.
 
 Found bugs:
 [-] When using Lua/ERM, post triggers ($) cause error with _NOGLOBALS macro. I believe game mistake them as macros. Not fixed, but i have added .pre and .post syntax - those works. For example, now you can use OB(11).pre = function() 

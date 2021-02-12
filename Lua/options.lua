@@ -52,7 +52,7 @@ SetupPath = SetupPath..ReadIniString("WoGification", "SetupFile", "Setup.lua")
 local UN_P = ERM.UN.P
 local ?v = ?v
 
-local wog_options_num = 1000
+local wog_options_num = internal.PL_WONUM
 
 ----------- No globals from this point ------------
 

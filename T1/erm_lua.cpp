@@ -1248,6 +1248,7 @@ void InitLua()
 	LuaInternalConst("ModsPath", ModsPath);
 	LuaInternalConst("ERM_HeroStr", (int)&ERM_HeroStr);
 	LuaInternalConst("DumpERMVars", (int)DumpERMVars);
+	LuaInternalConst("PL_WONUM", PL_WONUM);
 
 	// Scripts path
 	LoadIniPath(Path, "LuaScriptsPath", (DeveloperPath[0] ? Format("%sLua\\", DeveloperPath) : "Data\\zvs\\Lua\\"));
