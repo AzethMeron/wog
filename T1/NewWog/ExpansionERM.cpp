@@ -11,6 +11,8 @@
 #define __FILENUM__ 33
 #include "List.h"
 
+// by Jakub Grzana
+
 // Structure is send byte after byte. Pointers aren't allowed, though you can use static arrays
 // You can add variables here to be automatically saved in savefile. 
 // Should work in battles. Assuming that "sending savefile" works just like save/load, then should work in multiplayer aswell. Brief tests suggest that aswell

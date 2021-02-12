@@ -11,6 +11,8 @@
 
 #define __FILENUM__ 30
 
+// by Jakub Grzana, WoG Team and/or Core WoG
+
 struct _CurseType_ CurseType[CURSETYPE_NUM]; // Types of curses
 int DHVC_Table[CURSE_BLOCKS][3]; // Blocked objets
 short int AS_CBad[CURSETYPE_NUM][3]; // Sphinx pool - curses

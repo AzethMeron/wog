@@ -1,5 +1,37 @@
 #pragma once
 // requires __FILENUM__
+// must be included AFTER __FILENUM__ is defined in cpp file!
+
+// by Jakub Grzana
+
+/****************************** DOCUMENTATION ******************************/
+// _List_<Type> Generic list
+// Doesn't create nor remove objects of given Type. Instead, it operates solely on pointers
+// You have to create objects on heap, pass pointer to them, and manually delete before removing from list
+// Because of this, there are no requirements towards 'Type'. No required operators, destructors nor constructors
+//
+// Features:
+// - fully generic, very simple
+// - add, remove items to list
+// - get number of items in list
+// - every item in list has "id", which is c-string, length=ID_LENGTH
+// - there might be ONLY one item for every name
+// - tested (tho briefly)
+// 
+// Trying to add multiple objects with the same name means ONLY THE FIRST IS ADDED, rest is IGNORED!
+// Basically this list helps only with storing, finding, and iterating (by using _ListIterator_<Type>)
+// You must make your own tools to add/remove objects, for every task you want to use it. Still helpful IMO.
+//
+// Methods: 
+// unsigned int size() const - measure number of items in List (complexity depends on number of items O(n))
+// const char* id_front() const - get name of first item (c-string)
+// Type* front() - get pointer to first object (NULL if none)
+// Type* find(const char* id) - get pointer to object with given name (NULL if not found)
+// bool push_front(const char* id, Type* ob) - adds object 'ob' into list with given name. Returns false if there's already object with this name in list
+// bool pop_front() - remove first object from list, false if there's none
+// bool remove(const char* id) - removes item with given name
+// _ListIterator_<Type> begin() - get iterator to first object
+/***************************************************************************/
 
 #define ID_LENGTH (32)
 
@@ -30,18 +62,13 @@ struct _ListIterator_
 	private:
 		_ListObject_<Type>* ptr;
 	public:
-		_ListIterator_& operator++() { ptr = ptr->next; return *this; }
-		const char* id() { return ptr->id; }
-		Type* operator*() { return ptr->current; }
-		bool exists() { return ptr!=NULL; }
-		_ListIterator_(_ListObject_<Type>* p) { ptr=p; }
+		_ListIterator_& operator++() { ptr = ptr->next; return *this; } // get next object
+		const char* id() { return ptr->id; } // get name (id) of current object
+		Type* operator*() { return ptr->current; } // get current object
+		bool exists() { return ptr!=NULL; } // check whether there's object in this iterator
+		_ListIterator_(_ListObject_<Type>* p) { ptr=p; } 
 };
 
-// Generic list
-// Doesn't create nor remove objects of given Type. Instead, it operates solely on pointers
-// You have to create objects on heap, pass pointer to them, and delete before removing
-// Because of this, there are no requirements towards 'Type'. No required operators, destructors nor constructors
-// Note: all c-strings used should have length equal to ID_LENGTH
 template<typename Type>
 class _List_
 {
