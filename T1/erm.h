@@ -24,6 +24,11 @@ extern int   ERMVarX[16];
 extern int   *ERMVarY,*ERMVarYT;  // [100]
 extern float *ERMVarF,*ERMVarFT;  // [100]
 
+/* For signal system - which doesn't work, so commented
+int& AccessYVarInsideFunction(); 
+extern Mes *LastFUMes;
+extern int LastFUNum;*/
+
 extern int ERMVarH[HERNUM][200];  extern int ERMW;  extern char ERMVarHMacro[200][16];
 extern char ERMString[1000][512];
 extern char (*ERMLString)[512];  extern char ERMStringMacro[1000][16];

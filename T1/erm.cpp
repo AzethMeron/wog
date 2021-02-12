@@ -378,6 +378,9 @@ char *GetErmText(Mes *Mp,int ind){
 static int TriggerBreak=0;
 static int TriggerGoTo=0;
 static int YVarInsideFunction=1; // default is OFF to check
+int& AccessYVarInsideFunction()
+{	return YVarInsideFunction;	}
+
 Mes *LastFUMes;
 int LastFUNum;
 
@@ -4765,6 +4768,7 @@ struct _ERM_Trigger_{ // triggers with 1 or no parameters
 //      +  0x40000000+ OB type/subtype leavestruct _ERM_Trigger_{ // triggers with 1 or no parameters
 //////////////////////////////
 
+// New receivers. The oldest ones are hardcoded into parser (we might remake it, but... dunno if there's need for it)
 struct _ERM_Addition_{
     Word   Id; // "name", like 'QW', 'UN'
     int  (*Fun)(char,int,_ToDo_ *,Mes *); // function to be called
@@ -4853,9 +4857,9 @@ struct _ERM_Addition_{
 	{'CR',ERM_CurseSetup,1},
 	{'MK',ERM_BlackMarket,2},
 	{'VA',ERM_VarList,0},
-	{'SI',ERM_Signal,0},
+	//{'SI',ERM_Signal,0},
 	
-	{0,0}
+	{0,0} // remove this and you get segfault
 };
 
 //////////////////////////////

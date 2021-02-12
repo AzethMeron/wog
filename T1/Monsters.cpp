@@ -48,7 +48,7 @@ int ERM_MonAtr(char Cmd,int Num,_ToDo_*,Mes *Mp)
 	STARTNA(__LINE__,&Mp->m.s[Mp->i])
 	if(Num<2) RETURN(0)
 	k=Mp->n[0];  // номер монстра
-	if((k<0)||(k>=MONNUM)){ RETURN(0) }
+	if((k<0)||(k>=MONNUM)){ MError2("Wrong creature number (Format C)"); RETURN(0) }
 	switch(Cmd){
 		case 'O': // Группа O#/$ принадлежность городу (0...8,-1 = ничейный)
 			if(Apply(&MonTable[k].Group,4,Mp,1)) break;
@@ -133,6 +133,14 @@ int ERM_MonAtr(char Cmd,int Num,_ToDo_*,Mes *Mp)
 		case 'U': // Upgrade to U#/$
 			if(Apply(&MonsterUpgradeTable[k],4,Mp,1)) break;
 			break;
+		case 'T': // Skeleton Transformer, using Skeleton Patch programmed in ExpansionERM
+			{// k = cr_id
+				int upgraded = SkelTrans[k];
+				if(Apply(&upgraded,sizeof(upgraded),Mp,1) ==0)
+				{
+					AddSkeletonPatch(k,upgraded);
+				}
+			} break;
 		default:
 			RETURN(0)
 	}

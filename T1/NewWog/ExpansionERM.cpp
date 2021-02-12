@@ -28,6 +28,8 @@ struct _NewVariable_ {
 
 	char* val_str;
 	int val_int;
+	// would be better, if both stored in one pointer - Byte* data, then casted to proper representation
+	// but waste is 4 bytes per variable, i think it is acceptable XD 
 	
 	_NewVariable_() { next = NULL; val_str = NULL; val_int = 0; }
 };
@@ -303,106 +305,8 @@ int ERM_VarList(char Cmd,int Num,_ToDo_* sp,Mes *Mp)
 
 /****************************************************************************************/
 
-//int SkelTransBackup[MONNUM];
 
-/****************************** MULTIPLAYER BATTLE SUPPORT ******************************/
-#define LegacyDataBufferSize 10000
-Byte LegacyDataBuffer[LegacyDataBufferSize]; // Used when sending, but not when receiving
 
-int WriteToBuffer(Byte* buffer, int bufsize, unsigned int index, Byte* data, int datasize)
-{
-	for(int i = index; i < index+datasize; ++i)
-	{
-		if(i >= bufsize) return 1;
-		buffer[i] = data[i-index];
-	}
-	return 0;
-}
-
-int LoadFromBuffer(Byte* buffer, int bufsize, unsigned int index, Byte* data, int datasize)
-{
-	for(int i = index; i < index+datasize; ++i)
-	{
-		if(i >= bufsize) return 1;
-		data[i-index] = buffer[i];
-	}
-	return 0;
-}
-
-void SendLegacyData(int* len, Byte** buf)
-{
-	STARTNA(__LINE__, 0)
-	// init
-	*len = 0;
-	*buf = LegacyDataBuffer;
-	// Sending header
-	if(WriteToBuffer(LegacyDataBuffer,LegacyDataBufferSize,*len,(Byte*) "JGWL",4) ) MError("Sending legacy data caused overflow");
-	*len += 4; // Accquire length of data - in bytes
-	// Sending generic data
-	if(WriteToBuffer(LegacyDataBuffer,LegacyDataBufferSize,*len,(Byte*) &LegacyGenericData,sizeof(LegacyGenericData)) ) UniversalErrorMessage("Sending legacy data caused overflow");
-	*len += sizeof(LegacyGenericData); // Accquire length of data - in bytes
-	RETURNV;
-}
-
-void ReceiveLegacyData(int len, Byte* buf)
-{
-	STARTNA(__LINE__, 0)
-	// Index in buffer
-	int index = 0; 
-	// Receiving header
-	char head_buf[4] = "";
-	if(LoadFromBuffer(buf,len,index,(Byte*) head_buf,4)) MError("Received malformed legacy data");
-	if(head_buf[0] != 'J' || head_buf[1] != 'G' || head_buf[2] != 'W' || head_buf[3] != 'L') MError("Received malformed legacy data");
-	index += 4;
-	// Receiving generic data
-	if(LoadFromBuffer(buf,len,index,(Byte*) &LegacyGenericData,sizeof(LegacyGenericData))) MError("Received malformed legacy data");
-	index += sizeof(LegacyGenericData);
-	RETURNV;
-}
-/****************************************************************************************/
-
-/*********************************** SAVEFILE SUPPORT ***********************************/
-// return 0 if everything is fine, otherwise 1
-int SaveLegacyData()
-{
-	STARTNA(__LINE__, 0)
-	// Header - for safety purposes
-	if(Saver((void*) "JGWL",4)) RETURN(1);
-	// Saving data
-	if(Saver(&LegacyGenericData,sizeof(LegacyGenericData))) { RETURN(1); }
-	if(Saver(&SkelTrans,sizeof(SkelTrans))) { RETURN(1); }
-	if(save_vl()) { RETURN(1); }
-	// End mark
-	if(Saver((void*) "LWGJ",4)) RETURN(1);
-
-	RETURN(0);
-}
-
-// return 0 if everything is fine, otherwise 1
-int LoadLegacyData()
-{
-	STARTNA(__LINE__, 0)
-	// Header - for safety purposes
-	char head_buf[4] = "";
-	if(Loader(&head_buf,4)) RETURN(1);
-	if(head_buf[0] != 'J' || head_buf[1] != 'G' || head_buf[2] != 'W' || head_buf[3] != 'L') { MError("Malformed savefile - failed to load Legacy data header"); RETURN(1); }
-	// Loading data
-	if(Loader(&LegacyGenericData,sizeof(LegacyGenericData))) { RETURN(1); }
-	if(Loader(&SkelTrans,sizeof(SkelTrans))) { RETURN(1); }
-	if(load_vl()) { RETURN(1); }
-	// End Mark
-	if(Loader(&head_buf,4)) RETURN(1);
-	if(head_buf[0] != 'L' || head_buf[1] != 'W' || head_buf[2] != 'G' || head_buf[3] != 'J') { MError("Malformed savefile - failed to load Legacy data end mark"); RETURN(1); }
-	RETURN(0);
-}
-
-void ResetLegacyData()
-{
-	STARTNA(__LINE__, 0)
-	vl_clear(vl_save);
-	vl_clear(vl_temp);
-	RETURNV;
-}
 /****************************************************************************************/
 
 double round( double fValue )
@@ -518,13 +422,13 @@ int ERM_BlackMarket(char Cmd,int Num,_ToDo_* sp,Mes *Mp)
 
 /****************************************************************************************/
 // Signals
-#define SIGNAL_buffer_size (64)
+/*#define SIGNAL_buffer_size (64)
 bool SIGNAL_entered_block = false;
 char SIGNAL_raised[SIGNAL_buffer_size];
 
 int ERM_Signal(char Cmd,int Num,_ToDo_* sp,Mes *Mp)
 // doesn't fully operational yet
-// Y-vars are not supported properly yet
+// Y-vars are not supported properly yet - keeps value between signal block and block above, which is a bug, not a feature here
 {
 	STARTNA(__LINE__, 0)
 
@@ -536,16 +440,28 @@ int ERM_Signal(char Cmd,int Num,_ToDo_* sp,Mes *Mp)
 			// Manage parameter
 			char buffer[SIGNAL_buffer_size];
 			if(StrMan::Apply(buffer,Mp,0,SIGNAL_buffer_size) == 0) { MError2("Cannot get signal"); RETURN(0); }
-			// Raise signal
+			// backing up previously called signal
 			char last_signal[SIGNAL_buffer_size]; // i gave you my heart
 			memcpy(last_signal,SIGNAL_raised,SIGNAL_buffer_size);
 			memcpy(SIGNAL_raised,buffer,SIGNAL_buffer_size);
+			// preparing before signal execution
+			Mes *lastMp = LastFUMes;
+			int lastNum = LastFUNum;
+			LastFUMes = Mp;
+			LastFUNum = Num;
 			SIGNAL_entered_block = true;
 			int last_ptr = pointer;
+			int yvars = AccessYVarInsideFunction();
+			AccessYVarInsideFunction() = 1;
 			pointer = 30379;
+			// execution
 			ProcessERM(true);
+			// cleaning after signal execution
 			pointer = last_ptr;
+			AccessYVarInsideFunction() = yvars;
 			SIGNAL_entered_block = false;
+			LastFUMes = lastMp;
+			LastFUNum = lastNum;
 			memcpy(SIGNAL_raised,last_signal,SIGNAL_buffer_size);
 		} break;
 
@@ -563,12 +479,224 @@ int ERM_Signal(char Cmd,int Num,_ToDo_* sp,Mes *Mp)
 	}
 
 	RETURN(1)
-}
+}*/
 
 /****************************************************************************************/
 
 struct SkelTransPatch {
-	int cr_id;
+	//int cr_id; Since im using generic _List_, i will use 'name' to store creature id. 
+	//It makes much sense, im wasting less memory AND problem of overlapping patches is solved
 	int cr_new;
 	int cr_prev;
 };
+
+_List_<SkelTransPatch> ListOfSkelPatches;
+// global structure: SkelTrans[cr_id]
+
+// Note: cr_id and cr_new MUST have proper value, check that in ERM section!
+void AddSkeletonPatch(int cr_id, int cr_new)
+{
+	STARTNA(__LINE__, 0)
+	// converting cr_id into c-string
+	char name_buffer[ID_LENGTH] = "";
+	sprintf_s(name_buffer,ID_LENGTH,"%d",cr_id); 
+	// looking for existing patch for given creature
+	SkelTransPatch* patch = ListOfSkelPatches.find(name_buffer);
+	if(patch) // creature with given ID was already changed - not typical situation, but definitely possible
+	{
+		// Updating existing patch
+		SkelTrans[cr_id] = (patch->cr_new = cr_new);
+	}
+	else
+	{
+		// Typical situation - creating brand-new patch
+		patch = new SkelTransPatch;
+		patch->cr_new = cr_new;
+		patch->cr_prev = SkelTrans[cr_id];
+		SkelTrans[cr_id] = cr_new;
+		ListOfSkelPatches.push_front(name_buffer,patch);
+	}
+	RETURNV;
+}
+
+void RemoveSkeletonPatch(int cr_id, bool error_on_absence = false)
+{
+	STARTNA(__LINE__, 0)
+	// converting cr_id into c-string
+	char name_buffer[ID_LENGTH] = "";
+	sprintf_s(name_buffer,ID_LENGTH,"%d",cr_id); 
+	// searching for patch
+	SkelTransPatch* patch = ListOfSkelPatches.find(name_buffer);
+	if(patch)
+	{
+		SkelTrans[cr_id] = patch->cr_prev;
+		ListOfSkelPatches.remove(name_buffer);
+		delete patch;
+	}
+	else
+	{
+		if(error_on_absence)
+		{
+			UniversalErrorMessage("Internal error: trying to revert non-existing Skel Trans Patch");
+		}
+	}
+	RETURNV;
+}
+
+int save_SkelPatches()
+{
+	STARTNA(__LINE__, 0)
+	if(Saver("skel",4)) { RETURN(1); }
+	// data
+	int num = ListOfSkelPatches.size();
+	if(Saver(&num,sizeof(num))) { RETURN(1); }
+	_ListIterator_<SkelTransPatch> iterator = ListOfSkelPatches.begin();
+	for(int i = 0; i < num; ++i)
+	{
+		if(!iterator.exists()) { UniversalErrorMessage("Internal error while saving Skeleton Patch List. Please report this.\nLoading saved file will be impossible"); RETURN(1); } 
+		int cr_id = atoi(iterator.id());
+		int cr_new = (*iterator)->cr_new;
+		if(Saver(&cr_id,sizeof(cr_id))) { RETURN(1); }
+		if(Saver(&cr_new,sizeof(cr_new))) { RETURN(1); }
+		++iterator;
+	}
+	// end of data
+	if(Saver("leks",4)) { RETURN(1); }
+	RETURN(0);
+}
+
+int load_SkelPatches()
+{
+	STARTNA(__LINE__, 0)
+	char head_buf[4] = "";
+	if(Loader(&head_buf,4)) RETURN(1);
+	if(head_buf[0] != 's' || head_buf[1] != 'k' || head_buf[2] != 'e' || head_buf[3] != 'l') { MError("Malformed savefile - failed to load Skeleton Patch List header"); RETURN(1); }
+	// data
+	int num = 0;
+	if(Loader(&num,sizeof(num))) { RETURN(1); }
+	for(int i = 0; i < num; ++i)
+	{
+		int cr_id = 0;
+		int cr_new = 0;
+		if(Loader(&cr_id,sizeof(cr_id))) { RETURN(1); }
+		if(Loader(&cr_new,sizeof(cr_new))) { RETURN(1); }
+		AddSkeletonPatch(cr_id,cr_new);
+	}
+	// end of data
+	if(Loader(&head_buf,4)) RETURN(1);
+	if(head_buf[0] != 'l' || head_buf[1] != 'e' || head_buf[2] != 'k' || head_buf[3] != 's') { MError("Malformed savefile - failed to load Skeleton Patch List header"); RETURN(1); }
+	RETURN(0);
+}
+
+int reset_SkelPatches()
+{
+	STARTNA(__LINE__, 0)
+	int num = ListOfSkelPatches.size();
+	for(int i = 0; i < num; ++i)
+	{
+		int cr_id = atoi(ListOfSkelPatches.id_front());
+		RemoveSkeletonPatch(cr_id,true);
+	}
+	RETURN(0);
+}
+
+/****************************** MULTIPLAYER BATTLE SUPPORT ******************************/
+#define LegacyDataBufferSize 10000
+Byte LegacyDataBuffer[LegacyDataBufferSize]; // Used when sending, but not when receiving
+
+int WriteToBuffer(Byte* buffer, int bufsize, unsigned int index, Byte* data, int datasize)
+{
+	for(int i = index; i < index+datasize; ++i)
+	{
+		if(i >= bufsize) return 1;
+		buffer[i] = data[i-index];
+	}
+	return 0;
+}
+
+int LoadFromBuffer(Byte* buffer, int bufsize, unsigned int index, Byte* data, int datasize)
+{
+	for(int i = index; i < index+datasize; ++i)
+	{
+		if(i >= bufsize) return 1;
+		data[i-index] = buffer[i];
+	}
+	return 0;
+}
+
+void SendLegacyData(int* len, Byte** buf)
+{
+	STARTNA(__LINE__, 0)
+	// init
+	*len = 0;
+	*buf = LegacyDataBuffer;
+	// Sending header
+	if(WriteToBuffer(LegacyDataBuffer,LegacyDataBufferSize,*len,(Byte*) "JGWL",4) ) MError("Sending legacy data caused overflow");
+	*len += 4; // Accquire length of data - in bytes
+	// Sending generic data
+	if(WriteToBuffer(LegacyDataBuffer,LegacyDataBufferSize,*len,(Byte*) &LegacyGenericData,sizeof(LegacyGenericData)) ) UniversalErrorMessage("Sending legacy data caused overflow");
+	*len += sizeof(LegacyGenericData); // Accquire length of data - in bytes
+	RETURNV;
+}
+
+void ReceiveLegacyData(int len, Byte* buf)
+{
+	STARTNA(__LINE__, 0)
+	// Index in buffer
+	int index = 0; 
+	// Receiving header
+	char head_buf[4] = "";
+	if(LoadFromBuffer(buf,len,index,(Byte*) head_buf,4)) MError("Received malformed legacy data");
+	if(head_buf[0] != 'J' || head_buf[1] != 'G' || head_buf[2] != 'W' || head_buf[3] != 'L') MError("Received malformed legacy data");
+	index += 4;
+	// Receiving generic data
+	if(LoadFromBuffer(buf,len,index,(Byte*) &LegacyGenericData,sizeof(LegacyGenericData))) MError("Received malformed legacy data");
+	index += sizeof(LegacyGenericData);
+	RETURNV;
+}
+/****************************************************************************************/
+
+/*********************************** SAVEFILE SUPPORT ***********************************/
+// return 0 if everything is fine, otherwise 1
+int SaveLegacyData()
+{
+	STARTNA(__LINE__, 0)
+	// Header - for safety purposes
+	if(Saver((void*) "JGWL",4)) RETURN(1);
+	// Saving data
+	if(Saver(&LegacyGenericData,sizeof(LegacyGenericData))) { RETURN(1); }
+	if(save_vl()) { RETURN(1); }
+	if(save_SkelPatches()) { RETURN(1); }
+	// End mark
+	if(Saver((void*) "LWGJ",4)) RETURN(1);
+
+	RETURN(0);
+}
+
+// return 0 if everything is fine, otherwise 1
+int LoadLegacyData()
+{
+	STARTNA(__LINE__, 0)
+	// Header - for safety purposes
+	char head_buf[4] = "";
+	if(Loader(&head_buf,4)) RETURN(1);
+	if(head_buf[0] != 'J' || head_buf[1] != 'G' || head_buf[2] != 'W' || head_buf[3] != 'L') { MError("Malformed savefile - failed to load Legacy data header"); RETURN(1); }
+	// Loading data
+	if(Loader(&LegacyGenericData,sizeof(LegacyGenericData))) { RETURN(1); }
+	if(load_vl()) { RETURN(1); }
+	if(load_SkelPatches()) { RETURN(1); }
+	// End Mark
+	if(Loader(&head_buf,4)) RETURN(1);
+	if(head_buf[0] != 'L' || head_buf[1] != 'W' || head_buf[2] != 'G' || head_buf[3] != 'J') { MError("Malformed savefile - failed to load Legacy data end mark"); RETURN(1); }
+	RETURN(0);
+}
+
+void ResetLegacyData()
+{
+	STARTNA(__LINE__, 0)
+	vl_clear(vl_save);
+	vl_clear(vl_temp);
+	reset_SkelPatches();
+	RETURNV;
+}
+/****************************************************************************************/

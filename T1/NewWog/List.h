@@ -16,41 +16,56 @@ bool compare(const char* a, const char* b, int len)
 }
 
 template<typename Type>
-struct ListObject
+struct _ListObject_
 {
 	char id[ID_LENGTH];
 	Type* current;
-	ListObject<Type>* next;
-	ListObject<Type>() { sprintf_s(id,ID_LENGTH,""); current = NULL; next = NULL; }
+	_ListObject_<Type>* next;
+	_ListObject_<Type>() { char str[ID_LENGTH]=""; for(int i=0; i < ID_LENGTH; ++i) { id[i] = str[i]; } current = NULL; next = NULL; }
+};
+
+template<typename Type>
+struct _ListIterator_ 
+{
+	private:
+		_ListObject_<Type>* ptr;
+	public:
+		_ListIterator_& operator++() { ptr = ptr->next; return *this; }
+		const char* id() { return ptr->id; }
+		Type* operator*() { return ptr->current; }
+		bool exists() { return ptr!=NULL; }
+		_ListIterator_(_ListObject_<Type>* p) { ptr=p; }
 };
 
 // Generic list
 // Doesn't create nor remove objects of given Type. Instead, it operates solely on pointers
 // You have to create objects on heap, pass pointer to them, and delete before removing
 // Because of this, there are no requirements towards 'Type'. No required operators, destructors nor constructors
+// Note: all c-strings used should have length equal to ID_LENGTH
 template<typename Type>
-class List
+class _List_
 {
 	private:
-		ListObject<Type>* top;
+		_ListObject_<Type>* top;
 	
 	public:
 		unsigned int size() const;
 		const char* id_front() const;
-		Type* front() { return top->current; } 
+		Type* front() { if(top) { return top->current; } else { return NULL; } } 
 		Type* find(const char* id);
 		bool push_front(const char* id, Type* ob);
 		bool pop_front();
 		bool remove(const char* id);
-		List<Type>() { top = NULL; }
+		_ListIterator_<Type> begin() { _ListIterator_<Type> output(top); return output; }
+		_List_<Type>() { top = NULL; }
 };
 
 template<typename Type>
-unsigned int List<Type>::size() const
+unsigned int _List_<Type>::size() const
 {
 	STARTNA(__LINE__, 0)
 	unsigned int output = 0;
-	for(ListObject<Type>* current = this->top; current != NULL; current = current->next)
+	for(_ListObject_<Type>* current = this->top; current != NULL; current = current->next)
 	{
 		++output;
 	}
@@ -58,10 +73,10 @@ unsigned int List<Type>::size() const
 }
 
 template<typename Type>
-Type* List<Type>::find(const char* id)
+Type* _List_<Type>::find(const char* id)
 {
 	STARTNA(__LINE__, 0)
-	for(ListObject<Type>* current = top; current; current = current->next)
+	for(_ListObject_<Type>* current = top; current; current = current->next)
 	{
 		if(!compare(id,current->id,ID_LENGTH))
 			RETURN(current->current);
@@ -70,11 +85,11 @@ Type* List<Type>::find(const char* id)
 }
 
 template<typename Type>
-bool List<Type>::push_front(const char* id, Type* ob) // false - already in list (overlapping id)
+bool _List_<Type>::push_front(const char* id, Type* ob) // false - already in list (overlapping id)
 {
 	STARTNA(__LINE__, 0)
 	if(this->find(id)) RETURN(false)
-	ListObject<Type>* object = new ListObject<Type>;
+	_ListObject_<Type>* object = new _ListObject_<Type>;
 	object->current = ob;
 	sprintf_s(object->id,ID_LENGTH,"%s",id);
 	object->next = this->top;
@@ -83,10 +98,10 @@ bool List<Type>::push_front(const char* id, Type* ob) // false - already in list
 }
 
 template<typename Type>
-bool List<Type>::pop_front() // false - list is empty
+bool _List_<Type>::pop_front() // false - list is empty
 {
 	STARTNA(__LINE__, 0)
-	ListObject<Type>* next = NULL;
+	_ListObject_<Type>* next = NULL;
 	if(top)
 	{
 		next = top->next;
@@ -98,14 +113,14 @@ bool List<Type>::pop_front() // false - list is empty
 }
 
 template<typename Type>
-bool List<Type>::remove(const char* id) // false - there is no object with such ID
+bool _List_<Type>::remove(const char* id) // false - there is no object with such ID
 {
 	STARTNA(__LINE__, 0)
 	if(this->find(id)==NULL) { RETURN(false); }  // not found
-	ListObject<Type>* current = top;
+	_ListObject_<Type>* current = top;
 	if(current == NULL) { RETURN(false); } // empty
 	if(!compare(current->id,id,ID_LENGTH)) { RETURN(this->pop_front()); } // first element - use pop_front
-	ListObject<Type>* next = current->next;
+	_ListObject_<Type>* next = current->next;
 	while(next)
 	{
 		if(!compare(next->id,id,ID_LENGTH))
@@ -121,7 +136,7 @@ bool List<Type>::remove(const char* id) // false - there is no object with such 
 }
 
 template<typename Type>
-const char* List<Type>::id_front() const
+const char* _List_<Type>::id_front() const
 {
 	STARTNA(__LINE__, 0)
 	if(this->top) { RETURN(this->top->id); }
