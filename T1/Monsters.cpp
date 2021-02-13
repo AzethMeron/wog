@@ -138,11 +138,12 @@ int ERM_MonAtr(char Cmd,int Num,_ToDo_*,Mes *Mp)
 				int upgraded = SkelTrans[k];
 				if(Apply(&upgraded,sizeof(upgraded),Mp,1) ==0)
 				{
+					if((upgraded < 0) || (upgraded >= MONNUM)) { MError2("Wrong destination-creature number."); RETURN(0); }
 					AddSkeletonPatch(k,upgraded);
 				}
 			} break;
 		default:
-			RETURN(0)
+			{ EWrongCommand(); RETURN(0); } break;
 	}
 	RETURN(1)
 }
