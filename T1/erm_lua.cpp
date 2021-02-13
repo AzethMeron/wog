@@ -241,9 +241,12 @@ static int ERM_Call(lua_State *L)
 {
 	if (lua_gettop(L) > 17)
 	{
+		// my style
 		char errmess[ERR_BUFSIZE];
 		sprintf_s(errmess,ERR_BUFSIZE,Format("\"%s:%s\"-too many parameters.", CmdToDo.Type, lua_tostring(L, 1)));
 		return LuaError(errmess, ERM_Call_ErrorLevel); // Marker
+		// old (original) style
+		//return LuaError(Format("\"%s:%s\"-too many parameters.", CmdToDo.Type, lua_tostring(L, 1)), ERM_Call_ErrorLevel);
 	}
 	STARTNA(__LINE__, 0)
 
@@ -363,9 +366,14 @@ _string:
 _error:
 				if (countV)  memcpy((char*)&ERMVar2[indexV - countV], (char*)&backV[0], 4*countV);
 				StoreVars(false, true);
-				char errmess[ERR_BUFSIZE];
-				sprintf_s(errmess,ERR_BUFSIZE,"Invalid parameter type: %s", lua_typename(L, ltype));
-				RETURN(LuaError(errmess, ERM_Call_ErrorLevel)) // Marker
+				#ifdef LERM_ERROR_IN_C
+					char errmess[ERR_BUFSIZE];
+					sprintf_s(errmess,ERR_BUFSIZE,"Invalid parameter type: %s", lua_typename(L, ltype));
+					RETURN(LuaError(errmess, ERM_Call_ErrorLevel)) // Marker
+				#endif
+				#ifndef LERM_ERROR_IN_C
+					RETURN(LuaError(Format("Invalid parameter type: %s", lua_typename(L, ltype)), ERM_Call_ErrorLevel))
+				#endif
 		}
 
 	}
@@ -407,9 +415,13 @@ _error:
 	// Lua Error Message
 	if (WasErmError) // Marker
 	{
-		LuaErmError(&CmdToDo,&CmdMessage,k == 0 ? 1 : k, LastErmError);
-		RETURN(0)
-		//RETURN(LuaError(LastErmError, ERM_Call_ErrorLevel,&CmdToDo,&CmdMessage,k == 0 ? 1 : k))
+		#ifdef LERM_ERROR_IN_C
+			LuaErmError(&CmdToDo,&CmdMessage,k == 0 ? 1 : k, LastErmError);
+			RETURN(0)
+		#endif
+		#ifndef LERM_ERROR_IN_C
+			RETURN(LuaError(LastErmError, ERM_Call_ErrorLevel))
+		#endif
 	}
 
 	RETURN(retCount)
@@ -1278,8 +1290,10 @@ static int LuaError(char *text, int level) // Marker
 	return lua_error(Lua);
 }
 
+#ifdef LERM_ERROR_IN_C
 static int LuaError(char *text, int level, _ToDo_* sp, Mes* m, int Num) // Marker
 {
 	LuaErmError(sp,m,Num,text);
 	return 0;
 }
+#endif

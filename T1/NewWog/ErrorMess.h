@@ -6,6 +6,11 @@
 #define MESSAGE_YES (30725)
 #define MESSAGE_NO (30726)
 
+// Macro, if defined, then Lua/ERM errors are managed by C/C++ code
+// otherwise, error is passed to Lua
+#define LERM_ERROR_IN_C
+// Works only for Lua/ERM errors, others are managed by Lua anyway
+
 // Log files
 #define WOGERMLOG ("woglogs/WOGERMLOG.TXT")
 #define WOGLUALOG ("woglogs/WOGLUALOG.TXT")

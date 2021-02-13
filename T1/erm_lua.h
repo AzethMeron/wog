@@ -5,6 +5,7 @@
 #define __ERM_LUA__
 
 #include "structs.h"
+#include "NewWog/ErrorMess.h"
 //#include "luaW_debug.h"
 extern "C"
 {
@@ -36,6 +37,9 @@ void LuaInternalConst(const char *name, int value);
 const char* LuaPushERMInfo(char *erm, bool OneLine = true);
 
 static int LuaError(char *text, int level);
+
+#ifdef LERM_ERROR_IN_C
 static int LuaError(char *text, int level, _ToDo_* sp, Mes* m, int Num);
+#endif
 
 #endif
