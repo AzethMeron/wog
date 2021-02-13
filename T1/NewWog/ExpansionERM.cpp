@@ -13,13 +13,6 @@
 
 // by Jakub Grzana
 
-// Structure is send byte after byte. Pointers aren't allowed, though you can use static arrays
-// You can add variables here to be automatically saved in savefile. 
-// Should work in battles. Assuming that "sending savefile" works just like save/load, then should work in multiplayer aswell. Brief tests suggest that aswell
-struct _LegacyGenericData_ {
-	char ttt;
-} LegacyGenericData;
-
 /************************************ NEW VARIABLES *************************************/
 // should be remade to use list implementation from List.h
 struct _NewVariable_ {
@@ -33,7 +26,7 @@ struct _NewVariable_ {
 	// would be better, if both stored in one pointer - Byte* data, then casted to proper representation
 	// but waste is 4 bytes per variable, i think it is acceptable XD 
 	
-	_NewVariable_() { next = NULL; val_str = NULL; val_int = 0; }
+	_NewVariable_() { for(int i = 0; i < 32; ++i) { name[i]='\0'; } next = NULL; val_str = NULL; val_int = 0; }
 };
 
 _NewVariable_* vl_get_next(_NewVariable_* list)
@@ -426,7 +419,7 @@ int ERM_BlackMarket(char Cmd,int Num,_ToDo_* sp,Mes *Mp)
 // Signals
 /*#define SIGNAL_buffer_size (64)
 bool SIGNAL_entered_block = false;
-char SIGNAL_raised[SIGNAL_buffer_size];
+char SIGNAL_raised[SIGNAL_buffer_size]="";
 
 int ERM_Signal(char Cmd,int Num,_ToDo_* sp,Mes *Mp)
 // doesn't fully operational yet
@@ -440,10 +433,10 @@ int ERM_Signal(char Cmd,int Num,_ToDo_* sp,Mes *Mp)
 		{
 			CHECK_ParamsNum(1);
 			// Manage parameter
-			char buffer[SIGNAL_buffer_size];
+			char buffer[SIGNAL_buffer_size]="";
 			if(StrMan::Apply(buffer,Mp,0,SIGNAL_buffer_size) == 0) { MError2("Cannot get signal"); RETURN(0); }
 			// backing up previously called signal
-			char last_signal[SIGNAL_buffer_size]; // i gave you my heart
+			char last_signal[SIGNAL_buffer_size]=""; // i gave you my heart
 			memcpy(last_signal,SIGNAL_raised,SIGNAL_buffer_size);
 			memcpy(SIGNAL_raised,buffer,SIGNAL_buffer_size);
 			// preparing before signal execution
@@ -471,7 +464,7 @@ int ERM_Signal(char Cmd,int Num,_ToDo_* sp,Mes *Mp)
 		{
 			CHECK_ParamsNum(1);
 			if(!SIGNAL_entered_block) { MError2("Cannot get raised signal outside of signal trigger"); RETURN(0); }
-			char buffer[SIGNAL_buffer_size];
+			char buffer[SIGNAL_buffer_size]="";
 			memcpy(buffer,SIGNAL_raised,SIGNAL_buffer_size);
 			if(StrMan::Apply(buffer,Mp,0,SIGNAL_buffer_size)) { MError2("Cannot set signal"); RETURN(0); }
 		} break;
@@ -602,62 +595,6 @@ int reset_SkelPatches()
 	RETURN(0);
 }
 
-/****************************** MULTIPLAYER BATTLE SUPPORT ******************************/
-#define LegacyDataBufferSize 10000
-Byte LegacyDataBuffer[LegacyDataBufferSize]; // Used when sending, but not when receiving
-
-int WriteToBuffer(Byte* buffer, int bufsize, unsigned int index, Byte* data, int datasize)
-{
-	for(int i = index; i < index+datasize; ++i)
-	{
-		if(i >= bufsize) return 1;
-		buffer[i] = data[i-index];
-	}
-	return 0;
-}
-
-int LoadFromBuffer(Byte* buffer, int bufsize, unsigned int index, Byte* data, int datasize)
-{
-	for(int i = index; i < index+datasize; ++i)
-	{
-		if(i >= bufsize) return 1;
-		data[i-index] = buffer[i];
-	}
-	return 0;
-}
-
-void SendLegacyData(int* len, Byte** buf)
-{
-	STARTNA(__LINE__, 0)
-	// init
-	*len = 0;
-	*buf = LegacyDataBuffer;
-	// Sending header
-	if(WriteToBuffer(LegacyDataBuffer,LegacyDataBufferSize,*len,(Byte*) "JGWL",4) ) MError("Sending legacy data caused overflow");
-	*len += 4; // Accquire length of data - in bytes
-	// Sending generic data
-	if(WriteToBuffer(LegacyDataBuffer,LegacyDataBufferSize,*len,(Byte*) &LegacyGenericData,sizeof(LegacyGenericData)) ) UniversalErrorMessage("Sending legacy data caused overflow");
-	*len += sizeof(LegacyGenericData); // Accquire length of data - in bytes
-	RETURNV;
-}
-
-void ReceiveLegacyData(int len, Byte* buf)
-{
-	STARTNA(__LINE__, 0)
-	// Index in buffer
-	int index = 0; 
-	// Receiving header
-	char head_buf[4] = "";
-	if(LoadFromBuffer(buf,len,index,(Byte*) head_buf,4)) MError("Received malformed legacy data");
-	if(head_buf[0] != 'J' || head_buf[1] != 'G' || head_buf[2] != 'W' || head_buf[3] != 'L') MError("Received malformed legacy data");
-	index += 4;
-	// Receiving generic data
-	if(LoadFromBuffer(buf,len,index,(Byte*) &LegacyGenericData,sizeof(LegacyGenericData))) MError("Received malformed legacy data");
-	index += sizeof(LegacyGenericData);
-	RETURNV;
-}
-/****************************************************************************************/
-
 /*********************************** SAVEFILE SUPPORT ***********************************/
 // return 0 if everything is fine, otherwise 1
 int SaveLegacyData()
@@ -666,7 +603,6 @@ int SaveLegacyData()
 	// Header - for safety purposes
 	if(Saver((void*) "JGWL",4)) RETURN(1);
 	// Saving data
-	if(Saver(&LegacyGenericData,sizeof(LegacyGenericData))) { RETURN(1); }
 	if(save_vl()) { RETURN(1); }
 	if(save_SkelPatches()) { RETURN(1); }
 	// End mark
@@ -684,7 +620,6 @@ int LoadLegacyData()
 	if(Loader(&head_buf,4)) RETURN(1);
 	if(head_buf[0] != 'J' || head_buf[1] != 'G' || head_buf[2] != 'W' || head_buf[3] != 'L') { MError("Malformed savefile - failed to load Legacy data header"); RETURN(1); }
 	// Loading data
-	if(Loader(&LegacyGenericData,sizeof(LegacyGenericData))) { RETURN(1); }
 	if(load_vl()) { RETURN(1); }
 	if(load_SkelPatches()) { RETURN(1); }
 	// End Mark

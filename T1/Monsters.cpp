@@ -7230,12 +7230,7 @@ void Add2Send(void)
 		for(i=0;i<len;i++) S2D_Buf[last+i]=buf[i];
 		last+=len;
 
-		SendMonOfWeek(&len,&buf); if((last+len)>100000) break;
-		*((int *)&S2D_Buf[last])=len; last+=sizeof(int);
-		for(i=0;i<len;i++) S2D_Buf[last+i]=buf[i];
-		last+=len;
-
-		SendLegacyData(&len,&buf); if((last+len)>100000) break; // Exit if too much data
+		SendMonOfWeek(&len,&buf); if((last+len)>100000) break; // Exit if too much data
 		*((int *)&S2D_Buf[last])=len; last+=sizeof(int); // Save length in buffer (int type) 
 		for(i=0;i<len;i++) S2D_Buf[last+i]=buf[i]; // Save every byte
 		last+=len;
@@ -7315,11 +7310,6 @@ void Get4Receive(Byte *Buf)
 
 		len=*(int *)&Buf[first]; first+=sizeof(int);
 		ReceiveMonOfWeek(len,&Buf[first]);
-		first+=len;
-		if(first>last) break;
-
-		len=*(int *)&Buf[first]; first+=sizeof(int); 
-		ReceiveLegacyData(len,&Buf[first]);
 		first+=len;
 		if(first>last) break;
 

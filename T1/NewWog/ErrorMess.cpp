@@ -66,11 +66,12 @@ void MakeErmArgDescription(char* destination, const int& length, _ToDo_* sp)
 {
 	char* message = new char[length];
 	char* buffer = new char[length];
+	for(int i = 0; i < length; ++i) { message[i] = '\0'; buffer[i] = '\0'; }
 	sprintf_s(buffer,length,"Arguments (there's always one)\n"); 
 	std::swap(message,buffer);
 	for(int i = 0; i < sp->ParSet; ++i)
 	{
-		char arg_description[256];
+		char arg_description[256] ="";
 		MakeErmVarNumDescription(arg_description,256,sp->Par[i]);
 		sprintf_s(buffer,length,"%sArg %d: %s\n", message, i+1, arg_description);
 		std::swap(message,buffer);
@@ -84,11 +85,12 @@ void MakeErmParamDescription(char* destination, const int& length, Mes *m, const
 {
 	char* message = new char[length];
 	char* buffer = new char[length];
+	for(int i = 0; i < length; ++i) { message[i] = '\0'; buffer[i] = '\0'; }
 	sprintf_s(buffer,length,"Parameters (if none, syntax error occured)\n"); 
 	std::swap(message,buffer);
 	for(int i = 0; i < Num; ++i)
 	{
-		char param_description[256];
+		char param_description[256]="";
 		MakeErmVarNumDescription(param_description,256,m->VarI[i]);
 		sprintf_s(buffer,length,"%sParam %d: %s\n", message, i+1, param_description);
 		std::swap(message,buffer);
@@ -131,7 +133,7 @@ void ParseLuaTraceback(char* destination, int Length, const char* traceback, int
 void WriteLog(const char* logfilename, const char* message, const bool oneLine)
 {
 	FILE* file = fopen(logfilename,"at");
-	char final_message[ERR_BUFSIZE];
+	char final_message[ERR_BUFSIZE]="";
 	time_t ltime;
 	time(&ltime);
 	if(file != NULL)
@@ -155,11 +157,11 @@ void WriteLog(const char* logfilename, const char* message, const bool oneLine)
 void MakeErmErrorMessage(char* destination, const int& length, _ToDo_* sp, Mes *m, const int& Num, const char* header_info)
 {
 	STARTNA(__LINE__, 0)
-	char header[ERR_BUFSIZE];
+	char header[ERR_BUFSIZE] = "";
 	MakeErmErrorHeader(header,ERR_BUFSIZE,header_info);
-	char arguments[ERR_BUFSIZE];
+	char arguments[ERR_BUFSIZE] = "";
 	MakeErmArgDescription(arguments,ERR_BUFSIZE,sp);
-	char parameters[ERR_BUFSIZE];
+	char parameters[ERR_BUFSIZE] = "";
 	MakeErmParamDescription(parameters,ERR_BUFSIZE,m,Num);
 	sprintf_s(destination,length,"%s\n%s\n%s",header,arguments,parameters);
 	RETURNV
@@ -191,7 +193,7 @@ void ErmSemanticError(_ToDo_* sp, Mes *m, const int& Num) // Marker
 	char last = m->m.s[m->m.l];
 	m->m.s[m->m.l] = 0;
 
-	char message[ERR_BUFSIZE];
+	char message[ERR_BUFSIZE]= "";
 	MakeErmErrorMessage(message,ERR_BUFSIZE,sp,m,Num,LuaPushERMInfo(sp->Self.s,false));
 	UniversalErrorMessage(message,WOGERMLOG);
 
@@ -205,7 +207,7 @@ void ErmSemanticError(_ToDo_* sp, Mes *m, const int& Num) // Marker
 
 void ErmSyntaxError(Mes *M, const int& Ind)
 {
-	char err_mess[ERR_BUFSIZE];
+	char err_mess[ERR_BUFSIZE] = "";
 	sprintf_s(err_mess,ERR_BUFSIZE,"%s\n\n%s", ITxt(26,0,&Strings), LuaPushERMInfo(&M->m.s[Ind], false));
 	lua_pop(Lua, 1);
 	UniversalErrorMessage(err_mess,WOGERMLOG);
@@ -213,7 +215,7 @@ void ErmSyntaxError(Mes *M, const int& Ind)
 
 void LuaErmError(_ToDo_* sp, Mes* m, int Num, char* err_mess)
 {
-	char message[ERR_BUFSIZE];
+	char message[ERR_BUFSIZE] = "";
 	
 	char traceback[ERR_BUFSIZE] = "";
 	LuaCallStart("traceback");
@@ -223,7 +225,7 @@ void LuaErmError(_ToDo_* sp, Mes* m, int Num, char* err_mess)
 
 	MakeErmErrorMessage(message,ERR_BUFSIZE,sp,m,Num, traceback);
 
-	char error_message[ERR_BUFSIZE];
+	char error_message[ERR_BUFSIZE]="";
 	//sprintf_s(error_message,ERR_BUFSIZE,"%s\n\n%s\nSave all ERM vars to WOGVARLOG.TXT (may take time)?",err_mess,message);
 	sprintf_s(error_message,ERR_BUFSIZE,"%s\n\n%s\n",err_mess,message);
 	/*if(UniversalErrorMessage(error_message,WOGERMLOG,2) == MESSAGE_YES) {	DumpERMVars(err_mess,false); } // Commented because there is no need for dump if it's Lua*/
@@ -236,7 +238,7 @@ void LuaErmError(_ToDo_* sp, Mes* m, int Num, char* err_mess)
 void _Error(int File,int Line)
 {
 	STARTNA(__LINE__, 0)
-	char err_mess[ERR_BUFSIZE];
+	char err_mess[ERR_BUFSIZE]="";
 	if(File==0){
 		//if(WoGType){ Zsprintf2(&TermStruct,"Ошибка в скрипте ERM. Причина не указана.",0,0); }
 		//else{ Zsprintf2(&TermStruct,"ERM script Error. Reason unknown.",0,0); }
@@ -276,7 +278,7 @@ void _MError(int File,int Line,char *Txt)
 		: "ERM script Error.\n\tFile: %s\n\tLine : %i\n\tReason:\n\t%s\n\nSave all ERM vars to WOGVARLOG.TXT (may take time)?"
 	);
 	
-	char err_mess[ERR_BUFSIZE];
+	char err_mess[ERR_BUFSIZE]="";
 	sprintf_s(err_mess,ERR_BUFSIZE,ErrorStr, SourceFileList[File], (Dword)Line, Txt);
 	//Zsprintf3(&TermStruct, ErrorStr, (Dword)SourceFileList[File], (Dword)Line, (Dword)Txt);
 	//}
@@ -290,7 +292,7 @@ void _MError(int File,int Line,char *Txt)
 void _TError(int File,int Line,char *Txt)
 {
 	STARTNA(__LINE__, 0)
-	char err_mess[ERR_BUFSIZE];
+	char err_mess[ERR_BUFSIZE]="";
 	if(Txt==0){
 		sprintf_s(err_mess,ERR_BUFSIZE,"Error. \n\tFile: %s\n\tLine : %i",(Dword)SourceFileList[File],(Dword)Line);
 	}else{
@@ -303,13 +305,13 @@ void _TError(int File,int Line,char *Txt)
 
 void DumpMessage(char *txt,int offset){
 	STARTNA(__LINE__, 0)
-	char err_mess[ERR_BUFSIZE];
+	char err_mess[ERR_BUFSIZE]="";
 	strncpy(err_mess,&txt[offset],ERR_BUFSIZE);
 	UniversalErrorMessage(err_mess);
 	RETURNV
 }
 
-static char ME_Buf2[1000000];
+static char ME_Buf2[1000000]="";
 void DumpERMVars(char *Text, bool NoLuaTraceback)
 {
 	// 3.58
