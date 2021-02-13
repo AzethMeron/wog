@@ -1,0 +1,43 @@
+COMMUNICATION LUA C++
+by person who has no idea about embedding Lua in C++, trying to figure out source
+sorry if im stating obvious shit, or misleading
+
+EXECUTING LUA SCRIPTS OF ENGINE
+At the beginning, C++ parses main.lua file.
+Scripts in Lua folder are manually called by main.lua, in hardcoded order. 
+Additionally, all *.lua files in Lua/Misc folder are called. This is directory for many extension scripts, like New Campaign support.
+
+EXPOSING VARIABLES (and functions?)
+Done inside erm_lua.cpp, in function 'void InitLua()'
+cpp:
+	LuaInternalConst("PL_WONUM", PL_WONUM);
+lua:
+	local internal = debug.getregistry()
+	pl_wonum = internal.PL_WONUM
+example above copies value of macro PL_WONUM (C++) into variable pl_wonum in Lua. 
+
+LUA EVENTS CALLED FROM C++ SRC (by using LuaCall("EventName"))
+to be used with -- function global.events.EventName() ... end
+i've noticed there's global.events.EnterContext() but i couldn't find it in c++
+EnterMap
+SaveGame
+LoadGame
+LoadScripts, "global"
+WindowProc
+CallTrigger
+SetErrorLevel
+Edit_SetFocused
+Edit_KeyPressed
+Edit_IsKeyIgnored
+Scroll_Callback
+DialogVMT0
+DialogVMT3
+DialogVMT8
+ClearERT
+GetERT
+OnShowDialog
+OnHideDialog
+DialogCallback
+MessagePictureInit
+MessagePictureHint
+AfterBuildResBar
