@@ -66,7 +66,7 @@ char *SourceFileList[]={
 	"RepeatableBattle.cpp", // 31
 	"ErrorMess", // 32
 	"ExpansionERM", // 33
-	"Memory.cpp", // 34
+	"lua_stdlib.cpp", // 34
 	"?",
 	"?",
 	"?",

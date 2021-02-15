@@ -54,7 +54,4 @@ int ResetLODs(void);
 int LoadCustomLOD(int location,char *name);
 void LoadNewSnd(); // Diakon
 
-int LuaUnloadCustomLOD(lua_State *L);
-int LuaLoadCustomLOD(lua_State *L);
-
 #endif

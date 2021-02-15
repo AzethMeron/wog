@@ -172,6 +172,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\lua_stdlib.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\RepeatableBattle.cpp"
 				>
 			</File>
@@ -235,6 +239,10 @@
 			</File>
 			<File
 				RelativePath="..\\LogManager.h"
+				>
+			</File>
+			<File
+				RelativePath=".\lua_stdlib.h"
 				>
 			</File>
 			<File

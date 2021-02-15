@@ -20,8 +20,7 @@ extern "C"
 #include "wogsetup.h"
 #include "RSMem.h"
 #include "NewWog/ErrorMess.h"
-#include "NewWog/ExpansionERM.h"
-
+#include "NewWog/lua_stdlib.h"
 #include "lod.h"
 
 //#include "afx.h"

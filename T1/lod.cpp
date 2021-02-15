@@ -339,26 +339,3 @@ int SaveLODs(void){
 	}
 	RETURN(0)
 }
-
-// exposing LOD support to Lua
-// note: I don't understand how LODs work. Im just assuming all code regarding them works fine,
-// and that kind=2 works aswell, despite it isn't mentioned in changelogs and has no documentation
-int LuaLoadCustomLOD(lua_State *L)
-{
-	// Input
-	int location = lua_tointeger(L,1);
-	char name[1024] = "";
-	sprintf_s(name,1024,"%s",lua_tostring(L,2));
-	int kind = lua_tointeger(L,3);
-	// Loading LOD
-	int ind = Lod::LoadCustomLOD(location, name, kind);
-	// Returning index
-	lua_pushinteger(L,ind);
-	return 1; // return informs LUA that X values on stack are returned values!
-}
-
-int LuaUnloadCustomLOD(lua_State *L)
-{
-	Lod::UnloadCustomLOD(lua_tointeger(L,1));
-	return 0;
-}

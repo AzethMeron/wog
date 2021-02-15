@@ -1,4 +1,5 @@
 #pragma once
+#include <cstdlib>
 #include "../structs.h"
 
 // Other, useful for debugging
