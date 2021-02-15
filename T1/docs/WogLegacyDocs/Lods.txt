@@ -1,0 +1,33 @@
+first thing: i don't understand how Lod support is programmed
+that being said, here's what i've figured out
+
+h3wog.lod, h3std.lod, h3custom.lod are NOT managed by Custom Lod Support. I think those are loaded using internal H3 tool.
+To load new Lod, use Lod::LoadCustomLOD(location,name,kind);
+	int location - location modifier, like in UN:J8
+	char name[] - cstring, name of Lod file
+	int kind - parameter:
+		kind=Lod::STORED means "Normal mode. Lod filename is stored in savefile, it is automatically loaded when loading game and unloaded upon resetting/starting new game".
+		kind=Lod::TEMP means "Temporary mode. Lod is unloaded upon resetting/starting new game. It isn't loaded automatically".
+		kind=Lod::PERM means "Permanent mode. Lod isn't unloaded nor loaded automatically."
+		Permenent mode had no mentions in changelogs. It seems to work properly tho.
+LOD will be loaded EVEN if it is already loaded, thus be careful with using LD within repeatable functions!
+Temporary mode = LD:T
+Normal mode = LD:L
+Permanent mode isn't available via ERM
+
+I've added support for custom lods to Lua:
+local internal = debug.getregistry()
+-- functions
+local ind = internal.LoadCustomLOD(location,name,kind)
+internal.UnloadCustomLOD(ind)
+-- constants
+internal.LodKindTemp (equal to C Lod::TEMP)
+internal.LodKindStored (equal to C Lod::STORED)
+internal.LodKindPerm (equal to C Lod::PERM)
+it has no arg control tho, this is why we should develop proper, secured functions in Lua
+i've started this in Misc/StdLib.lua. It is really poor right now
+
+But why have i did this?
+Well, to allow usage of lods in Permanent mode. It should solve the issue with "Note though that standard TXT files (like crtraits.txt) in game are parsed at game start. so even if you modify it, it does not affect the game. "
+I didn't test it, but if you add script into 'global' folder of Mod loading your LOD file, it should work.
+And well, it allows to load LODs globally, at game startup, while ERM receiver LD allows to only load LODs for specific scenario.

@@ -1462,7 +1462,7 @@ static void OnLodsLoaded()
 		LodTypes::Add2List(5);
 	}
 	//BaseFileLoader();
-	LuaCall("LoadScripts", "global");
+	LuaCall("LoadScripts", "global"); 
 	RETURNV
 }
 

@@ -20,6 +20,9 @@ extern "C"
 #include "wogsetup.h"
 #include "RSMem.h"
 #include "NewWog/ErrorMess.h"
+
+#include "lod.h"
+
 //#include "afx.h"
 #define __FILENUM__ 25
 
@@ -1186,6 +1189,9 @@ static const struct luaL_reg LuaLib_internal [] =
 	{"GetHeroGod", LuaGetHeroGod},
 	{"HeroHasBlessCurse", LuaHeroHasBlessCurse},
 	{"ITxt", LuaITxt},
+	// Alpha 8.2
+	{"LoadCustomLOD", LuaLoadCustomLOD},
+	{"UnloadCustomLOD", LuaUnloadCustomLOD},
 	{0, 0}
 };
 
@@ -1260,7 +1266,11 @@ void InitLua()
 	LuaInternalConst("ModsPath", ModsPath);
 	LuaInternalConst("ERM_HeroStr", (int)&ERM_HeroStr);
 	LuaInternalConst("DumpERMVars", (int)DumpERMVars);
+	// Alpha 8.2
 	LuaInternalConst("PL_WONUM", PL_WONUM);
+	LuaInternalConst("LodKindTemp",Lod::TEMP);
+	LuaInternalConst("LodKindPerm",Lod::PERM);
+	LuaInternalConst("LodKindStored",Lod::STORED);
 
 	// Scripts path
 	LoadIniPath(Path, "LuaScriptsPath", (DeveloperPath[0] ? Format("%sLua\\", DeveloperPath) : "Data\\zvs\\Lua\\"));

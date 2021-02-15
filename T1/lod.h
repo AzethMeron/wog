@@ -4,6 +4,7 @@
 #define __LOD__
 
 #include "structs.h"
+#include "erm_lua.h"
 //void *h3new(size_t sz);
 
 class Lod{
@@ -52,5 +53,8 @@ int SaveLODs(void);
 int ResetLODs(void);
 int LoadCustomLOD(int location,char *name);
 void LoadNewSnd(); // Diakon
+
+int LuaUnloadCustomLOD(lua_State *L);
+int LuaLoadCustomLOD(lua_State *L);
 
 #endif

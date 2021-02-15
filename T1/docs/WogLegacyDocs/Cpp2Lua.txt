@@ -1,13 +1,16 @@
 COMMUNICATION LUA C++
 by person who has no idea about embedding Lua in C++, trying to figure out source
 sorry if im stating obvious shit, or misleading
+Most important file for Lua in H3 is erm_lua.cpp
+
 
 EXECUTING LUA SCRIPTS OF ENGINE
 At the beginning, C++ parses main.lua file.
 Scripts in Lua folder are manually called by main.lua, in hardcoded order. 
 Additionally, all *.lua files in Lua/Misc folder are called. This is directory for many extension scripts, like New Campaign support.
 
-EXPOSING VARIABLES (and functions?)
+
+EXPOSING VARIABLES
 Done inside erm_lua.cpp, in function 'void InitLua()'
 cpp:
 	LuaInternalConst("PL_WONUM", PL_WONUM);
@@ -15,6 +18,40 @@ lua:
 	local internal = debug.getregistry()
 	pl_wonum = internal.PL_WONUM
 example above copies value of macro PL_WONUM (C++) into variable pl_wonum in Lua. 
+
+
+EXPOSING FUNCTIONS TO LUA
+real explanation: https://chsasank.github.io/lua-c-wrapping.html
+
+to expose function to Lua, you need to create function returning integer, with lua_State* as argument, example:
+int foo(lua_State*);
+
+then add it into array (erm_lua.cpp)
+static const struct luaL_reg LuaLib_internal [] = {
+	...
+	{"foo",foo},
+	{0,0}
+}
+
+now you can call this function from Lua:
+	local internal = debug.getregistry()
+	internal.foo(arg1,arg2,arg3)
+
+managing arguments and returned values:
+int foo(lua_State* L)
+{
+	// getting input
+	int arg1 = lua_tointeger(L,1);
+	char arg2[1024] = "";
+	sprintf_s(arg2,1024,"%s",lua_tostring(L,2));
+	int arg3 = lua_tointeger(L,3);
+	// returning values
+	lua_pushinteger(L,16);
+	lua_pushinteger(L,32);
+	return 2; // number of returned values
+}
+using lua_tointeger(...) and other tools can appearantly cause segfault if there's no data (or wrong data) under given index on stack.
+
 
 LUA EVENTS CALLED FROM C++ SRC (by using LuaCall("EventName"))
 to be used with -- function global.events.EventName() ... end
