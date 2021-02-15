@@ -7,6 +7,7 @@
 #include "ExpansionERM.h"
 #include <cmath>
 #include <cstring>
+#include "../service.h"
 
 #define __FILENUM__ 33
 #include "List.h"
@@ -262,7 +263,7 @@ int ERM_VarList(char Cmd,int Num,_ToDo_* sp,Mes *Mp)
 			}
 		} break;
 
-		case 'U': { Message(vl_calculate(*list));  } break;
+		//case 'U': { Message(vl_calculate(*list));  } break;
 
 		case 'E':
 		{
@@ -314,67 +315,8 @@ double round( double fValue )
 int ERM_Testing(char Cmd,int Num,_ToDo_* sp,Mes *Mp)
 {
 	STARTNA(__LINE__, 0)
-	//Dword MixPos=GetDinMixPos(sp);
-	//_MapItem_ *mip=GetMapItem2(MixPos);
 	switch(Cmd)
 	{
-		// Show pointer value
-		case 'P':
-		{
-			Message(Format("(Internal) Pointer value: %lu", pointer));
-		} break;
-
-		// Get square root of value. No support for float variables
-		case 'R':
-		{
-			CHECK_ParamsNum(3)
-			int value = 0;
-			if(Apply(&value,4,Mp,0)) { MError2("Cannot get parameter 1 - value to be rooted"); RETURN(0); }
-			int modifier = 0;
-			if(Apply(&modifier,4,Mp,1)) { MError2("Cannot get parameter 2 - modifier"); RETURN(0); }
-			int output = int( \
-				sqrt(double(value)) * double(modifier) \
-				);
-			if(Apply(&output,4,Mp,2) == 0) { MError2("Cannot set parameter 3 - output value"); RETURN(0)}
-		} break;
-
-		// Call any trigger - note it is bad idea, cuz it doesn't make ANY other changes
-		case 'C':
-		{
-			CHECK_ParamsNum(1);
-			unsigned long ptr = 0;
-			if(Apply(&ptr,sizeof(ptr),Mp,0)) { MError2("Cannot get parameter 1 - pointer"); RETURN(0); }
-			pointer=ptr;
-			ProcessERM();
-		} break;
-
-		case 'S': // Szkieletornia
-		{
-			int cr_type = 0;
-			if(Apply(&cr_type,sizeof(cr_type),Mp,0)) { MError2("Cannot get creature type"); RETURN(0); }
-			if(cr_type < 0 || cr_type >= MONNUM) { MError2("Incorrect creature (source) type"); RETURN(0); }
-			int last_cr = SkelTrans[cr_type];
-			Apply(&SkelTrans[cr_type],sizeof(SkelTrans[cr_type]),Mp,1);
-			if(SkelTrans[cr_type] < 0 || SkelTrans[cr_type] >= MONNUM) { SkelTrans[cr_type] = last_cr; MError2("Incorrect creature (destination) type"); RETURN(0); } 
-		} break;
-
-		// Calculate logaritm (n-based) of value
-		case 'L':
-		{
-			CHECK_ParamsNum(4)
-			int base = 0;
-			if(Apply(&base,4,Mp,0)) { MError2("Cannot get parameter 1 - logbase"); RETURN(0); }
-			int value = 0;
-			if(Apply(&value,4,Mp,1)) { MError2("Cannot get parameter 2 - value to be logarithmed"); RETURN(0); }
-			int modifier = 0;
-			if(Apply(&modifier,4,Mp,2)) { MError2("Cannot get parameter 3 - modifier"); RETURN(0); }
-			double temp1 = log( double(value) );
-			double temp2 = log( double(base) );
-			temp1 = temp1 / temp2;
-			int output = round(temp1 * double(modifier));
-			if(Apply(&output,4,Mp,3) == 0) { MError2("Cannot set parameter 4 - output value"); RETURN(0)}
-		} break;
-
 		default:
 			{ EWrongCommand(); RETURN(0); }
 			break;
@@ -637,3 +579,37 @@ void ResetLegacyData()
 	RETURNV;
 }
 /****************************************************************************************/
+
+int LuaCalcObjects(lua_State *L)
+{
+	int type = lua_tointeger(L,1);
+	int subtype = lua_tointeger(L,2);
+	lua_pushinteger(L,CalcObjects(type,subtype));
+	return 1;
+}
+
+int LuaFindNextObjects(lua_State *L)
+{
+	int type = lua_tointeger(L,1);
+	int subtype = lua_tointeger(L,2);
+	int direction = lua_tointeger(L,3);
+	int x = lua_tointeger(L,4);
+	int y = lua_tointeger(L,5);
+	int z = lua_tointeger(L,6);
+
+	if(FindNextObjects(type,subtype,&x,&y,&z,direction)) { MError("LuaFindNextObjects: cannot find more objects."); }
+
+	lua_pushinteger(L,x);
+	lua_pushinteger(L,y);
+	lua_pushinteger(L,z);
+	return 3;
+}
+
+int LuaDoesFileExist(lua_State *L)
+{
+	char name[1024] = "";
+	sprintf_s(name,1024,"%s",lua_tostring(L,1));
+	int modifier = lua_tointeger(L,2);
+	lua_pushinteger(L,DoesFileExist(name,modifier));
+	return 1;
+}

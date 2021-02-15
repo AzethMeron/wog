@@ -22,6 +22,9 @@
 // Basically this list helps only with storing, finding, and iterating (by using _ListIterator_<Type>)
 // You must make your own tools to add/remove objects, for every task you want to use it. Still helpful IMO.
 //
+// You should alwaysuse name-buffer initiated with zeros, of length ID_LENGTH
+// char buffer[ID_LENGTH] = "";
+//
 // Methods: 
 // unsigned int size() const - measure number of items in List (complexity depends on number of items O(n))
 // const char* id_front() const - get name of first item (c-string)

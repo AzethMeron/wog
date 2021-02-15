@@ -121,8 +121,6 @@ void __fastcall PostGainLevel(int skill1, int skill2);
 extern int GL_SSkillResult;
 void MakeQuestLog(void);
 Dword ArtifacsDescription(void);
-int CalcObjects(int t,int st);
-int FindObjects(int t,int st,int i,int *xv,int *yv,int *lv);
 void BFCall(void);
 void BACall2(Dword,int);
 void BACall3(int,int);
@@ -130,6 +128,9 @@ void ArtifactOff(void);
 void ArtifactOn(void);
 void TriggerIP(Dword n);
 void COCall(Dword n,_Hero_ *hp);
+int CalcObjects(int t,int st);
+int FindObjects(int t,int st,int i,int *xv,int *yv,int *lv);
+int FindNextObjects(int t,int st,int *xv,int *yv,int *lv,int direction);
 // 3.58
 void AdvMagicManager(void);
 void AdvMagicManagerSkill(void);

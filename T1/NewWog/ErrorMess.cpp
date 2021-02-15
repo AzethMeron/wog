@@ -146,7 +146,7 @@ void WriteLog(const char* logfilename, const char* message, const bool oneLine)
 	}
 	else
 	{
-		sprintf_s(final_message,ERR_BUFSIZE,"Failed to open {log} file\n%s\n\nThis {may} mean that there is no {woglogs} folder in Heroes 3 main directory",logfilename);
+		sprintf_s(final_message,ERR_BUFSIZE,"Failed to open {log} file\n%s\n\nThis {may} mean that there is no {woglogs} folder in Heroes 3 main directory, or insufficent permissions.",logfilename);
 		UniversalErrorMessage(final_message);
 	}
 }

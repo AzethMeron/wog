@@ -20,6 +20,7 @@ extern "C"
 #include "wogsetup.h"
 #include "RSMem.h"
 #include "NewWog/ErrorMess.h"
+#include "NewWog/ExpansionERM.h"
 
 #include "lod.h"
 
@@ -1192,6 +1193,9 @@ static const struct luaL_reg LuaLib_internal [] =
 	// Alpha 8.2
 	{"LoadCustomLOD", LuaLoadCustomLOD},
 	{"UnloadCustomLOD", LuaUnloadCustomLOD},
+	{"CalcObjects",LuaCalcObjects},
+	{"FindNextObjects",LuaFindNextObjects},
+	{"DoesFileExist",LuaDoesFileExist},
 	{0, 0}
 };
 
