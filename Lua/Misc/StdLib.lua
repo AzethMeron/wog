@@ -15,9 +15,9 @@ local _NOGLOBALS
 -- typical user shouldn't use internal.smt, and there should be some error management for tools
 -- this is why i've made these
 Lib.Lod = {
-	Temp = internal.LodKindTemp,
-	Stored = internal.LodKindStored,
-	Perm = internal.LodKindPerm,
+	Temp = function() return internal.LodKindTemp end,
+	Stored = function() return internal.LodKindStored end,
+	Perm = function() return internal.LodKindPerm end,
 
 	Unload = function(ind) 
 	-- ind - index of LOD file to be unloaded
