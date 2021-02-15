@@ -4,7 +4,7 @@ StdLib = {}
 local internal = debug.getregistry()
 local Lib = StdLib
 local type = type
-local DbgMess = debug.Message
+local DbgMess = error
 
 ----------- No globals from this point ------------
 
@@ -15,6 +15,10 @@ local _NOGLOBALS
 -- typical user shouldn't use internal.smt, and there should be some error management for tools
 -- this is why i've made these
 Lib.Lod = {
+	Temp = internal.LodKindTemp,
+	Stored = internal.LodKindStored,
+	Perm = internal.LodKindPerm,
+
 	Unload = function(ind) 
 	-- ind - index of LOD file to be unloaded
 	-- return -1 if there was error

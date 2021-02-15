@@ -13,7 +13,8 @@ Changelog AFTER Alpha 8.0, by WoG Legacy Team
 [+] Logs moved to woglogs/ folder. It's created automatically by exec at setup
 [+] We have now LuaLog, WOGERMLOG, WOGVARLOG, WOGCRASHLOG and WOGCRASHDUMP. A lot, but each of them makes sense.
 [+] Added struct that's automatically saved to (and loaded from) savefile. Proven to work in singleplayer, doesn't know if it works in multi. 
-[+] Many Lua/ERM errors are managed by C code now and doesn't cause crash (when managed by Lua, they caused crashes...) Additionally allows me to immediately show argument and parameter values. 
+[+] Many Lua/ERM errors are managed by C code now and doesn't cause crash (when managed by Lua, they caused crashes...) Additionally allows me to immediately show argument and parameter values. Note: can be disabled via commenting 1 line in C++ code
+[+] Lua StdLib created. Contains some functions (loading/unloading lods, interating through objects, checking if file exists)
 [ ] Curses separated from herospec.
 [ ] I kinda don't understand purpose of h3std, so i've moved everything to h3wog EXCEPT txt files. So all text files can be put in h3std for easier translation,
 [ ] Old saves will NOT work.
