@@ -1948,7 +1948,7 @@ struct __Accessers{
 struct __Copiers{
 	Byte *from;
 	Byte *to;
-	long  len;
+	long  len; // in Bytes?
 } Copiers[]={
 // FindERMn
 	{(Byte *)"\xE8\x1\x1\x1\x1\x5E\x33\xC0\x5B\x5D\xC2\x10\x00",(Byte *)0x4FDF8B,13},

@@ -8677,7 +8677,7 @@ void UpgrInd(void){
 //
 static int   MF_Trigger=0;
 static int   MF_Dam, MF_Cor;
-static int   MF_Enable, MF_Ret;
+static int   MF_Enable, MF_Ret; // Ret - i think it is retalliation
 static Byte *MF_Mon;
 static int   MF_RetAddr;
 //static int   MF_Exp;
