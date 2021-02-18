@@ -5,6 +5,7 @@
 
 // Creatures
 void AddSkeletonPatch(int cr_id, int cr_new);
+void RemoveSkeletonPatch(int cr_id, bool error_on_absence = false);
 
 // Savefile
 int SaveLegacyData();

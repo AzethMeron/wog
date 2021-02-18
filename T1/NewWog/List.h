@@ -77,7 +77,7 @@ class _List_
 {
 	private:
 		_ListObject_<Type>* top;
-	
+		_List_<Type>(const _List_<Type>&); // disable copying
 	public:
 		unsigned int size() const;
 		const char* id_front() const;

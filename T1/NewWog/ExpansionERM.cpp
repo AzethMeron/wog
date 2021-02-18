@@ -15,208 +15,148 @@
 // by Jakub Grzana
 
 /************************************ NEW VARIABLES *************************************/
-// should be remade to use list implementation from List.h
-struct _NewVariable_ {
-	_NewVariable_* next;
-
-	char name[32];
-	char type;
-
-	char* val_str;
-	int val_int;
-	// would be better, if both stored in one pointer - Byte* data, then casted to proper representation
-	// but waste is 4 bytes per variable, i think it is acceptable XD 
-	
-	_NewVariable_() { for(int i = 0; i < 32; ++i) { name[i]='\0'; } next = NULL; val_str = NULL; val_int = 0; }
+// _DataBlock_ replaced new variables structure. It is more universal, tho harder to use by scripter
+struct _DataBlock_ {
+	// storage
+	int length;
+	Byte* data;
+	// constructor, destructor
+	_DataBlock_(int len) {
+		if(len <= 0) 
+		{ 
+			MError("(internal) trying to allocate less than 0 bytes"); length = 0; data = NULL; // should be managed in layer above, in ERM func 
+		}
+		else 
+		{ 
+			length = len;
+			data = new Byte[len];
+			for(int i = 0; i < len; ++i) 
+			{ data[i] = '\0'; } // fill with zeros
+		}
+	}
+	~_DataBlock_() { 
+		delete data; 
+	}
+	// remove copy-able
+	private: _DataBlock_(const _DataBlock_&);
 };
 
-_NewVariable_* vl_get_next(_NewVariable_* list)
+_List_<_DataBlock_> datablocks_stored;
+_List_<_DataBlock_> datablocks_temp;
+_List_<_DataBlock_> datablocks_perm;
+
+void AddDataBlock(_List_<_DataBlock_>* list, const char name[], int len)
 {
 	STARTNA(__LINE__, 0)
-	if(list == NULL) RETURN(NULL);
-	RETURN(list->next)
-}
-
-int Apply(_NewVariable_* var, Mes* Mp, char ind)
-{
-	STARTNA(__LINE__, 0)
-	int output = 0;
-	if(var->type == 0) { output = Apply(&var->val_int,sizeof(var->val_int),Mp,ind); }
-	else if(var->type == 1) { if(StrMan::Apply(var->val_str,Mp,ind,512)) { output = 0; } else { output = 1; } }
-	RETURN(output)
-}
-
-int var_save(_NewVariable_* var) 
-{
-	STARTNA(__LINE__, 0)
-	if(Saver(var->name,sizeof(var->name))) { RETURN(1); }
-	if(Saver(&var->type,sizeof(var->type))) { RETURN(1); }
-	if(var->type == 0) { if(Saver(&var->val_int,sizeof(var->val_int))) { RETURN(1); } }
-	if(var->type == 1) { if(Saver(var->val_str,512)) { RETURN(1); } }
-	RETURN(0)
-}
-
-int var_load(_NewVariable_* var)
-{
-	STARTNA(__LINE__, 0)
-	if(Loader(var->name,sizeof(var->name))) { RETURN(1);}
-	if(Loader(&var->type,sizeof(var->type))) { RETURN(1);}
-	if(var->type == 0) { if(Loader(&var->val_int,sizeof(var->val_int))) { RETURN(1); } }
-	if(var->type == 1) { if(var->val_str == NULL) {var->val_str = new char[512];} if(Loader(var->val_str,512)) { RETURN(1); } }
-	var->next = NULL;
-	RETURN(0)
-}
-
-_NewVariable_* vl_save = NULL;
-_NewVariable_* vl_temp = NULL;
-
-int custom_string_compare(char* a, char* b, int num)
-{
-	for(int i = 0; i < num; ++i)
+	_DataBlock_* block = list->find(name);
+	if(block) // exists
 	{
-		if(a[i] != b[i]) return 1;
+		MError("Trying to create multiple multiple datablocks with the same name"); // should be managed in layer above, by ERM function
 	}
-	return 0;
+	else // null
+	{
+		block = new _DataBlock_(len);
+		list->push_front(name,block);
+	}
+	RETURNV;
 }
 
-_NewVariable_* vl_find(char* name, _NewVariable_* list)
+void RemoveDataBlock(_List_<_DataBlock_>* list, const char name[])
 {
 	STARTNA(__LINE__, 0)
-	_NewVariable_* ptr = list;
-	while(ptr)
+	_DataBlock_* block = list->find(name);
+	if(block) // exists
 	{
-		if(!custom_string_compare(name,ptr->name,32)) RETURN(ptr)
-		ptr = vl_get_next(ptr);
+		list->remove(name);
+		delete block;
 	}
-	RETURN(NULL)
-}
-
-void vl_clear(_NewVariable_* &list)
-{
-	STARTNA(__LINE__, 0)
-	_NewVariable_* ptr_prev = list;
-	_NewVariable_* ptr_next = NULL;
-	if(list) ptr_next = list->next;
-	while(ptr_prev)
+	else // doesnt exist
 	{
-		delete ptr_prev;
-		ptr_prev = ptr_next;
-		if(ptr_next) ptr_next = ptr_next->next;
-	}
-	list = NULL;
-	RETURNV
-}
-
-int vl_add(char* name, char type, _NewVariable_* &list)
-{
-	STARTNA(__LINE__, 0)
-	if(vl_find(name,list)) { RETURN(1); }
-	_NewVariable_* ptr_prev = list;
-	_NewVariable_* ptr_next = NULL;
-	if(list) ptr_next = vl_get_next(list);
-	while(ptr_next)
-	{
-		ptr_prev = ptr_next;
-		ptr_next = vl_get_next(ptr_next);
-	}
-	if(!list) { list = new _NewVariable_; ptr_next = list; }
-	else { ptr_next = new _NewVariable_;  ptr_prev->next = ptr_next; }
-	ptr_next->type = type;
-	sprintf_s(ptr_next->name,32,"%s",name);
-	if(type == 1) ptr_next->val_str = new char[512];
-	RETURN(0)
-}
-
-void vl_remove(char* name, _NewVariable_* &list)
-{
-	STARTNA(__LINE__, 0)
-	_NewVariable_* ptr_prev = list;
-	_NewVariable_* ptr_next = NULL;
-	if(list) // exception - if first element
-	{
-		if(custom_string_compare(name,list->name,32) == 0)
-		{
-			ptr_next = list->next;
-			if(list->val_str) delete list->val_str;
-			delete list;
-			list = ptr_next;
-			RETURNV;
-		}
-	}
-	while(ptr_prev) // every other
-	{
-		ptr_next = ptr_prev->next;
-		if(ptr_next)
-		{
-			if(custom_string_compare(name,ptr_next->name,32) == 0)
-			{
-				if(ptr_next->val_str) delete ptr_next->val_str;
-				ptr_prev->next = ptr_next->next;
-				delete ptr_next;
-				RETURNV;
-			}
-		}
-		ptr_prev = ptr_next;
+		// should be managed by layer above, in ERM function
+		MError("(internal) Trying to remove non-existant block");
 	}
 	RETURNV
 }
 
-unsigned int vl_calculate(_NewVariable_* list)
+int save_single_datablock_list(_List_<_DataBlock_>* list)
 {
 	STARTNA(__LINE__, 0)
-	unsigned int output = 0;
-	_NewVariable_* ptr_prev = list;
-	_NewVariable_* ptr_next = NULL;
-	if(list) ptr_next = list->next;
-	while(ptr_prev)
+	unsigned int num = list->size();
+	if(Saver(&num,sizeof(num))) { RETURN(1); }
+	_ListIterator_<_DataBlock_> iterator = list->begin();
+	for(unsigned int i = 0; i < num; ++i)
 	{
-		++output;
-		ptr_prev = ptr_next;
-		if(ptr_next) ptr_next = ptr_next->next;
+		if(Saver( iterator.id(), ID_LENGTH)) { RETURN(1); }
+		_DataBlock_* current = *iterator;
+		if(Saver( &current->length, sizeof(current->length))) { RETURN(1); }
+		if(Saver( current->data, current->length ) ) { RETURN(1); }
+		++iterator;
 	}
-	RETURN(output)
+	RETURN(0)
 }
 
-int save_vl()
+int load_single_datablock_list(_List_<_DataBlock_>* list)
+{
+	STARTNA(__LINE__, 0)
+	unsigned int num = 0;
+	if(Loader(&num,sizeof(num)) ) { RETURN(1); }
+	for(unsigned int i = 0; i < num; ++i)
+	{
+		char name[ID_LENGTH] = "";
+		if(Loader(name,sizeof(name)) ) { RETURN(1); }
+		int length = 0;
+		if(Loader(&length,sizeof(length))) { RETURN(1); }
+		AddDataBlock(list, name, length);
+		if(Loader(list->front()->data,length*sizeof(Byte))) { RETURN(1); }
+	}
+	RETURN(0)
+}
+
+void reset_single_datablock_list(_List_<_DataBlock_>* list)
+{
+	STARTNA(__LINE__, 0)
+	unsigned int num = list->size();
+	for(unsigned int i = 0; i < num; ++i)
+	{
+		_DataBlock_* current = list->front();
+		list->pop_front();
+		delete current;
+	}
+	RETURNV
+}
+
+int save_datablocks()
 {
 	STARTNA(__LINE__, 0)
 	if(Saver("varl",4)) { RETURN(1); }
 	// data
-	unsigned int size_save = vl_calculate(vl_save); 
-	if(Saver(&size_save,sizeof(size_save))) { RETURN(1); }
-
-	for(_NewVariable_* ptr = vl_save; ptr; ptr = vl_get_next(ptr))
-	{
-		var_save(ptr);
-	}
-	
+	save_single_datablock_list(&datablocks_stored);
 	if(Saver("lrav",4)) { RETURN(1); }
 	RETURN(0)
 }
 
-int load_vl()
+int load_datablocks()
 {
 	STARTNA(__LINE__, 0)
 	// header
 	char head_buf[4] = "";
 	if(Loader(&head_buf,4)) RETURN(1);
-	if(head_buf[0] != 'v' || head_buf[1] != 'a' || head_buf[2] != 'r' || head_buf[3] != 'l') { MError("Malformed savefile - failed to load New Var List header"); RETURN(1); }
+	if(head_buf[0] != 'v' || head_buf[1] != 'a' || head_buf[2] != 'r' || head_buf[3] != 'l') { MError("Malformed savefile - failed to load Datablocks header"); RETURN(1); }
 	
 	// data
-	unsigned int size_save = 0;
-	if(Loader(&size_save,sizeof(size_save))) { RETURN(1); }
-
-	for(unsigned int i = 0; i < size_save; ++i)
-	{
-		_NewVariable_* ptr = new _NewVariable_;
-		if(var_load(ptr)) { RETURN(1); }
-		ptr->next = vl_save;
-		vl_save = ptr;
-	}
+	load_single_datablock_list(&datablocks_stored);
 
 	// End Mark
 	if(Loader(&head_buf,4)) RETURN(1);
-	if(head_buf[0] != 'l' || head_buf[1] != 'r' || head_buf[2] != 'a' || head_buf[3] != 'v') { MError("Malformed savefile - failed to load New Var List end mark"); RETURN(1); }
+	if(head_buf[0] != 'l' || head_buf[1] != 'r' || head_buf[2] != 'a' || head_buf[3] != 'v') { MError("Malformed savefile - failed to load Datablocks end mark"); RETURN(1); }
+	RETURN(0)
+}
+
+int reset_datablocks()
+{
+	STARTNA(__LINE__, 0)
+	reset_single_datablock_list(&datablocks_stored);
+	reset_single_datablock_list(&datablocks_temp);
 	RETURN(0)
 }
 	
@@ -226,70 +166,136 @@ int ERM_VarList(char Cmd,int Num,_ToDo_* sp,Mes *Mp)
 	STARTNA(__LINE__, 0);
 
 	int mode = GetVarVal(&sp->Par[0]);
-	_NewVariable_** list = NULL;
+	_List_<_DataBlock_>* list = NULL;
 
-	if(mode == 0) { list = &vl_save;}
-	else if(mode == 1) { list = &vl_temp; }
-	else { MError2("Unknown 'mode' of variable"); RETURN(0); }
+	if(mode == 0) { list = &datablocks_stored;}
+	else if(mode == 1) { list = &datablocks_temp; }
+	else if(mode == 2) { list = &datablocks_perm; }
+	else { MError2("Unknown 'mode' of DataBlock"); RETURN(0); }
 
 	switch(Cmd)
 	{
-		case 'I':
-		{
-			CHECK_ParamsNum(2);
-			char name[32] = "";
-			if(StrMan::Apply(name,Mp,0,32) == 0) { MError2("Cannot get 'name' of variable"); RETURN(0); }
-			int type = 0;
-			if(type != 0 && type != 1) { MError2("Unrecognised 'type'"); RETURN(0); }
-			if(Apply(&type,sizeof(type),Mp,1)) { MError2("Cannot get 'type' of variable"); RETURN(0); }
-			if(vl_find(name,*list)) { MError2("Name already taken"); RETURN(0); }
-			vl_add(name,type,*list);
+		// LOW-LEVEL
+		case 'C': { // check whether datablock already exists
+			CHECK_ParamsMin(2);
+			CHECK_ParamsMax(3);
+			char name[ID_LENGTH] = "";
+			if(StrMan::Apply(name,Mp,0,ID_LENGTH) == 0 ) { MError2("Cannot get name of DataBlock"); RETURN(0); }
+			_DataBlock_* ptr = list->find(name);
+			int address = NULL;
+			int length = -1;
+			if(ptr) {
+				address = (int)ptr->data;
+				length = ptr->length;
+			}
+			Apply(&address,sizeof(address),Mp,1);
+			if(Num==3) {
+				Apply(&length,sizeof(length),Mp,2);
+			}
 		} break;
 
-		case 'A':
-		{
-			CHECK_ParamsMin(2);
-			char name[32] = "";
-			if(StrMan::Apply(name,Mp,0,32) == 0) { MError2("Cannot get 'name' of variable"); RETURN(0); }
-			_NewVariable_* var = vl_find(name,*list);
-			if(Num > 2) { char type = 0; Apply(&type,sizeof(type),Mp,2); if(type != 0 && type != 1) { MError2("Incorrect type"); RETURN(0); } vl_add(name,type,*list); var = vl_find(name,*list); }
-			if(var)
+		case 'R': { // remove block
+			CHECK_ParamsNum(1);
+			char name[ID_LENGTH] = "";
+			if(StrMan::Apply(name,Mp,0,ID_LENGTH) == 0 ) { MError2("Cannot get name of DataBlock"); RETURN(0); }
+			_DataBlock_* ptr = list->find(name);
+			if(ptr)
 			{
-				Apply(var,Mp,1); 
+				RemoveDataBlock(list,name);
 			}
 			else
 			{
-				MError2("Memory slot not found"); RETURN(0); 
+				MError2("Attempting to remove non-existant DataBlock"); RETURN(0);
 			}
 		} break;
 
-		//case 'U': { Message(vl_calculate(*list));  } break;
-
-		case 'E':
-		{
-			vl_clear(*list);			
+		case 'A': { // direct access to data
+			CHECK_ParamsNum(2);
+			char name[ID_LENGTH] = "";
+			if(StrMan::Apply(name,Mp,0,ID_LENGTH) == 0 ) { MError2("Cannot get name of DataBlock"); RETURN(0); }
+			_DataBlock_* block = list->find(name);
+			if(block == NULL) { MError2("Accessing non-existant DataBlock"); RETURN(0); }
+			if(Mp->VarI[1].Type == 7) // z-strings
+			{
+				StrMan::Apply((char*)block->data,Mp,1,block->length);
+			}
+			else // integers 
+			{
+				Apply(block->data,4,Mp,1);
+			}
 		} break;
 
-		case 'R':
-		{
-			CHECK_ParamsNum(1);
-			char name[32] = "";
-			if(StrMan::Apply(name,Mp,0,32) == 0) { MError2("Cannot get 'name' of variable"); RETURN(0); }
-			vl_remove(name,*list);
-		} break;
-
-		case 'C':
-		{
+		// HIGH-LEVEL
+		case 'B': { // array of bytes - interface for easier accessing
 			CHECK_ParamsMin(2);
-			char name[32] = "";
-			if(StrMan::Apply(name,Mp,0,32) == 0) { MError2("Cannot get 'name' of variable"); RETURN(0); }
-			int exist = 0;
-			_NewVariable_* ptr = vl_find(name,*list);
-			if(ptr) { exist = 1; }
-			int type = -1;
-			if(ptr) { type = ptr->type; }
-			if(Apply(&exist,sizeof(exist),Mp,1) == 0) { MError2("'Exist' parameter is read-only");   RETURN(1); }
-			if(Num >= 3) if(Apply(&type,sizeof(type),Mp,2) == 0) { MError2("'Type' parameter is read-only"); RETURN(1); }
+			CHECK_ParamsMax(3);
+			char name[ID_LENGTH] = "";
+			if(StrMan::Apply(name,Mp,0,ID_LENGTH) == 0 ) { MError2("Cannot get name of DataBlock"); RETURN(0); }
+			if(Num==2) // creating
+			{
+				int length = 0;
+				if(Apply(&length,sizeof(length),Mp,1)) { MError2("Cannot get length of DataBlock"); RETURN(0); }
+				if(list->find(name)) { MError2("DataBlock with given name already exists"); RETURN(0); }
+				AddDataBlock(list,name,length);
+			} 
+			else // accessing
+			{
+				int index = 0;
+				if(Apply(&index,sizeof(index),Mp,1)) { MError2("Cannot get index"); RETURN(0); }
+				_DataBlock_* block = list->find(name);
+				if(!block) { MError2("DataBlock with given name doesn't exist"); RETURN(0); }
+				if(index >= block->length || index < 0) { MError2("Invalid index"); RETURN(0); }
+				Apply(&block->data[index],sizeof(Byte),Mp,2);
+			}
+		} break;
+		case 'V': { // array of v-vars
+			CHECK_ParamsMin(2);
+			CHECK_ParamsMax(3);
+			char name[ID_LENGTH] = "";
+			if(StrMan::Apply(name,Mp,0,ID_LENGTH) == 0 ) { MError2("Cannot get name of DataBlock"); RETURN(0); }
+			if(Num==2) // creating
+			{
+				int length = 0;
+				if(Apply(&length,sizeof(length),Mp,1)) { MError2("Cannot get length of DataBlock"); RETURN(0); }
+				if(list->find(name)) { MError2("DataBlock with given name already exists"); RETURN(0); }
+				length = length * sizeof(int);
+				AddDataBlock(list,name,length);
+			} 
+			else // accessing
+			{
+				int index = 0;
+				if(Apply(&index,sizeof(index),Mp,1)) { MError2("Cannot get index"); RETURN(0); }
+				_DataBlock_* block = list->find(name);
+				if(!block) { MError2("DataBlock with given name doesn't exist"); RETURN(0); }
+				index = index * sizeof(int);
+				if(index >= block->length || index < 0) { MError2("Invalid index"); RETURN(0); }
+				Apply(&block->data[index],sizeof(Byte),Mp,2);
+			}
+		} break;
+
+		case 'Z': { // array of z-vars
+			CHECK_ParamsMin(2);
+			CHECK_ParamsMax(3);
+			char name[ID_LENGTH] = "";
+			if(StrMan::Apply(name,Mp,0,ID_LENGTH) == 0 ) { MError2("Cannot get name of DataBlock"); RETURN(0); }
+			if(Num==2) // creating
+			{
+				int length = 0;
+				if(Apply(&length,sizeof(length),Mp,1)) { MError2("Cannot get length of DataBlock"); RETURN(0); }
+				if(list->find(name)) { MError2("DataBlock with given name already exists"); RETURN(0); }
+				length = length * 1024;
+				AddDataBlock(list,name,length);
+			} 
+			else // accessing
+			{
+				int index = 0;
+				if(Apply(&index,sizeof(index),Mp,1)) { MError2("Cannot get index"); RETURN(0); }
+				_DataBlock_* block = list->find(name);
+				if(!block) { MError2("DataBlock with given name doesn't exist"); RETURN(0); }
+				if(index >= block->length || index < 0) { MError2("Invalid index"); RETURN(0); }
+				index = index * 1024;
+				StrMan::Apply((char*)block->data[index],Mp,2,1024);
+			}
 		} break;
 
 		default:
@@ -456,7 +462,7 @@ void AddSkeletonPatch(int cr_id, int cr_new)
 	RETURNV;
 }
 
-void RemoveSkeletonPatch(int cr_id, bool error_on_absence = false)
+void RemoveSkeletonPatch(int cr_id, bool error_on_absence)
 {
 	STARTNA(__LINE__, 0)
 	// converting cr_id into c-string
@@ -545,7 +551,7 @@ int SaveLegacyData()
 	// Header - for safety purposes
 	if(Saver((void*) "JGWL",4)) RETURN(1);
 	// Saving data
-	if(save_vl()) { RETURN(1); }
+	if(save_datablocks()) { RETURN(1); }
 	if(save_SkelPatches()) { RETURN(1); }
 	// End mark
 	if(Saver((void*) "LWGJ",4)) RETURN(1);
@@ -562,7 +568,7 @@ int LoadLegacyData()
 	if(Loader(&head_buf,4)) RETURN(1);
 	if(head_buf[0] != 'J' || head_buf[1] != 'G' || head_buf[2] != 'W' || head_buf[3] != 'L') { MError("Malformed savefile - failed to load Legacy data header"); RETURN(1); }
 	// Loading data
-	if(load_vl()) { RETURN(1); }
+	if(load_datablocks()) { RETURN(1); }
 	if(load_SkelPatches()) { RETURN(1); }
 	// End Mark
 	if(Loader(&head_buf,4)) RETURN(1);
@@ -573,8 +579,7 @@ int LoadLegacyData()
 void ResetLegacyData()
 {
 	STARTNA(__LINE__, 0)
-	vl_clear(vl_save);
-	vl_clear(vl_temp);
+	reset_datablocks();
 	reset_SkelPatches();
 	RETURNV;
 }
