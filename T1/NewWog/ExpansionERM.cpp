@@ -244,7 +244,7 @@ int ERM_VarList(char Cmd,int Num,_ToDo_* sp,Mes *Mp)
 				if(Apply(&index,sizeof(index),Mp,1)) { MError2("Cannot get index"); RETURN(0); }
 				_DataBlock_* block = list->find(name);
 				if(!block) { MError2("DataBlock with given name doesn't exist"); RETURN(0); }
-				if(index >= block->length || index < 0) { MError2("Invalid index"); RETURN(0); }
+				if(index > block->length - sizeof(Byte) || index < 0) { MError2("Invalid index (out of boundaries)"); RETURN(0); }
 				Apply(&block->data[index],sizeof(Byte),Mp,2);
 			}
 		} break;
@@ -268,7 +268,7 @@ int ERM_VarList(char Cmd,int Num,_ToDo_* sp,Mes *Mp)
 				_DataBlock_* block = list->find(name);
 				if(!block) { MError2("DataBlock with given name doesn't exist"); RETURN(0); }
 				index = index * sizeof(int);
-				if(index >= block->length || index < 0) { MError2("Invalid index"); RETURN(0); }
+				if(index > block->length - sizeof(int) || index < 0) { MError2("Invalid index (out of boundaries)"); RETURN(0); }
 				Apply(&block->data[index],sizeof(Byte),Mp,2);
 			}
 		} break;
@@ -283,7 +283,7 @@ int ERM_VarList(char Cmd,int Num,_ToDo_* sp,Mes *Mp)
 				int length = 0;
 				if(Apply(&length,sizeof(length),Mp,1)) { MError2("Cannot get length of DataBlock"); RETURN(0); }
 				if(list->find(name)) { MError2("DataBlock with given name already exists"); RETURN(0); }
-				length = length * 1024;
+				length = length * 512;
 				AddDataBlock(list,name,length);
 			} 
 			else // accessing
@@ -292,9 +292,9 @@ int ERM_VarList(char Cmd,int Num,_ToDo_* sp,Mes *Mp)
 				if(Apply(&index,sizeof(index),Mp,1)) { MError2("Cannot get index"); RETURN(0); }
 				_DataBlock_* block = list->find(name);
 				if(!block) { MError2("DataBlock with given name doesn't exist"); RETURN(0); }
-				if(index >= block->length || index < 0) { MError2("Invalid index"); RETURN(0); }
-				index = index * 1024;
-				StrMan::Apply((char*)block->data[index],Mp,2,1024);
+				if(index > block->length - 512 || index < 0) { MError2("Invalid index (out of boundaries)"); RETURN(0); }
+				index = index * 512;
+				StrMan::Apply((char*)&block->data[index],Mp,2,512);
 			}
 		} break;
 
