@@ -209,7 +209,7 @@ int ERM_VarList(char Cmd,int Num,_ToDo_* sp,Mes *Mp)
 			}
 		} break;
 
-		case 'A': { // direct access to data
+		/*case 'A': { // direct access to data, obsolete at this point
 			CHECK_ParamsNum(2);
 			char name[ID_LENGTH] = "";
 			if(StrMan::Apply(name,Mp,0,ID_LENGTH) == 0 ) { MError2("Cannot get name of DataBlock"); RETURN(0); }
@@ -223,7 +223,7 @@ int ERM_VarList(char Cmd,int Num,_ToDo_* sp,Mes *Mp)
 			{
 				Apply(block->data,4,Mp,1);
 			}
-		} break;
+		} break;*/
 
 		// HIGH-LEVEL
 		case 'B': { // array of bytes - interface for easier accessing
