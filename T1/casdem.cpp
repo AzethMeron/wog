@@ -25,34 +25,36 @@ static TxtFile TFile;
 #define CASTLESNUM 500
 // 3.59 reduce
 //#define CASTLESNUM 48
-struct _CastleState_{
+struct _CastleState_{ 
 	int    State; //0 - Ok, 1,2,3,... -1 - broken
 	int    Date;
 	int    Cost;
-	int    Destroyed; // когда был разрушен
-	int    DestroyedBy; // кем был разрушен
+	int    Destroyed; // РєРѕРіРґР° Р±С‹Р» СЂР°Р·СЂСѓС€РµРЅ - when it was destroyed
+	int    DestroyedBy; // РєРµРј Р±С‹Р» СЂР°Р·СЂСѓС€РµРЅ - who destroyed
 	int    Ghost;
-	short  TCenter,TSide; // бонус боковых башен
+	short  TCenter,TSide; // Р±РѕРЅСѓСЃ Р±РѕРєРѕРІС‹С… Р±Р°С€РµРЅ - side tower bonus?
 	short  TLastOwner;
 //  Byte   Creat[7][2];
 } CastleState[CASTLESNUM];
 
-char *CastleDefs[7][9]={
-	{"AVCcasz0.def","AVCramz0.def","AVCtowz0.def","AVCinfz0.def","AVCnecz0.def","AVCdunz0.def","AVCstrz0.def","AVCforz0.def","AVChforz.def"},
-	{"AVCcasx0.def","AVCramx0.def","AVCtowx0.def","AVCinfx0.def","AVCnecx0.def","AVCdunx0.def","AVCstrx0.def","AVCforx0.def","AVChforx.def"},
-	{"AVCcast0.def","AVCramp0.def","AVCtowr0.def","AVCinft0.def","AVCnecr0.def","AVCdung0.def","AVCstro0.def","AVCftrt0.def","AVChfor0.def"},
+const char *CastleDefs[7][9]={ // [i][j] 
+	// i stands for tier/destruction
+	// j stands for Town Type
+	{"AVCcasz0.def","AVCramz0.def","AVCtowz0.def","AVCinfz0.def","AVCnecz0.def","AVCdunz0.def","AVCstrz0.def","AVCforz0.def","AVChforz.def"}, // 0 castle tier
+	{"AVCcasx0.def","AVCramx0.def","AVCtowx0.def","AVCinfx0.def","AVCnecx0.def","AVCdunx0.def","AVCstrx0.def","AVCforx0.def","AVChforx.def"}, // 1 fort tier
+	{"AVCcast0.def","AVCramp0.def","AVCtowr0.def","AVCinft0.def","AVCnecr0.def","AVCdung0.def","AVCstro0.def","AVCftrt0.def","AVChfor0.def"}, // 2 town hall tier
 
-	{"AVCcast1.def","AVCramp1.def","AVCtowr1.def","AVCinfr1.def","AVCnecr1.def","AVCdung1.def","AVCstrn1.def","AVCfort1.def","AVCconf1.def"},
-	{"AVCcast2.def","AVCramp2.def","AVCtowr2.def","AVCinfr2.def","AVCnecr2.def","AVCdung2.def","AVCstrn2.def","AVCfort2.def","AVCconf2.def"},
-	{"AVCcast3.def","AVCramp3.def","AVCtowr3.def","AVCinfr3.def","AVCnecr3.def","AVCdung3.def","AVCstrn3.def","AVCfort3.def","AVCconf3.def"},
-	{"AVCcast4.def","AVCramp4.def","AVCtowr4.def","AVCinfr4.def","AVCnecr4.def","AVCdung4.def","AVCstrn4.def","AVCfort4.def","AVCconf4.def"}
+	{"AVCcast1.def","AVCramp1.def","AVCtowr1.def","AVCinfr1.def","AVCnecr1.def","AVCdung1.def","AVCstrn1.def","AVCfort1.def","AVCconf1.def"}, // 3 minor destruction
+	{"AVCcast2.def","AVCramp2.def","AVCtowr2.def","AVCinfr2.def","AVCnecr2.def","AVCdung2.def","AVCstrn2.def","AVCfort2.def","AVCconf2.def"}, // 4 more destroyed
+	{"AVCcast3.def","AVCramp3.def","AVCtowr3.def","AVCinfr3.def","AVCnecr3.def","AVCdung3.def","AVCstrn3.def","AVCfort3.def","AVCconf3.def"}, // 5 major destruction
+	{"AVCcast4.def","AVCramp4.def","AVCtowr4.def","AVCinfr4.def","AVCnecr4.def","AVCdung4.def","AVCstrn4.def","AVCfort4.def","AVCconf4.def"}  // 6 total destruction
 };
 
 struct _BattlePlace_{
 	int x;
 	int y;
 	int l;
-	int abs; // =0 -относит. относительно входа =1 -абсолютные
+	int abs; // =0 -РѕС‚РЅРѕСЃРёС‚. РѕС‚РЅРѕСЃРёС‚РµР»СЊРЅРѕ РІС…РѕРґР° =1 -Р°Р±СЃРѕР»СЋС‚РЅС‹Рµ
 } BattlePlace_back[14],BattlePlace[14]={
 	{0,0,0,0},{0,0,0,0},{0,0,0,0},{0,0,0,0},{0,0,0,0},{0,0,0,0},{0,0,0,0},
 	{0,0,0,0},{0,0,0,0},{0,0,0,0},{0,0,0,0},{0,0,0,0},{0,0,0,0},{0,0,0,0}
@@ -60,10 +62,10 @@ struct _BattlePlace_{
 
 int MonInTownsBack[9*7*2], MonInTownsBack_Saved=0;
 
-int DemPerDay_back,DemPerDay=3; // сколько в день
-int DemNextCost_back[100],DemNextCost[100]={0,500,1000,0}; // цена разрушения
-int Mov2Lost_back,Mov2Lost=0x100; // потеря ходов при битве
-//int Army2Dem_back[48][100][2],Army2Dem[48][100][2]; // мин. армия для разрушения строения
+int DemPerDay_back,DemPerDay=3; // СЃРєРѕР»СЊРєРѕ РІ РґРµРЅСЊ
+int DemNextCost_back[100],DemNextCost[100]={0,500,1000,0}; // С†РµРЅР° СЂР°Р·СЂСѓС€РµРЅРёСЏ
+int Mov2Lost_back,Mov2Lost=0x100; // РїРѕС‚РµСЂСЏ С…РѕРґРѕРІ РїСЂРё Р±РёС‚РІРµ
+//int Army2Dem_back[48][100][2],Army2Dem[48][100][2]; // РјРёРЅ. Р°СЂРјРёСЏ РґР»СЏ СЂР°Р·СЂСѓС€РµРЅРёСЏ СЃС‚СЂРѕРµРЅРёСЏ
 int GrailDemontage;
 
 int CSMTran[4][9]={
@@ -72,7 +74,7 @@ int CSMTran[4][9]={
 	{0,5,0,3,0,0,0,0,0},
 	{0,5+7,0,3+7,0,0,0,0,0}
 };
-Dword CommonBuildingsMask[2][2]={{0xC403FBFF,0x00000FFF},  // AND общие для всех
+Dword CommonBuildingsMask[2][2]={{0xC403FBFF,0x00000FFF},  // AND РѕР±С‰РёРµ РґР»СЏ РІСЃРµС…
 																 {0x03EC0040,0x00000000}}; // OR
 Dword UniqBuildingsMask[9][2]={{0xC46FFBEF,0x00000FFF},
 															 {0xC76FFBBF,0x00000FFF},
@@ -84,9 +86,9 @@ Dword UniqBuildingsMask[9][2]={{0xC46FFBEF,0x00000FFF},
 															 {0xC46FFBE7,0x00000FFF},
 															 {0xC42FFBFF,0x00000FFF}};
 struct _CSCheck_{
-	Byte Mon;         // тип монстров для драки
-	Byte Bits2Build;  // после разрушения нужно строить след здания ...
-	Byte Byte2Build;  // ... в след байте
+	Byte Mon;         // С‚РёРї РјРѕРЅСЃС‚СЂРѕРІ РґР»СЏ РґСЂР°РєРё
+	Byte Bits2Build;  // РїРѕСЃР»Рµ СЂР°Р·СЂСѓС€РµРЅРёСЏ РЅСѓР¶РЅРѕ СЃС‚СЂРѕРёС‚СЊ СЃР»РµРґ Р·РґР°РЅРёСЏ ...
+	Byte Byte2Build;  // ... РІ СЃР»РµРґ Р±Р°Р№С‚Рµ
 	struct {
 		Byte  Depend[6];
 		int   Cost2Break;
@@ -116,8 +118,8 @@ struct _CSCheck_{
 	{8},{9},{10},{11},{12},{13},{14}  //43 (-)
 };
 struct _CSCheckERM_{
-	Byte Bits2Build;  // после разрушения нужно строить след здания ...
-	Byte Byte2Build;  // ... в след байте
+	Byte Bits2Build;  // РїРѕСЃР»Рµ СЂР°Р·СЂСѓС€РµРЅРёСЏ РЅСѓР¶РЅРѕ СЃС‚СЂРѕРёС‚СЊ СЃР»РµРґ Р·РґР°РЅРёСЏ ...
+	Byte Byte2Build;  // ... РІ СЃР»РµРґ Р±Р°Р№С‚Рµ
 } CSCheckERM[44]={
 //  0x00,0x00,0xC0,0x03,0x7E,0x0F // All creature 
 //  0x00,0x00,0x00,0xC0,0xFF,0x0F // All creature (old)
@@ -142,17 +144,17 @@ struct _CSCheckERM_{
 int CSCostNext=0;
 //int CSValues[48][4][2];
 //int CS2Crash[48];
-int CSMonst[7*2]; // стоимость ухода существ 7 уровней
+int CSMonst[7*2]; // СЃС‚РѕРёРјРѕСЃС‚СЊ СѓС…РѕРґР° СЃСѓС‰РµСЃС‚РІ 7 СѓСЂРѕРІРЅРµР№
 
-// Жилища монстров 8-го уровня
+// Р–РёР»РёС‰Р° РјРѕРЅСЃС‚СЂРѕРІ 8-РіРѕ СѓСЂРѕРІРЅСЏ
 #define DWELLMAPNUM 1000
 static struct _DwellMapInfo_{
-	char  Owner; // 0...8 - хозяин, -1=не чей, 
+	char  Owner; // 0...8 - С…РѕР·СЏРёРЅ, -1=РЅРµ С‡РµР№, 
 	short x,y;
 	char  l;
-	Byte  SType;  // подтип, 0 - не занят
-	short GotDay; // день, когда был захвачен этим хозяином
-	Word  Mon2Town; // устанавливается в начале каждой недели, сбрасывается при найме
+	Byte  SType;  // РїРѕРґС‚РёРї, 0 - РЅРµ Р·Р°РЅСЏС‚
+	short GotDay; // РґРµРЅСЊ, РєРѕРіРґР° Р±С‹Р» Р·Р°С…РІР°С‡РµРЅ СЌС‚РёРј С…РѕР·СЏРёРЅРѕРј
+	Word  Mon2Town; // СѓСЃС‚Р°РЅР°РІР»РёРІР°РµС‚СЃСЏ РІ РЅР°С‡Р°Р»Рµ РєР°Р¶РґРѕР№ РЅРµРґРµР»Рё, СЃР±СЂР°СЃС‹РІР°РµС‚СЃСЏ РїСЂРё РЅР°Р№РјРµ
 } DwellMapInfo[DWELLMAPNUM];
 
 Dword CSval;
@@ -215,8 +217,8 @@ void static MakeCheck(int item,int town,char *depend)
 	if((item<0)||(item>43)){ Message("CD: Item to check is out of range.",1); }
 	for(j=0;j<6;j++) CSCheck[item].Town[town].Depend[j]=0;
 	for(i=0;i<44;i++){
-		j=i/8; // индекс
-		k=i%8; // номер бита
+		j=i/8; // РёРЅРґРµРєСЃ
+		k=i%8; // РЅРѕРјРµСЂ Р±РёС‚Р°
 		b=(Byte)((depend[i]-'0')<<k);
 		CSCheck[item].Town[town].Depend[j]|=b;
 	}  
@@ -290,8 +292,8 @@ void CastleSkipDemolition(void)
 	if((Cnum=GetCastleNumber(CStructure))<0) RETURNV
 	
 	csp=&CastleState[Cnum];
-	csp->State=0; // снимаем разрущения
-	csp->Ghost=0; // убираем привидений
+	csp->State=0; // СЃРЅРёРјР°РµРј СЂР°Р·СЂСѓС‰РµРЅРёСЏ
+	csp->Ghost=0; // СѓР±РёСЂР°РµРј РїСЂРёРІРёРґРµРЅРёР№
 	RETURNV
 }
 
@@ -304,7 +306,7 @@ void SetBonRes(short *Bonus)
 		if(Bonus[i]!=0){
 			++n;
 			if(n==2){
-				if(f){ // не первый раз
+				if(f){ // РЅРµ РїРµСЂРІС‹Р№ СЂР°Р·
 					Request2Pic(ITxt(15,0,&Strings),r,v,i,Bonus[i],1);
 					AddRes(-1,r,v); AddRes(-1,i,Bonus[i]);
 				}else{
@@ -319,7 +321,7 @@ void SetBonRes(short *Bonus)
 		}
 	}
 	if(r!=-1){
-		if(f){ // не первый раз
+		if(f){ // РЅРµ РїРµСЂРІС‹Р№ СЂР°Р·
 			Request2Pic(ITxt(15,0,&Strings),r,v,-1,0,1);
 			AddRes(-1,r,v);
 		}else{
@@ -352,7 +354,7 @@ void CastleCheckDemolition(void)
 	CSval=0;
 	//if(WoG==0) RETURNV
 	if(PL_NoTownDem) RETURNV
-	if(IsThis(CurrentUser())==0){  // не тот игрок
+	if(IsThis(CurrentUser())==0){  // РЅРµ С‚РѕС‚ РёРіСЂРѕРє
 		RETURNV
 	}
 	// 3.58f fix - disable demolition in allied town
@@ -393,43 +395,43 @@ void CastleCheckDemolition(void)
 	}
 	if(VHero==-1) Hp=0;
 	else Hp=&Hp0[VHero];
-	if(flag!=1){ // левая мышь
-		if(Btype!=16) RETURNV // не кузница
-		if(csp->State!=-1) RETURNV // не разрушено
-		if(VHero==-1) RETURNV // героя в городе нет
-		if(Mn!=0){ // Прив. есть
-			if((Date-csp->Destroyed)>=GHOSTDAYS){ // и можно нанять
+	if(flag!=1){ // Р»РµРІР°СЏ РјС‹С€СЊ
+		if(Btype!=16) RETURNV // РЅРµ РєСѓР·РЅРёС†Р°
+		if(csp->State!=-1) RETURNV // РЅРµ СЂР°Р·СЂСѓС€РµРЅРѕ
+		if(VHero==-1) RETURNV // РіРµСЂРѕСЏ РІ РіРѕСЂРѕРґРµ РЅРµС‚
+		if(Mn!=0){ // РџСЂРёРІ. РµСЃС‚СЊ
+			if((Date-csp->Destroyed)>=GHOSTDAYS){ // Рё РјРѕР¶РЅРѕ РЅР°РЅСЏС‚СЊ
 				__asm{
-					lea    eax,Mn // -> число монстров (dw)
-					mov    ebx,Hp // -> Герой
-					add    ebx,0x91 // -> слоты для армий у героя (ebx->Герой)
+					lea    eax,Mn // -> С‡РёСЃР»Рѕ РјРѕРЅСЃС‚СЂРѕРІ (dw)
+					mov    ebx,Hp // -> Р“РµСЂРѕР№
+					add    ebx,0x91 // -> СЃР»РѕС‚С‹ РґР»СЏ Р°СЂРјРёР№ Сѓ РіРµСЂРѕСЏ (ebx->Р“РµСЂРѕР№)
 					mov    edi,GHOSTTYPE
-					lea    ecx,CSBuffer // -> буфер на ~20h байт
-// четвертый монстр для наема
+					lea    ecx,CSBuffer // -> Р±СѓС„РµСЂ РЅР° ~20h Р±Р°Р№С‚
+// С‡РµС‚РІРµСЂС‚С‹Р№ РјРѕРЅСЃС‚СЂ РґР»СЏ РЅР°РµРјР°
 					push   0
 					push   -1
-// третий монстр для наема
+// С‚СЂРµС‚РёР№ РјРѕРЅСЃС‚СЂ РґР»СЏ РЅР°РµРјР°
 					push   0
 					push   -1
-// второй монстр для наема
+// РІС‚РѕСЂРѕР№ РјРѕРЅСЃС‚СЂ РґР»СЏ РЅР°РµРјР°
 					push   0
 					push   -1
-// первый монстр для наема
-					push   eax // -> количество
-					push   edi // = тип монстров
+// РїРµСЂРІС‹Р№ РјРѕРЅСЃС‚СЂ РґР»СЏ РЅР°РµРјР°
+					push   eax // -> РєРѕР»РёС‡РµСЃС‚РІРѕ
+					push   edi // = С‚РёРї РјРѕРЅСЃС‚СЂРѕРІ
 					push   0
 					push   ebx
 					mov    eax,0x0551750
 					call   eax
-					lea    ecx,CSBuffer // -> буфер на ~20h байт
+					lea    ecx,CSBuffer // -> Р±СѓС„РµСЂ РЅР° ~20h Р±Р°Р№С‚
 					push   ecx
 					mov    ecx,0x699550 //???
 					mov    ecx,[ecx]
 					mov    eax,0x04B0770
 					call   eax
 				}
-				CastleCheck(-1); // оставим мрачный вид
-				if(Mn!=csp->Ghost){ // надо перерисовать героя
+				CastleCheck(-1); // РѕСЃС‚Р°РІРёРј РјСЂР°С‡РЅС‹Р№ РІРёРґ
+				if(Mn!=csp->Ghost){ // РЅР°РґРѕ РїРµСЂРµСЂРёСЃРѕРІР°С‚СЊ РіРµСЂРѕСЏ
 					for(i=0;i<6;i++){
 						Building[i]=0;
 						Bonus[i]=0;
@@ -442,10 +444,10 @@ void CastleCheckDemolition(void)
 					}  
 				}
 				csp->Ghost=Mn;
-			}else{ // еще нельзя набрать
+			}else{ // РµС‰Рµ РЅРµР»СЊР·СЏ РЅР°Р±СЂР°С‚СЊ
 				Message(ITxt(4,0,&Strings),1);
 			}  
-		}else{ // Прив. нет
+		}else{ // РџСЂРёРІ. РЅРµС‚
 			Message(ITxt(7,0,&Strings),1);
 		}
 		CSval=0x5D4617;
@@ -453,33 +455,33 @@ void CastleCheckDemolition(void)
 	}
 
 	if((Btype==16)&&((Building[1]&0x3C)==0)){
-// разрушаем кузницу, города уже нет - это дом с привидениями
-		if(csp->Ghost){ // есть привидения
-			if((Date-csp->Destroyed)>=GHOSTDAYS){ // 6 дней прошло - можно нанимать
+// СЂР°Р·СЂСѓС€Р°РµРј РєСѓР·РЅРёС†Сѓ, РіРѕСЂРѕРґР° СѓР¶Рµ РЅРµС‚ - СЌС‚Рѕ РґРѕРј СЃ РїСЂРёРІРёРґРµРЅРёСЏРјРё
+		if(csp->Ghost){ // РµСЃС‚СЊ РїСЂРёРІРёРґРµРЅРёСЏ
+			if((Date-csp->Destroyed)>=GHOSTDAYS){ // 6 РґРЅРµР№ РїСЂРѕС€Р»Рѕ - РјРѕР¶РЅРѕ РЅР°РЅРёРјР°С‚СЊ
 				RequestPic(ITxt(3,0,&Strings),0x15,GHOSTTYPE,1);
 				CSval=0x5D4617;
 				RETURNV
-			}else{ // еще не время
+			}else{ // РµС‰Рµ РЅРµ РІСЂРµРјСЏ
 				Message(ITxt(4,0,&Strings),1);
 				CSval=0x5D4617;
 				RETURNV
 			}
-		}else{ // нет - можно восстанавливать
+		}else{ // РЅРµС‚ - РјРѕР¶РЅРѕ РІРѕСЃСЃС‚Р°РЅР°РІР»РёРІР°С‚СЊ
 			if(RequestPic(ITxt(5,0,&Strings),CType+0x16,10,2)==0){
 				CSval=0x5D4617;
 				RETURNV
 			}
 			if(Hp!=0){
-				// в городе есть герой - можно сменить тип.
-				// проверим на строителя
+				// РІ РіРѕСЂРѕРґРµ РµСЃС‚СЊ РіРµСЂРѕР№ - РјРѕР¶РЅРѕ СЃРјРµРЅРёС‚СЊ С‚РёРї.
+				// РїСЂРѕРІРµСЂРёРј РЅР° СЃС‚СЂРѕРёС‚РµР»СЏ
 				CNewType=CType;
 				if((HSpecTable[Hp->Number].Spec==HSUPERSPEC)&&(HSpecTable[Hp->Number].Spec1==HSPEC_ANYTOWN)){
 					CNewType=ChooseCastle();
 				}else{
 					i=Hp->Spec/2;
-					if(CType!=i){ // если типы городов различаются
+					if(CType!=i){ // РµСЃР»Рё С‚РёРїС‹ РіРѕСЂРѕРґРѕРІ СЂР°Р·Р»РёС‡Р°СЋС‚СЃСЏ
 						if(Request2Pic(ITxt(14,0,&Strings),CType+0x16,10,0x16+i,10,7)==0){
-							 // меняем тип
+							 // РјРµРЅСЏРµРј С‚РёРї
 							 CNewType=i;
 						}
 					}
@@ -497,10 +499,10 @@ void CastleCheckDemolition(void)
 				}
 			}
 			Rebuild=1;
-			CastleCheck(0); // сделаем нормальный вид
+			CastleCheck(0); // СЃРґРµР»Р°РµРј РЅРѕСЂРјР°Р»СЊРЅС‹Р№ РІРёРґ
 		}
 	}
-	// проверяем возможность разрушения данного строения (от остальных строений)
+	// РїСЂРѕРІРµСЂСЏРµРј РІРѕР·РјРѕР¶РЅРѕСЃС‚СЊ СЂР°Р·СЂСѓС€РµРЅРёСЏ РґР°РЅРЅРѕРіРѕ СЃС‚СЂРѕРµРЅРёСЏ (РѕС‚ РѕСЃС‚Р°Р»СЊРЅС‹С… СЃС‚СЂРѕРµРЅРёР№)
 	if(Rebuild==0){
 		for(i=0;i<6;i++){
 			if(CSCheck[Btype].Town[CType].Depend[i]&Building[i]){
@@ -535,12 +537,12 @@ void CastleCheckDemolition(void)
 	CSBuffer[i]=0;
 	if(RequestPic(CSBuffer,CStructure->Type+0x16,Btype,2)==0){
 /*
-		// выход для строений без инфы по правой кнопке
+		// РІС‹С…РѕРґ РґР»СЏ СЃС‚СЂРѕРµРЅРёР№ Р±РµР· РёРЅС„С‹ РїРѕ РїСЂР°РІРѕР№ РєРЅРѕРїРєРµ
 		if(CSCheck[Btype][0]==0) CSval=0x5D4617;
-		// выход с инфой по правой кнопке
+		// РІС‹С…РѕРґ СЃ РёРЅС„РѕР№ РїРѕ РїСЂР°РІРѕР№ РєРЅРѕРїРєРµ
 		RETURNV
 */
-		// пока отменим вывод инфы по правой кнопке для всех
+		// РїРѕРєР° РѕС‚РјРµРЅРёРј РІС‹РІРѕРґ РёРЅС„С‹ РїРѕ РїСЂР°РІРѕР№ РєРЅРѕРїРєРµ РґР»СЏ РІСЃРµС…
 		CSval=0x5D4617;
 		RETURNV
 	}
@@ -551,18 +553,18 @@ void CastleCheckDemolition(void)
 		CSval=0x5D4617;
 		RETURNV
 	}
-	if(csp->Cost>=DemPerDay){ // слишком много уже разрушено в этот день
+	if(csp->Cost>=DemPerDay){ // СЃР»РёС€РєРѕРј РјРЅРѕРіРѕ СѓР¶Рµ СЂР°Р·СЂСѓС€РµРЅРѕ РІ СЌС‚РѕС‚ РґРµРЅСЊ
 		Message(ITxt(16,0,&Strings),1);
 		CSval=0x5D4617;
 		RETURNV
 	}
-// проверка опыта героя
+// РїСЂРѕРІРµСЂРєР° РѕРїС‹С‚Р° РіРµСЂРѕСЏ
 	if(Hp->Exp<(Dword)CSCheck[Btype].Town[CType].MinHeroExp){
 		Message(ITxt(30,0,&Strings),1);
 		CSval=0x5D4617;
 		RETURNV
 	}
-// проверка мощности армии
+// РїСЂРѕРІРµСЂРєР° РјРѕС‰РЅРѕСЃС‚Рё Р°СЂРјРёРё
 	tval=0;
 	for(j=0;j<7;j++){
 		if(Hp->Ct[j]==-1) continue;
@@ -574,11 +576,11 @@ void CastleCheckDemolition(void)
 		CSval=0x5D4617;
 		RETURNV
 	}
-// проверяем на Грааль
+// РїСЂРѕРІРµСЂСЏРµРј РЅР° Р“СЂР°Р°Р»СЊ
 	GrailDemFlag=0;
 	if(Btype==26){
 		if(Request2Pic(ITxt(31,0,&Strings),6,GrailDemontage,8,2,2)){
-			// хочет демонтировать
+			// С…РѕС‡РµС‚ РґРµРјРѕРЅС‚РёСЂРѕРІР°С‚СЊ
 			LCost2=DemNextCost[csp->Cost]+GrailDemontage;
 			for(i=0;i<64;i++){
 				if(Hp->OArt[i][0]==0xFFFFFFFF){
@@ -592,13 +594,13 @@ void CastleCheckDemolition(void)
 				RETURNV
 			}
 			if(CheckRes(-1,6,-LCost2)){
-				// не хватает ресурсов
-				RequestPic(ITxt(10,0,&Strings),6,LCost2,1); // не хватает
+				// РЅРµ С…РІР°С‚Р°РµС‚ СЂРµСЃСѓСЂСЃРѕРІ
+				RequestPic(ITxt(10,0,&Strings),6,LCost2,1); // РЅРµ С…РІР°С‚Р°РµС‚
 				CSval=0x5D4617;
 				RETURNV
 			}else{
 				if(RequestPic(ITxt(9,0,&Strings),6,LCost2,2)==0){
-					// не хочет - не надо
+					// РЅРµ С…РѕС‡РµС‚ - РЅРµ РЅР°РґРѕ
 					CSval=0x5D4617;
 					RETURNV
 				}
@@ -613,7 +615,7 @@ void CastleCheckDemolition(void)
 					}
 				}
 			}
-		}else{ // платить не хочет
+		}else{ // РїР»Р°С‚РёС‚СЊ РЅРµ С…РѕС‡РµС‚
 			LCost2=DemNextCost[csp->Cost]+CSCheck[Btype].Town[CType].Cost2Break;
 			GrailDemFlag=0;
 		}
@@ -623,16 +625,16 @@ void CastleCheckDemolition(void)
 //  Monst=((Word *)&CStructure[0x16]);
 	Monst=(Word *)CStructure->Monsters;
 	i=CSCheck[Btype].Mon;
-//  d=(Btype-0x1E); // тип строения для получения типа монстра
-	if(i>=100){ // тип монстра зависит от типа города
+//  d=(Btype-0x1E); // С‚РёРї СЃС‚СЂРѕРµРЅРёСЏ РґР»СЏ РїРѕР»СѓС‡РµРЅРёСЏ С‚РёРїР° РјРѕРЅСЃС‚СЂР°
+	if(i>=100){ // С‚РёРї РјРѕРЅСЃС‚СЂР° Р·Р°РІРёСЃРёС‚ РѕС‚ С‚РёРїР° РіРѕСЂРѕРґР°
 		i-=100;
 		i=CSMTran[i][CType];
 	}
-	if(i!=0){ // могут быть монстры - просим денег
+	if(i!=0){ // РјРѕРіСѓС‚ Р±С‹С‚СЊ РјРѕРЅСЃС‚СЂС‹ - РїСЂРѕСЃРёРј РґРµРЅРµРі
 		MCt=i-1;
 		Mnp=&Monst[MCt];
 		Mn=Monst[MCt];
-		// Получим тип монстра
+		// РџРѕР»СѓС‡РёРј С‚РёРї РјРѕРЅСЃС‚СЂР°
 		i=(MCt+CType*14)*4;
 		__asm{
 			mov   eax,i
@@ -643,32 +645,32 @@ void CastleCheckDemolition(void)
 		if(Mn!=0){
 			LCost=Mn*CSMonst[MCt];
 			if(CheckRes(-1,6,-LCost)){
-				// не хватает ресурсов
-				Request2Pic(ITxt(10,0,&Strings),6,LCost,0x15,Mt+(Mn<<16),1); // не хватает
+				// РЅРµ С…РІР°С‚Р°РµС‚ СЂРµСЃСѓСЂСЃРѕРІ
+				Request2Pic(ITxt(10,0,&Strings),6,LCost,0x15,Mt+(Mn<<16),1); // РЅРµ С…РІР°С‚Р°РµС‚
 			}else{
 				if(Request2Pic(ITxt(8,0,&Strings),6,LCost,0x15,Mt+(Mn<<16),(int)2)==0){
-					// платить не хочет
+					// РїР»Р°С‚РёС‚СЊ РЅРµ С…РѕС‡РµС‚
 				}else{
-					// здесь отнимаем деньги у героя
+					// Р·РґРµСЃСЊ РѕС‚РЅРёРјР°РµРј РґРµРЅСЊРіРё Сѓ РіРµСЂРѕСЏ
 					AddRes(-1,6,-LCost);
-					Mn=*Mnp=0; // убираем монстров
+					Mn=*Mnp=0; // СѓР±РёСЂР°РµРј РјРѕРЅСЃС‚СЂРѕРІ
 				}
 			}
 			if((Hp!=0)&&(Mn!=0)){
-				// если есть герой в замке
+				// РµСЃР»Рё РµСЃС‚СЊ РіРµСЂРѕР№ РІ Р·Р°РјРєРµ
 				if(RequestPic(ITxt(11,0,&Strings),0x15,Mt+(Mn<<16),2)==1){
-					// здесь должна быть драка
-					if(Hp->Movement<Mov2Lost){ // есть свободные движения у Героя
+					// Р·РґРµСЃСЊ РґРѕР»Р¶РЅР° Р±С‹С‚СЊ РґСЂР°РєР°
+					if(Hp->Movement<Mov2Lost){ // РµСЃС‚СЊ СЃРІРѕР±РѕРґРЅС‹Рµ РґРІРёР¶РµРЅРёСЏ Сѓ Р“РµСЂРѕСЏ
 						Message(ITxt(18,0,&Strings),1);
 						CSval=0x5D4617;
 						RETURNV
 					}
 					Hp->Movement-=Mov2Lost; if(Hp->Movement<0) Hp->Movement=0;
-					// вычисляем координату привязки на карте
-					if(BattlePlace[MCt].abs){ // абсолютные координаты
+					// РІС‹С‡РёСЃР»СЏРµРј РєРѕРѕСЂРґРёРЅР°С‚Сѓ РїСЂРёРІСЏР·РєРё РЅР° РєР°СЂС‚Рµ
+					if(BattlePlace[MCt].abs){ // Р°Р±СЃРѕР»СЋС‚РЅС‹Рµ РєРѕРѕСЂРґРёРЅР°С‚С‹
 						PosMixed=((Dword)BattlePlace[MCt].y<<16)+(Dword)BattlePlace[MCt].x;
 						if(BattlePlace[MCt].l) PosMixed+=0x04000000;
-					}else{ // относительно входа
+					}else{ // РѕС‚РЅРѕСЃРёС‚РµР»СЊРЅРѕ РІС…РѕРґР°
 						PosMixed=((CStructure->y+(Dword)BattlePlace[MCt].y)<<16)+CStructure->x+(Dword)BattlePlace[MCt].x;
 						if(CStructure->l+BattlePlace[MCt].l) PosMixed+=0x04000000;
 					}
@@ -698,21 +700,21 @@ void CastleCheckDemolition(void)
 					 mov    ebx,0x4AE3A4
 					 mov    ax,0x4CEB
 					 mov    [ebx],ax
-						lea    eax,Mn // -> число монстров (dw)
-						mov    ebx,Hp // -> Герой
+						lea    eax,Mn // -> С‡РёСЃР»Рѕ РјРѕРЅСЃС‚СЂРѕРІ (dw)
+						mov    ebx,Hp // -> Р“РµСЂРѕР№
 						mov    edi,Mt
-						mov    edx,PosMixed // позиция замка
-						lea    ecx,CSBuffer // -> буфер на ~20h байт
+						mov    edx,PosMixed // РїРѕР·РёС†РёСЏ Р·Р°РјРєР°
+						lea    ecx,CSBuffer // -> Р±СѓС„РµСЂ РЅР° ~20h Р±Р°Р№С‚
 						push   0
 						push   0
 						push   -1
 						push   0
 						push   0
 						push   -1
-						push   edx  // позиция на карте
-						push   ecx  // ук на клетку на карте
-						push   eax  // ук на число монстров
-						push   edi   // = тип монстров
+						push   edx  // РїРѕР·РёС†РёСЏ РЅР° РєР°СЂС‚Рµ
+						push   ecx  // СѓРє РЅР° РєР»РµС‚РєСѓ РЅР° РєР°СЂС‚Рµ
+						push   eax  // СѓРє РЅР° С‡РёСЃР»Рѕ РјРѕРЅСЃС‚СЂРѕРІ
+						push   edi   // = С‚РёРї РјРѕРЅСЃС‚СЂРѕРІ
 						push   ebx
 //            mov    ecx,0x1A00020
 						mov    ecx,0x6992B8 // [BASE]+ 109700h
@@ -771,15 +773,15 @@ void CastleCheckDemolition(void)
 		RETURNV
 	}
 	if(LCost2!=0){
-		// надо доплатить за повторное разрушение
+		// РЅР°РґРѕ РґРѕРїР»Р°С‚РёС‚СЊ Р·Р° РїРѕРІС‚РѕСЂРЅРѕРµ СЂР°Р·СЂСѓС€РµРЅРёРµ
 		if(CheckRes(-1,6,-LCost2)){
-			// не хватает ресурсов
-			RequestPic(ITxt(10,0,&Strings),6,LCost2,1); // не хватает
+			// РЅРµ С…РІР°С‚Р°РµС‚ СЂРµСЃСѓСЂСЃРѕРІ
+			RequestPic(ITxt(10,0,&Strings),6,LCost2,1); // РЅРµ С…РІР°С‚Р°РµС‚
 			CSval=0x5D4617;
 			RETURNV
 		}else{
 			if(RequestPic(ITxt(9,0,&Strings),6,LCost2,2)==0){
-				// не хочет - не надо
+				// РЅРµ С…РѕС‡РµС‚ - РЅРµ РЅР°РґРѕ
 				CSval=0x5D4617;
 				RETURNV
 			}
@@ -800,10 +802,10 @@ void CastleCheckDemolition(void)
 //    Building[i]&=(Byte)~b;
 //    Bonus[i]&=(Byte)~b;
 	}
-	if(Btype<5){ // разрушаем магическую гильдию
-		CStructure->MagLevel=(Byte)Btype; // уменьшим уровень гильдии
+	if(Btype<5){ // СЂР°Р·СЂСѓС€Р°РµРј РјР°РіРёС‡РµСЃРєСѓСЋ РіРёР»СЊРґРёСЋ
+		CStructure->MagLevel=(Byte)Btype; // СѓРјРµРЅСЊС€РёРј СѓСЂРѕРІРµРЅСЊ РіРёР»СЊРґРёРё
 		for(i=Btype;i<5;i++)
-			CStructure->MagicHild[i]=0; // запретим магию всю, что выше
+			CStructure->MagicHild[i]=0; // Р·Р°РїСЂРµС‚РёРј РјР°РіРёСЋ РІСЃСЋ, С‡С‚Рѕ РІС‹С€Рµ
 	}
 
 	Zb=(Byte)(Building[1]&0x3C);
@@ -816,7 +818,7 @@ void CastleCheckDemolition(void)
 	else Zb=0;
 
 	if(Rebuild==0){
-		if(Zb==0){ // все разрушили
+		if(Zb==0){ // РІСЃРµ СЂР°Р·СЂСѓС€РёР»Рё
 			t=-1;
 			csp->Destroyed=Date;
 			csp->Ghost=GHOSTNUM;
@@ -832,11 +834,11 @@ void CastleCheckDemolition(void)
 		CastleCheck(t);
 		csp->State=t;
 		csp->Date=Date;
-		csp->Cost+=1; // след разрушение будет стоить
-	}else{ // восстанавливаем
+		csp->Cost+=1; // СЃР»РµРґ СЂР°Р·СЂСѓС€РµРЅРёРµ Р±СѓРґРµС‚ СЃС‚РѕРёС‚СЊ
+	}else{ // РІРѕСЃСЃС‚Р°РЅР°РІР»РёРІР°РµРј
 		csp->Ghost=0;
 		csp->State=0;
-		Zb=10; // сельская управа
+		Zb=10; // СЃРµР»СЊСЃРєР°СЏ СѓРїСЂР°РІР°
 		for(i=0;i<6;i++){
 			Building[i]=0;
 			Bonus[i]=0;
@@ -847,7 +849,7 @@ void CastleCheckDemolition(void)
 		MIp->OSType=(Word)CNewType;
 	}
 	if(Zb==0){
-		Zb=16; // все. строим кузнецу.
+		Zb=16; // РІСЃРµ. СЃС‚СЂРѕРёРј РєСѓР·РЅРµС†Сѓ.
 		for(i=0;i<6;i++){
 			Building[i]=0;
 			Bonus[i]=0;
@@ -863,8 +865,8 @@ void CastleCheckDemolition(void)
 		call   eax
 	}
 	CastleCheck(0);
-	// Надо ли бонус?
-	if(GrailDemFlag==0){ // Грааль демонтирован
+	// РќР°РґРѕ Р»Рё Р±РѕРЅСѓСЃ?
+	if(GrailDemFlag==0){ // Р“СЂР°Р°Р»СЊ РґРµРјРѕРЅС‚РёСЂРѕРІР°РЅ
 		SetBonRes(CSCheck[Btype].Town[CType].Bonus);
 	}
 	CSval=0x5D4617;
@@ -906,7 +908,7 @@ void CastleExit(Dword/* Manager*/)
 //    if(csp->DestroyedBy!=cu) continue;
 		if(Castle->Owner!=cu) continue;
 		if(csp->State==-1){
-			// и заберем замок у Игрока
+			// Рё Р·Р°Р±РµСЂРµРј Р·Р°РјРѕРє Сѓ РРіСЂРѕРєР°
 			if((Date-csp->Destroyed)>=GHOSTDAYS){
 				if(ShowMess){
 					Message(ITxt(23,0,&Strings),1);
@@ -920,48 +922,48 @@ void CastleExit(Dword/* Manager*/)
 				} 
 			}
 /*
-			// проверим не стоит ли герой на месте города.
+			// РїСЂРѕРІРµСЂРёРј РЅРµ СЃС‚РѕРёС‚ Р»Рё РіРµСЂРѕР№ РЅР° РјРµСЃС‚Рµ РіРѕСЂРѕРґР°.
 			hn=*(int *)&Castle[0x10];
-			if(hn!=-1){ // есть герой снаружи
+			if(hn!=-1){ // РµСЃС‚СЊ РіРµСЂРѕР№ СЃРЅР°СЂСѓР¶Рё
 				chp=GetHeroStr(hn);
-				// попытаемся его выставить
-				if(ey<MapSize-1){ // ниже есть клетки
-					// ищем доступную клетку снизу
-					MIp=&MIp0[ex+((ey+1)+el*MapSize)*MapSize]; // снизу
-					if(EmptyPlace(MIp)){ // не занято
-						// ставим
+				// РїРѕРїС‹С‚Р°РµРјСЃСЏ РµРіРѕ РІС‹СЃС‚Р°РІРёС‚СЊ
+				if(ey<MapSize-1){ // РЅРёР¶Рµ РµСЃС‚СЊ РєР»РµС‚РєРё
+					// РёС‰РµРј РґРѕСЃС‚СѓРїРЅСѓСЋ РєР»РµС‚РєСѓ СЃРЅРёР·Сѓ
+					MIp=&MIp0[ex+((ey+1)+el*MapSize)*MapSize]; // СЃРЅРёР·Сѓ
+					if(EmptyPlace(MIp)){ // РЅРµ Р·Р°РЅСЏС‚Рѕ
+						// СЃС‚Р°РІРёРј
 						chp->y++; *(int *)&Castle[0x10]=-1;
 						goto _ok;
 					}
 					if(ex>0){
-						MIp=&MIp0[(ex-1)+((ey+1)+el*MapSize)*MapSize]; // снизу и слева
-						if(EmptyPlace(MIp)){ // не занято
-							// ставим
+						MIp=&MIp0[(ex-1)+((ey+1)+el*MapSize)*MapSize]; // СЃРЅРёР·Сѓ Рё СЃР»РµРІР°
+						if(EmptyPlace(MIp)){ // РЅРµ Р·Р°РЅСЏС‚Рѕ
+							// СЃС‚Р°РІРёРј
 							chp->y++; chp->x--; *(int *)&Castle[0x10]=-1;
 							goto _ok;
 						}
 					}
 					if(ex<MapSize-1){
-						MIp=&MIp0[(ex+1)+((ey+1)+el*MapSize)*MapSize]; // снизу и справа
-						if(EmptyPlace(MIp)){ // не занято
-							// ставим
+						MIp=&MIp0[(ex+1)+((ey+1)+el*MapSize)*MapSize]; // СЃРЅРёР·Сѓ Рё СЃРїСЂР°РІР°
+						if(EmptyPlace(MIp)){ // РЅРµ Р·Р°РЅСЏС‚Рѕ
+							// СЃС‚Р°РІРёРј
 							chp->y++; chp->x++; *(int *)&Castle[0x10]=-1;
 							goto _ok;
 						}
 					}
 				}
 				KillHero(hn);
-				// не вышло - попробуем его засунуть внутрь
+				// РЅРµ РІС‹С€Р»Рѕ - РїРѕРїСЂРѕР±СѓРµРј РµРіРѕ Р·Р°СЃСѓРЅСѓС‚СЊ РІРЅСѓС‚СЂСЊ
 				j=*(int *)&Castle[0x0C];
-				if(j!=-1){ // есть герой внутри
+				if(j!=-1){ // РµСЃС‚СЊ РіРµСЂРѕР№ РІРЅСѓС‚СЂРё
 //          Town2Hero(Manager); 
 //          KillHero(j);
-					// убиваем героя
+					// СѓР±РёРІР°РµРј РіРµСЂРѕСЏ
 					KillHero(hn);
 //          *(int *)&Castle[0x10]=-1;
 				}else{
-					// засовываем внутрь
-// пока запрещено, т.к. после битвы восстанавливает героя
+					// Р·Р°СЃРѕРІС‹РІР°РµРј РІРЅСѓС‚СЂСЊ
+// РїРѕРєР° Р·Р°РїСЂРµС‰РµРЅРѕ, С‚.Рє. РїРѕСЃР»Рµ Р±РёС‚РІС‹ РІРѕСЃСЃС‚Р°РЅР°РІР»РёРІР°РµС‚ РіРµСЂРѕСЏ
 					Hero2Town(Manager); 
 //            *(int *)&Castle[0x0C]=hn;
 //            *(int *)&Castle[0x10]=-1;
@@ -970,7 +972,7 @@ void CastleExit(Dword/* Manager*/)
 			}
 */
 //_ok:
-			// отбираем, если чей-то
+			// РѕС‚Р±РёСЂР°РµРј, РµСЃР»Рё С‡РµР№-С‚Рѕ
 			if(Castle->Owner!=-1){
 				__asm{
 					mov   eax,0x5BE6D0
@@ -979,7 +981,7 @@ void CastleExit(Dword/* Manager*/)
 				}
 			}  
 			if(DisableEnter){
-				// запретим вставать на клетку
+				// Р·Р°РїСЂРµС‚РёРј РІСЃС‚Р°РІР°С‚СЊ РЅР° РєР»РµС‚РєСѓ
 				MIp=&MIp0[ex+(ey+el*MapSize)*MapSize];
 				MIp->Attrib|=0x01;
 			}  
@@ -1011,8 +1013,8 @@ l_cont:
 void CastleService2(void)
 {
 	__asm pusha
-//  edx - указатель на менеджер (+38 -> замок)
-//  ecx - построенное здание
+//  edx - СѓРєР°Р·Р°С‚РµР»СЊ РЅР° РјРµРЅРµРґР¶РµСЂ (+38 -> Р·Р°РјРѕРє)
+//  ecx - РїРѕСЃС‚СЂРѕРµРЅРЅРѕРµ Р·РґР°РЅРёРµ
 	CastleSkipDemolition();
 	__asm popa
 	__asm mov [edx+0x1B8],ecx
@@ -1024,37 +1026,37 @@ int ERM_CasDem(char Cmd,int Num,_ToDo_*,Mes *Mp)
 	int k;
 	
 	switch(Cmd){
-		case 'P': // позиция привязки точки сражения с монстрами
+		case 'P': // РїРѕР·РёС†РёСЏ РїСЂРёРІСЏР·РєРё С‚РѕС‡РєРё СЃСЂР°Р¶РµРЅРёСЏ СЃ РјРѕРЅСЃС‚СЂР°РјРё
 			if(Num<5) RETURN(0) // #M/$x/$y/$l/#R
-			k=Mp->n[0];  // номер монстра
+			k=Mp->n[0];  // РЅРѕРјРµСЂ РјРѕРЅСЃС‚СЂР°
 			if((k<0)||(k>13)) RETURN(0)
 			BattlePlace[k].x=BattlePlace[k].x*Mp->f[1]+Mp->n[1]; // x
 			BattlePlace[k].y=BattlePlace[k].y*Mp->f[2]+Mp->n[2]; // y
 			BattlePlace[k].l=BattlePlace[k].l*Mp->f[3]+Mp->n[3]; // l
 			BattlePlace[k].abs=BattlePlace[k].abs*Mp->f[4]+Mp->n[4]; // r
 			break;
-		case 'D': // D$ кол-во разр. в день
-			DemPerDay=DemPerDay*Mp->f[0]+Mp->n[0]; // сколько в день
+		case 'D': // D$ РєРѕР»-РІРѕ СЂР°Р·СЂ. РІ РґРµРЅСЊ
+			DemPerDay=DemPerDay*Mp->f[0]+Mp->n[0]; // СЃРєРѕР»СЊРєРѕ РІ РґРµРЅСЊ
 			if(DemPerDay<0) DemPerDay=0;
 			break;
-		case 'M': // M$ потеря движения героя  
-			Mov2Lost=Mov2Lost*Mp->f[0]+Mp->n[0]; // сколько в день
+		case 'M': // M$ РїРѕС‚РµСЂСЏ РґРІРёР¶РµРЅРёСЏ РіРµСЂРѕСЏ  
+			Mov2Lost=Mov2Lost*Mp->f[0]+Mp->n[0]; // СЃРєРѕР»СЊРєРѕ РІ РґРµРЅСЊ
 			if(Mov2Lost<0) Mov2Lost=0;
 			break;
-		case 'N': // N#1/$2 цена след разрушения  
+		case 'N': // N#1/$2 С†РµРЅР° СЃР»РµРґ СЂР°Р·СЂСѓС€РµРЅРёСЏ  
 			if(Num<2) RETURN(0)
 			k=Mp->n[0];
 			if((k<0)||(k>99)) RETURN(0)
-			DemNextCost[k]=DemNextCost[k]*Mp->f[1]+Mp->n[1]; // цена разрушения
+			DemNextCost[k]=DemNextCost[k]*Mp->f[1]+Mp->n[1]; // С†РµРЅР° СЂР°Р·СЂСѓС€РµРЅРёСЏ
 			if(DemNextCost[k]<0) DemNextCost[k]=0;
 			break;
-		case 'E': // Etown_type/build_type/exp_val опыт героя для разрушения
+		case 'E': // Etown_type/build_type/exp_val РѕРїС‹С‚ РіРµСЂРѕСЏ РґР»СЏ СЂР°Р·СЂСѓС€РµРЅРёСЏ
 			CHECK_ParamsMin(3);
 			if((Mp->n[0]<0)||(Mp->n[0]>8)){ EWrongParam(); RETURN(0) }
 			if((Mp->n[1]<0)||(Mp->n[1]>43)){ EWrongParam(); RETURN(0) }
 			Apply(&CSCheck[Mp->n[1]].Town[Mp->n[0]].MinHeroExp,4,Mp,2);
 			break;
-		case 'A': // Atown_type/build_type/army_hp сила армии тероя для разрушения
+		case 'A': // Atown_type/build_type/army_hp СЃРёР»Р° Р°СЂРјРёРё С‚РµСЂРѕСЏ РґР»СЏ СЂР°Р·СЂСѓС€РµРЅРёСЏ
 			CHECK_ParamsMin(3);
 			if((Mp->n[0]<0)||(Mp->n[0]>8)){ EWrongParam(); RETURN(0) }
 			if((Mp->n[1]<0)||(Mp->n[1]>43)){ EWrongParam(); RETURN(0) }
@@ -1168,19 +1170,19 @@ void DaylyCastle(int User)
 		if((Cnum=GetCastleNumber(Castle))<0) RETURNV
 		csp=&CastleState[Cnum];
 		ex=Castle->x; ey=Castle->y; el=Castle->l;
-		if(csp->State==-1){ // разрушен
-			DoIt=-1; // запретить вход
-			if(csp->DestroyedBy==User){ // если этот игрок ломал
-				if((Date-csp->Destroyed)>=GHOSTDAYS){ // 6 дней прошло - можно нанимать
+		if(csp->State==-1){ // СЂР°Р·СЂСѓС€РµРЅ
+			DoIt=-1; // Р·Р°РїСЂРµС‚РёС‚СЊ РІС…РѕРґ
+			if(csp->DestroyedBy==User){ // РµСЃР»Рё СЌС‚РѕС‚ РёРіСЂРѕРє Р»РѕРјР°Р»
+				if((Date-csp->Destroyed)>=GHOSTDAYS){ // 6 РґРЅРµР№ РїСЂРѕС€Р»Рѕ - РјРѕР¶РЅРѕ РЅР°РЅРёРјР°С‚СЊ
 					DoIt=1;
 				}
 			}else{
-				if((Date-csp->Destroyed)>GHOSTDAYS){ // на следующий день
+				if((Date-csp->Destroyed)>GHOSTDAYS){ // РЅР° СЃР»РµРґСѓСЋС‰РёР№ РґРµРЅСЊ
 					DoIt=1;
 				}
 			}
-			// поджигаем лес и др.
-//      if(((Date-csp->Destroyed-1)%10)==0){ // поджигаем на след день. и каждые 10 дней
+			// РїРѕРґР¶РёРіР°РµРј Р»РµСЃ Рё РґСЂ.
+//      if(((Date-csp->Destroyed-1)%10)==0){ // РїРѕРґР¶РёРіР°РµРј РЅР° СЃР»РµРґ РґРµРЅСЊ. Рё РєР°Р¶РґС‹Рµ 10 РґРЅРµР№
 				ProvokeAnimation(ex-2,ey-2,el,5,3,1,OAM_AUTO);
 //      }
 		}
@@ -1195,16 +1197,16 @@ void DaylyCastle(int User)
 			}
 			MIp=&MIp0[ex+(ey+el*MapSize)*MapSize];
 			if(DoIt==1){
-				MIp->Attrib&=0xFE;  // открываем
+				MIp->Attrib&=0xFE;  // РѕС‚РєСЂС‹РІР°РµРј
 			}else{
-				MIp->Attrib|=0x01;  // закрываем
+				MIp->Attrib|=0x01;  // Р·Р°РєСЂС‹РІР°РµРј
 			}
-			// отбираем, если чей-то
+			// РѕС‚Р±РёСЂР°РµРј, РµСЃР»Рё С‡РµР№-С‚Рѕ
 			if(Castle->Owner!=-1){
-//        AIStartBuilding(-1); // восстановим город
-				// выставим героя
-				if(Castle->IHero!=-1){ // внутри есть герой.
-					if(Castle->VHero==-1){ // а с наружи нет
+//        AIStartBuilding(-1); // РІРѕСЃСЃС‚Р°РЅРѕРІРёРј РіРѕСЂРѕРґ
+				// РІС‹СЃС‚Р°РІРёРј РіРµСЂРѕСЏ
+				if(Castle->IHero!=-1){ // РІРЅСѓС‚СЂРё РµСЃС‚СЊ РіРµСЂРѕР№.
+					if(Castle->VHero==-1){ // Р° СЃ РЅР°СЂСѓР¶Рё РЅРµС‚
 						Town2Hero0(Castle);
 					}
 				}
@@ -1216,17 +1218,17 @@ void DaylyCastle(int User)
 			}
 		}
 	}
-	if((Date%7)==1){ // начало недели
-		// "взводим" строения монстров 8-го уровня
+	if((Date%7)==1){ // РЅР°С‡Р°Р»Рѕ РЅРµРґРµР»Рё
+		// "РІР·РІРѕРґРёРј" СЃС‚СЂРѕРµРЅРёСЏ РјРѕРЅСЃС‚СЂРѕРІ 8-РіРѕ СѓСЂРѕРІРЅСЏ
 		for(i=0;i<DWELLMAPNUM;i++){
-			if(DwellMapInfo[i].Owner!=User) continue; // пустой
+			if(DwellMapInfo[i].Owner!=User) continue; // РїСѓСЃС‚РѕР№
 			DwellMapInfo[i].Mon2Town=1;
 		}
 	}
 	RETURNV
 }
 
-// настройка стрелковых башен.
+// РЅР°СЃС‚СЂРѕР№РєР° СЃС‚СЂРµР»РєРѕРІС‹С… Р±Р°С€РµРЅ.
 void NextTowerState(_CastleSetup_ *Castle)
 {
 	STARTNA(__LINE__, 0)
@@ -1239,13 +1241,13 @@ void NextTowerState(_CastleSetup_ *Castle)
 	if((Owner==-1)||((Owner!=csp->TLastOwner)&&(csp->TLastOwner!=-2))){
 		csp->TCenter=csp->TSide=0;
 	}else{
-		if(Castle->Built[1]&0x02){ // построены 3
+		if(Castle->Built[1]&0x02){ // РїРѕСЃС‚СЂРѕРµРЅС‹ 3
 			csp->TCenter+=(short)5;
 			csp->TSide+=(short)3;
 		// The check didn't work in 3.58f due to a bug, now it's off for backward compatibility
-		//}else if(Castle->Built[1]&0x01){ // построена 1
+		//}else if(Castle->Built[1]&0x01){ // РїРѕСЃС‚СЂРѕРµРЅР° 1
 		//	csp->TCenter+=(short)5;
-		}else{ // ничего нет
+		}else{ // РЅРёС‡РµРіРѕ РЅРµС‚
 			csp->TCenter=csp->TSide=0;
 		}
 	}
@@ -1256,13 +1258,13 @@ void NextTowerState(_CastleSetup_ *Castle)
 void SetTowerBunus(_CastleSetup_ *Castle,Byte *MonStr)
 {
 	STARTNA(__LINE__, 0)
-	if(PL_TowerStd) RETURNV // стандартное поведение башен
+	if(PL_TowerStd) RETURNV // СЃС‚Р°РЅРґР°СЂС‚РЅРѕРµ РїРѕРІРµРґРµРЅРёРµ Р±Р°С€РµРЅ
 	_CastleState_ *csp;
 	int Cnum,Bonus;
 //RETURNV  
 	if((Cnum=GetCastleNumber(Castle))<0) RETURNV
 	csp=&CastleState[Cnum];
-	int mnum=*(int *)&MonStr[0x60]; // начальное количество монстров
+	int mnum=*(int *)&MonStr[0x60]; // РЅР°С‡Р°Р»СЊРЅРѕРµ РєРѕР»РёС‡РµСЃС‚РІРѕ РјРѕРЅСЃС‚СЂРѕРІ
 	if(mnum==5) Bonus=csp->TCenter; else Bonus=csp->TSide; 
 	*(int *)&MonStr[0x4C]+=Bonus;
 	RETURNV
@@ -1270,7 +1272,7 @@ void SetTowerBunus(_CastleSetup_ *Castle,Byte *MonStr)
 // network support
 struct _TransTownState_{
 	int  TInd;
-	int  TCenter,TSide; // бонус башен
+	int  TCenter,TSide; // Р±РѕРЅСѓСЃ Р±Р°С€РµРЅ
 } TransTownState;
 void SendCastleState(int cnum,int *len,Byte **buf){
 	STARTNA(__LINE__, 0)
@@ -1305,9 +1307,9 @@ void CastleTowers(void)
 //  _CastleState_ *csp;
 	int    Date;
 
-	if(PL_TowerStd) RETURNV // стандартное поведение башен
+	if(PL_TowerStd) RETURNV // СЃС‚Р°РЅРґР°СЂС‚РЅРѕРµ РїРѕРІРµРґРµРЅРёРµ Р±Р°С€РµРЅ
 	Date=GetCurDate();
-	if(((Date%7)!=1)||(Date==1)) RETURNV // не начало недели
+	if(((Date%7)!=1)||(Date==1)) RETURNV // РЅРµ РЅР°С‡Р°Р»Рѕ РЅРµРґРµР»Рё
 	__asm{
 		mov   ecx,BASE
 		mov   ecx,[ecx]
@@ -1323,8 +1325,8 @@ void CastleTowers(void)
 	RETURNV
 }
 
-// проверка на разрешение AI строить капитолий 5C119B
-// проверка на разрешение AI строить конкретное строение 5BF7E4
+// РїСЂРѕРІРµСЂРєР° РЅР° СЂР°Р·СЂРµС€РµРЅРёРµ AI СЃС‚СЂРѕРёС‚СЊ РєР°РїРёС‚РѕР»РёР№ 5C119B
+// РїСЂРѕРІРµСЂРєР° РЅР° СЂР°Р·СЂРµС€РµРЅРёРµ AI СЃС‚СЂРѕРёС‚СЊ РєРѕРЅРєСЂРµС‚РЅРѕРµ СЃС‚СЂРѕРµРЅРёРµ 5BF7E4
 int AIStartBuilding(int BType)
 {
 	_CastleSetup_ *CStructure; _ECX(CStructure);
@@ -1338,22 +1340,22 @@ int AIStartBuilding(int BType)
 	_MapItem_  *MIp;
 	Dword   Mask;
 	
-	if(BType==10) RETURN(1) // постройка управы
-// для внутреннего использования
+	if(BType==10) RETURN(1) // РїРѕСЃС‚СЂРѕР№РєР° СѓРїСЂР°РІС‹
+// РґР»СЏ РІРЅСѓС‚СЂРµРЅРЅРµРіРѕ РёСЃРїРѕР»СЊР·РѕРІР°РЅРёСЏ
 //  if(BType==-1) BType=10;
 	if((Cnum=GetCastleNumber(CStructure))<0) RETURN(0)
 	csp=&CastleState[Cnum];
-	if(csp->State>0){ // были частичные разрушения
+	if(csp->State>0){ // Р±С‹Р»Рё С‡Р°СЃС‚РёС‡РЅС‹Рµ СЂР°Р·СЂСѓС€РµРЅРёСЏ
 		csp->State=0;
 		RETURN(0)
 	}
-	if(csp->State!=-1) RETURN(0) // не разрушено
+	if(csp->State!=-1) RETURN(0) // РЅРµ СЂР°Р·СЂСѓС€РµРЅРѕ
 	VHero=CStructure->VHero;
 	IHero=CStructure->IHero;
 	Building=CStructure->Built;
 	Bonus=CStructure->Bonus;
 	if((Building[1]&0x3C)!=0) RETURN(0)
-// строится дальше
+// СЃС‚СЂРѕРёС‚СЃСЏ РґР°Р»СЊС€Рµ
 //  Building[1]|=0x04;
 //  Bonus[1]|=0x04;
 	__asm{
@@ -1367,7 +1369,7 @@ int AIStartBuilding(int BType)
 		else Hp=&Hp0[IHero]; 
 	}else Hp=&Hp0[VHero];
 	Mn=csp->Ghost;
-	if(Mn!=0){ // Прив. есть
+	if(Mn!=0){ // РџСЂРёРІ. РµСЃС‚СЊ
 		if(Hp!=0){
 			for(i=0;i<7;i++){
 				if(Hp->Ct[i]==-1){
@@ -1380,12 +1382,12 @@ int AIStartBuilding(int BType)
 	}
 	csp->Ghost=0;
 	csp->State=0;
-//  b=10; // сельская управа
+//  b=10; // СЃРµР»СЊСЃРєР°СЏ СѓРїСЂР°РІР°
 	ct=CStructure->Type;
 	if(Hp!=0) nct=Hp->Spec/2; else nct=ct;
-// здесь должна быть проверка на Билдера
+// Р·РґРµСЃСЊ РґРѕР»Р¶РЅР° Р±С‹С‚СЊ РїСЂРѕРІРµСЂРєР° РЅР° Р‘РёР»РґРµСЂР°
 	if(ct!=nct){
-		CStructure->Type=(Byte)(nct); // сменим тип города
+		CStructure->Type=(Byte)(nct); // СЃРјРµРЅРёРј С‚РёРї РіРѕСЂРѕРґР°
 		Building[2]&=0xFE;
 		Bonus[2]&=0xFE;
 		ex=CStructure->x; ey=CStructure->y; el=CStructure->l;
@@ -1399,7 +1401,7 @@ int AIStartBuilding(int BType)
 			CStructure->BMask[i]=Mask;
 		}
 	}  
-// построим управу
+// РїРѕСЃС‚СЂРѕРёРј СѓРїСЂР°РІСѓ
 	__asm{
 		push   10
 		mov    ecx,CStructure
@@ -1429,22 +1431,22 @@ int Enter2Castle(int GM_ai,_MapItem_ *Mi,_Hero_ *Hr,Dword /*avd.Manager*/)
 	_CastleSetup_ *CStr;
 	_CastleState_ *csp;
 
-	// проверка на кастл
-	// наюо бы проверять по типу, но пока по позиции
-	if((CStr=FindCastleStr(Mi))==0) RETURN(-1) // не нашли замок - значит не он
+	// РїСЂРѕРІРµСЂРєР° РЅР° РєР°СЃС‚Р»
+	// РЅР°СЋРѕ Р±С‹ РїСЂРѕРІРµСЂСЏС‚СЊ РїРѕ С‚РёРїСѓ, РЅРѕ РїРѕРєР° РїРѕ РїРѕР·РёС†РёРё
+	if((CStr=FindCastleStr(Mi))==0) RETURN(-1) // РЅРµ РЅР°С€Р»Рё Р·Р°РјРѕРє - Р·РЅР°С‡РёС‚ РЅРµ РѕРЅ
 	if((Cnum=GetCastleNumber(CStr))<0) RETURN(1)
 	csp=&CastleState[Cnum];
-	if(csp->State!=-1){ // не  разрушен
-//    CStr[1]=(Byte)Hr->Owner; // почему-то отнимает замок у героя
+	if(csp->State!=-1){ // РЅРµ  СЂР°Р·СЂСѓС€РµРЅ
+//    CStr[1]=(Byte)Hr->Owner; // РїРѕС‡РµРјСѓ-С‚Рѕ РѕС‚РЅРёРјР°РµС‚ Р·Р°РјРѕРє Сѓ РіРµСЂРѕСЏ
 		goto l_Exit;
 	}
 	Date=GetCurDate();
-	if(csp->DestroyedBy==Hr->Owner){ // если этот игрок ломал
-		if((Date-csp->Destroyed)>=GHOSTDAYS) goto l_Exit; // 6 дней прошло
+	if(csp->DestroyedBy==Hr->Owner){ // РµСЃР»Рё СЌС‚РѕС‚ РёРіСЂРѕРє Р»РѕРјР°Р»
+		if((Date-csp->Destroyed)>=GHOSTDAYS) goto l_Exit; // 6 РґРЅРµР№ РїСЂРѕС€Р»Рѕ
 	}else{
-		if((Date-csp->Destroyed)>GHOSTDAYS) goto l_Exit; // на следующий день
+		if((Date-csp->Destroyed)>GHOSTDAYS) goto l_Exit; // РЅР° СЃР»РµРґСѓСЋС‰РёР№ РґРµРЅСЊ
 	}
-	// нельзя пока входить
+	// РЅРµР»СЊР·СЏ РїРѕРєР° РІС…РѕРґРёС‚СЊ
 	if(GM_ai) Message(ITxt(33,0,&Strings),1);
 	RETURN(1)
 l_Exit:
@@ -1452,10 +1454,10 @@ l_Exit:
 	RETURN(0)
 }
 
-// помещает героя во врата замка (изнутри)
-// При этом не проверяется принадлежность героя к замку.
-// esi -> город
-// edx -> герой
+// РїРѕРјРµС‰Р°РµС‚ РіРµСЂРѕСЏ РІРѕ РІСЂР°С‚Р° Р·Р°РјРєР° (РёР·РЅСѓС‚СЂРё)
+// РџСЂРё СЌС‚РѕРј РЅРµ РїСЂРѕРІРµСЂСЏРµС‚СЃСЏ РїСЂРёРЅР°РґР»РµР¶РЅРѕСЃС‚СЊ РіРµСЂРѕСЏ Рє Р·Р°РјРєСѓ.
+// esi -> РіРѕСЂРѕРґ
+// edx -> РіРµСЂРѕР№
 //:004AAD4A 6A01           push   00000001
 //:004AAD4C 6A00           push   00000000
 //:004AAD4E 8BCF           mov    ecx,edi
@@ -1466,14 +1468,14 @@ void __stdcall MakeTownDefender(Dword v2,Dword v1)
 {
 	__asm{
 		mov   MTD_Ecx,ecx
-		mov   al,[edx+0x22] // хозяин героя
-		mov   dl,[esi+1]    // хозяин города
+		mov   al,[edx+0x22] // С…РѕР·СЏРёРЅ РіРµСЂРѕСЏ
+		mov   dl,[esi+1]    // С…РѕР·СЏРёРЅ РіРѕСЂРѕРґР°
 	}
 	__asm mov BDummy,dl
-	if(BDummy!=0xFF) goto lOk; // если есть хозяин
-//  if(_AL==_DL) goto Ok;  // если один хозяин
+	if(BDummy!=0xFF) goto lOk; // РµСЃР»Рё РµСЃС‚СЊ С…РѕР·СЏРёРЅ
+//  if(_AL==_DL) goto Ok;  // РµСЃР»Рё РѕРґРёРЅ С…РѕР·СЏРёРЅ
 	__asm{
-		mov   eax,[esi+0xE0]      // -1 все =-1, если никого нет
+		mov   eax,[esi+0xE0]      // -1 РІСЃРµ =-1, РµСЃР»Рё РЅРёРєРѕРіРѕ РЅРµС‚
 		add   eax,[esi+0xE0+0x04] // -2
 		add   eax,[esi+0xE0+0x08] // -3
 		add   eax,[esi+0xE0+0x0C] // -4
@@ -1483,7 +1485,7 @@ void __stdcall MakeTownDefender(Dword v2,Dword v1)
 	}
 	_EAX(DDummy); if((int)DDummy!=-7) return;
 	__asm{
-		mov   eax,[esi+0x0C]      // есть ли внутренний герой
+		mov   eax,[esi+0x0C]      // РµСЃС‚СЊ Р»Рё РІРЅСѓС‚СЂРµРЅРЅРёР№ РіРµСЂРѕР№
 	}
 	_EAX(DDummy); if((int)DDummy!=-1) return;
 lOk:
@@ -1499,14 +1501,14 @@ lOk:
 }
 
 //////////////////////////////
-// Жилища монстров 8-го уровня
+// Р–РёР»РёС‰Р° РјРѕРЅСЃС‚СЂРѕРІ 8-РіРѕ СѓСЂРѕРІРЅСЏ
 //#define DWELLMAPNUM 1000
 int FindDwellInfo(_Dwelling_ *dw)
 {
 	STARTNA(__LINE__, 0)
 	int i;
 	for(i=0;i<DWELLMAPNUM;i++){
-		if(DwellMapInfo[i].SType==0) continue; // пустой
+		if(DwellMapInfo[i].SType==0) continue; // РїСѓСЃС‚РѕР№
 		if(DwellMapInfo[i].x!=dw->x) continue;
 		if(DwellMapInfo[i].y!=dw->y) continue;
 		if(DwellMapInfo[i].l!=dw->l) continue;
@@ -1522,7 +1524,7 @@ int AddDwellInfo(_Dwelling_ *dw)
 	i=FindDwellInfo(dw);
 	if(i==-1){
 		for(i=0;i<DWELLMAPNUM;i++){
-			if(DwellMapInfo[i].SType==0) goto l_found; // пустой
+			if(DwellMapInfo[i].SType==0) goto l_found; // РїСѓСЃС‚РѕР№
 		}
 		RETURN(-1)
 	}
@@ -1541,11 +1543,11 @@ int IsFirstDay(_Dwelling_ *dw)
 	int ind;
 	int Day=GetCurDate();
 	ind=FindDwellInfo(dw);
-	if(ind==-1) RETURN(0) // такого нет
+	if(ind==-1) RETURN(0) // С‚Р°РєРѕРіРѕ РЅРµС‚
 	if((Day-DwellMapInfo[ind].GotDay)==0) RETURN(1)
 	RETURN(0)
 }
-// типы монстров для защиты
+// С‚РёРїС‹ РјРѕРЅСЃС‚СЂРѕРІ РґР»СЏ Р·Р°С‰РёС‚С‹
 static int E2D_GuardType[9][2][7];
 /*
 ={
@@ -1566,50 +1568,50 @@ int Enter2Dwelling(int GM_ai,_MapItem_ *Mi,_Hero_ *Hr,Dword /*avd.Manager*/,Dwor
 	int st,ind,i;
 	_Dwelling_ *dw;
 	_DwellMapInfo_ *di;
-	// проверка на новый двелинг
-//  if((CStr=FindCastleStr(Mi))==0) return -1; // не нашли дв - значит не оно
+	// РїСЂРѕРІРµСЂРєР° РЅР° РЅРѕРІС‹Р№ РґРІРµР»РёРЅРі
+//  if((CStr=FindCastleStr(Mi))==0) return -1; // РЅРµ РЅР°С€Р»Рё РґРІ - Р·РЅР°С‡РёС‚ РЅРµ РѕРЅРѕ
 	if(PL_ExtDwellStd==1) RETURN(-1)
-	if(Mi->OType!=17) RETURN(-1) // НЕ dwelling
+	if(Mi->OType!=17) RETURN(-1) // РќР• dwelling
 	st=Mi->OSType;
-	if((st<80)||(st>88)) RETURN(-1) // не наш
+	if((st<80)||(st>88)) RETURN(-1) // РЅРµ РЅР°С€
 //asm int 3
 	dw=FindDwellStr(Mi);
-	if(dw==0) RETURN(-1) // не нашли такого вообще - ошибка ?
-	*Object=(Dword)dw;   // вернем ук.
-	ind=AddDwellInfo(dw);    // добавим, если еще не было
-	if(ind==-1) RETURN(-1) // такого не было - такого быть не должно
+	if(dw==0) RETURN(-1) // РЅРµ РЅР°С€Р»Рё С‚Р°РєРѕРіРѕ РІРѕРѕР±С‰Рµ - РѕС€РёР±РєР° ?
+	*Object=(Dword)dw;   // РІРµСЂРЅРµРј СѓРє.
+	ind=AddDwellInfo(dw);    // РґРѕР±Р°РІРёРј, РµСЃР»Рё РµС‰Рµ РЅРµ Р±С‹Р»Рѕ
+	if(ind==-1) RETURN(-1) // С‚Р°РєРѕРіРѕ РЅРµ Р±С‹Р»Рѕ - С‚Р°РєРѕРіРѕ Р±С‹С‚СЊ РЅРµ РґРѕР»Р¶РЅРѕ
 	di=&DwellMapInfo[ind];
-	if(dw->Owner==Hr->Owner){ //  хозяин пришел
+	if(dw->Owner==Hr->Owner){ //  С…РѕР·СЏРёРЅ РїСЂРёС€РµР»
 //asm int 3
-		if(IsFirstDay(dw)){ // в этот день и захватил - можно нанять
-			if(dw->Num2Hire[0]==0){ // некого уже нанимать
+		if(IsFirstDay(dw)){ // РІ СЌС‚РѕС‚ РґРµРЅСЊ Рё Р·Р°С…РІР°С‚РёР» - РјРѕР¶РЅРѕ РЅР°РЅСЏС‚СЊ
+			if(dw->Num2Hire[0]==0){ // РЅРµРєРѕРіРѕ СѓР¶Рµ РЅР°РЅРёРјР°С‚СЊ
 				if(GM_ai){
-					RequestPic(ITxt(43,0,&Strings),0x15,150-80+st,1); // тип монстра
+					RequestPic(ITxt(43,0,&Strings),0x15,150-80+st,1); // С‚РёРї РјРѕРЅСЃС‚СЂР°
 					RETURN(1)
 				}
-			}else RETURN(0) // пусть все идет своим чередом
-		}else{ // время прошло, теперь только в соответствующем замке
-			if(di->Mon2Town/*Num2Hire[0]*/==0){ // все, остальное в городах
+			}else RETURN(0) // РїСѓСЃС‚СЊ РІСЃРµ РёРґРµС‚ СЃРІРѕРёРј С‡РµСЂРµРґРѕРј
+		}else{ // РІСЂРµРјСЏ РїСЂРѕС€Р»Рѕ, С‚РµРїРµСЂСЊ С‚РѕР»СЊРєРѕ РІ СЃРѕРѕС‚РІРµС‚СЃС‚РІСѓСЋС‰РµРј Р·Р°РјРєРµ
+			if(di->Mon2Town/*Num2Hire[0]*/==0){ // РІСЃРµ, РѕСЃС‚Р°Р»СЊРЅРѕРµ РІ РіРѕСЂРѕРґР°С…
 				if(GM_ai){
-					RequestPic(ITxt(44,0,&Strings),0x15,150-80+st,1); // тип монстра
-				}else RETURN(0) // пусть AI нанимает - а то он там застревает
-			}else{ // не нанял - опоздал
+					RequestPic(ITxt(44,0,&Strings),0x15,150-80+st,1); // С‚РёРї РјРѕРЅСЃС‚СЂР°
+				}else RETURN(0) // РїСѓСЃС‚СЊ AI РЅР°РЅРёРјР°РµС‚ - Р° С‚Рѕ РѕРЅ С‚Р°Рј Р·Р°СЃС‚СЂРµРІР°РµС‚
+			}else{ // РЅРµ РЅР°РЅСЏР» - РѕРїРѕР·РґР°Р»
 				if(GM_ai){
-					RequestPic(ITxt(41,0,&Strings),0x15,150-80+st,1); // тип монстра
-				}else RETURN(0) // пусть AI нанимает - а то он там застревает
-//        return 0; // разрешить всем нанимать и здесь
+					RequestPic(ITxt(41,0,&Strings),0x15,150-80+st,1); // С‚РёРї РјРѕРЅСЃС‚СЂР°
+				}else RETURN(0) // РїСѓСЃС‚СЊ AI РЅР°РЅРёРјР°РµС‚ - Р° С‚Рѕ РѕРЅ С‚Р°Рј Р·Р°СЃС‚СЂРµРІР°РµС‚
+//        return 0; // СЂР°Р·СЂРµС€РёС‚СЊ РІСЃРµРј РЅР°РЅРёРјР°С‚СЊ Рё Р·РґРµСЃСЊ
 			}  
-			RETURN(1) // нечего ему здесь делать
+			RETURN(1) // РЅРµС‡РµРіРѕ РµРјСѓ Р·РґРµСЃСЊ РґРµР»Р°С‚СЊ
 		}
-	}else{ // враг пришел
-		// приготовим ему монстров
+	}else{ // РІСЂР°Рі РїСЂРёС€РµР»
+		// РїСЂРёРіРѕС‚РѕРІРёРј РµРјСѓ РјРѕРЅСЃС‚СЂРѕРІ
 		for(i=0;i<7;i++){
 			dw->GType[i]=E2D_GuardType[st-80][0][i];
 			dw->GNum[i]=E2D_GuardType[st-80][1][i];
 		}
-		// и дадим нанять монстрика
+		// Рё РґР°РґРёРј РЅР°РЅСЏС‚СЊ РјРѕРЅСЃС‚СЂРёРєР°
 		dw->Num2Hire[0]=1;
-		RETURN(0) // пусть все идет своим чередом
+		RETURN(0) // РїСѓСЃС‚СЊ РІСЃРµ РёРґРµС‚ СЃРІРѕРёРј С‡РµСЂРµРґРѕРј
 	} 
 	RETURN(0)
 }
@@ -1622,20 +1624,20 @@ void EnterOutOfDwelling(int GM_ai,Dword Object)
 	int Day=GetCurDate();
 	_DwellMapInfo_ *di;
 	
-	if(dw==0) RETURNV // вообще-то невозможно
+	if(dw==0) RETURNV // РІРѕРѕР±С‰Рµ-С‚Рѕ РЅРµРІРѕР·РјРѕР¶РЅРѕ
 	ind=FindDwellInfo(dw);
-	if(ind==-1) RETURNV // такого не было - такого быть не должно
+	if(ind==-1) RETURNV // С‚Р°РєРѕРіРѕ РЅРµ Р±С‹Р»Рѕ - С‚Р°РєРѕРіРѕ Р±С‹С‚СЊ РЅРµ РґРѕР»Р¶РЅРѕ
 	di=&DwellMapInfo[ind];
-	if(di->Owner!=dw->Owner){ // хозяин сменился - захвачен
-		di->Owner=dw->Owner;   // модифицируем
+	if(di->Owner!=dw->Owner){ // С…РѕР·СЏРёРЅ СЃРјРµРЅРёР»СЃСЏ - Р·Р°С…РІР°С‡РµРЅ
+		di->Owner=dw->Owner;   // РјРѕРґРёС„РёС†РёСЂСѓРµРј
 		di->GotDay=(short)Day;
-		di->Mon2Town=0; // включится только со след недели
-		if(dw->Num2Hire[0]!=0){ // не нанял
+		di->Mon2Town=0; // РІРєР»СЋС‡РёС‚СЃСЏ С‚РѕР»СЊРєРѕ СЃРѕ СЃР»РµРґ РЅРµРґРµР»Рё
+		if(dw->Num2Hire[0]!=0){ // РЅРµ РЅР°РЅСЏР»
 			if(GM_ai){
-				RequestPic(ITxt(42,0,&Strings),0x15,150-80+dw->SType,1); // тип монстра
+				RequestPic(ITxt(42,0,&Strings),0x15,150-80+dw->SType,1); // С‚РёРї РјРѕРЅСЃС‚СЂР°
 			}
 		}
-		// покажем всем
+		// РїРѕРєР°Р¶РµРј РІСЃРµРј
 		for(i=0;i<8;i++){
 			ShowArea(dw->x,dw->y,dw->l,i,1);
 		}
@@ -1644,11 +1646,11 @@ void EnterOutOfDwelling(int GM_ai,Dword Object)
 }
 
 //////////////////////////
-// Найм монстров 8-го уровня в городах
+// РќР°Р№Рј РјРѕРЅСЃС‚СЂРѕРІ 8-РіРѕ СѓСЂРѕРІРЅСЏ РІ РіРѕСЂРѕРґР°С…
 static struct C2H_HireBufStr{
 	Byte  _u1[0x50];
 	int    DefCrType;
-	Word  *DefCrNum; //-> место для наема (охрана замка или внутренний герой)
+	Word  *DefCrNum; //-> РјРµСЃС‚Рѕ РґР»СЏ РЅР°РµРјР° (РѕС…СЂР°РЅР° Р·Р°РјРєР° РёР»Рё РІРЅСѓС‚СЂРµРЅРЅРёР№ РіРµСЂРѕР№)
 	int    DefCrInd; // 0,1,2,3
 	int    CrType[4];
 	Word  *CrNum[4];
@@ -1658,7 +1660,7 @@ static Byte  *C2H_TownMan;
 static Byte  *C2H_Town;
 static int PC2H_MonTrans[][2]={
 	{150,13},{151,27},{152,41},{153,55},{154,69},{155,83},{156,97},{157,111},{158,131}, // 8 level
-	{-1,-1} // последний
+	{-1,-1} // РїРѕСЃР»РµРґРЅРёР№
 };
 void ProcessC2H(void)
 {
@@ -1670,40 +1672,40 @@ void ProcessC2H(void)
 	//if(WoG==0) RETURNV
 	C2H_Town=(*(Byte **)&C2H_TownMan[0x38]);
 //....
-//  tp=C2H_HireBufPo->CrNum[0]; // кол-во 0
+//  tp=C2H_HireBufPo->CrNum[0]; // РєРѕР»-РІРѕ 0
 	mth=C2H_HireBufPo->CrType[0];
 	mtl=C2H_HireBufPo->CrType[1];
-	if(mth==-1) RETURNV // нет вообще типов монстров внутри (невозможно)
+	if(mth==-1) RETURNV // РЅРµС‚ РІРѕРѕР±С‰Рµ С‚РёРїРѕРІ РјРѕРЅСЃС‚СЂРѕРІ РІРЅСѓС‚СЂРё (РЅРµРІРѕР·РјРѕР¶РЅРѕ)
 	else if(mtl==-1) StInd=1;
 	else StInd=2;
-	if(StInd==1) RETURNV // нет апгрейда  
+	if(StInd==1) RETURNV // РЅРµС‚ Р°РїРіСЂРµР№РґР°  
 	for(i=0;;i++){
-		if(PC2H_MonTrans[i][0]==-1) break; // последний
+		if(PC2H_MonTrans[i][0]==-1) break; // РїРѕСЃР»РµРґРЅРёР№
 		if(PC2H_MonTrans[i][1]==mth){ mon=PC2H_MonTrans[i][0]; SInd=i; goto l_found; }
 	}
 	RETURNV
 l_found:
-	// проверяем на количество строений 8-го уровня у игрока
+	// РїСЂРѕРІРµСЂСЏРµРј РЅР° РєРѕР»РёС‡РµСЃС‚РІРѕ СЃС‚СЂРѕРµРЅРёР№ 8-РіРѕ СѓСЂРѕРІРЅСЏ Сѓ РёРіСЂРѕРєР°
 	Owner=C2H_Town[1];
 	DwNum=-1;
 	for(i=0;i<DWELLMAPNUM;i++){
-		if(DwellMapInfo[i].Owner!=Owner) continue; // не наш
-		if(DwellMapInfo[i].SType!=(SInd+80)) continue; // не наш
-		if(DwellMapInfo[i].Mon2Town==0) continue; // нет
-		// нашли
+		if(DwellMapInfo[i].Owner!=Owner) continue; // РЅРµ РЅР°С€
+		if(DwellMapInfo[i].SType!=(SInd+80)) continue; // РЅРµ РЅР°С€
+		if(DwellMapInfo[i].Mon2Town==0) continue; // РЅРµС‚
+		// РЅР°С€Р»Рё
 		DwNum=i;
 		break;
 	}
-	if(DwNum==-1) RETURNV // нет вообще - 
+	if(DwNum==-1) RETURNV // РЅРµС‚ РІРѕРѕР±С‰Рµ - 
 
 //  mon=C2H_Town[4]+150;
 //  num=1;
-	C2H_HireBufPo->CrType[StInd]=mon;   // тип 3
-	C2H_HireBufPo->CrNum[StInd]=&DwellMapInfo[DwNum].Mon2Town;   // кол-во 3
-//  C2H_HireBufPo->CrType[StInd+1]=1; // тип 4
-//  C2H_HireBufPo->CrNum[StInd+1]=tp; // кол-во 4
-	C2H_HireBufPo->CrType[StInd+1]=-1; // тип 4
-	C2H_HireBufPo->CrNum[StInd+1]=0; // кол-во 4
+	C2H_HireBufPo->CrType[StInd]=mon;   // С‚РёРї 3
+	C2H_HireBufPo->CrNum[StInd]=&DwellMapInfo[DwNum].Mon2Town;   // РєРѕР»-РІРѕ 3
+//  C2H_HireBufPo->CrType[StInd+1]=1; // С‚РёРї 4
+//  C2H_HireBufPo->CrNum[StInd+1]=tp; // РєРѕР»-РІРѕ 4
+	C2H_HireBufPo->CrType[StInd+1]=-1; // С‚РёРї 4
+	C2H_HireBufPo->CrNum[StInd+1]=0; // РєРѕР»-РІРѕ 4
 	RETURNV
 }
 
@@ -1800,16 +1802,16 @@ int ERM_Castle(char Cmd,int Num,_ToDo_*sp,Mes *Mp)
 	_CastleSetup_ *dp=GetCastleBase(); if(dp==0){ MError("\"!!CA\"-no Castles defined for a map.."); RETURN(0) }
 //  _CastleState_ *csp;
 	switch(sp->ParSet){
-		case 2: // флаг/номер
+		case 2: // С„Р»Р°Рі/РЅРѕРјРµСЂ
 			i=GetVarVal(&sp->Par[0]);
 			if(i!=0){ MError("\"CA#/#\"-first parameter out of range (0)."); RETURN(0) }
 			i=GetVarVal(&sp->Par[1]);
 			if((i<0)||(i>=GetCastleNum())){ MError("\"CA$\"-cannot find castle (out of range)."); RETURN(0) }
 			dp=&dp[i];
 			break;
-		case 1: // позиция indirect (-1=текущий)
+		case 1: // РїРѕР·РёС†РёСЏ indirect (-1=С‚РµРєСѓС‰РёР№)
 			i=GetVarVal(&sp->Par[0]);
-			if(i==-1){ // текущий
+			if(i==-1){ // С‚РµРєСѓС‰РёР№
 				if(CIstruct)
 				{
 					dp = CIstruct->Town;
@@ -1823,7 +1825,7 @@ int ERM_Castle(char Cmd,int Num,_ToDo_*sp,Mes *Mp)
 				}
 				break;
 			}
-		case 3: // позиция
+		case 3: // РїРѕР·РёС†РёСЏ
 			MixPos=GetDinMixPos(sp);
 			mip=GetMapItem2(MixPos);
 			stp=(int *)mip;
@@ -1837,7 +1839,7 @@ int ERM_Castle(char Cmd,int Num,_ToDo_*sp,Mes *Mp)
 			RETURN(0)
 	}
 	switch(Cmd){
-		case 'H': //H1/$ грой визитер H0/$ герой в гарнизоне
+		case 'H': //H1/$ РіСЂРѕР№ РІРёР·РёС‚РµСЂ H0/$ РіРµСЂРѕР№ РІ РіР°СЂРЅРёР·РѕРЅРµ
 			CHECK_ParamsNum(2);
 			switch(Mp->n[0]){
 				case 0:
@@ -1865,10 +1867,10 @@ int ERM_Castle(char Cmd,int Num,_ToDo_*sp,Mes *Mp)
 				default: MError("\"!!CA:H\"-wrong first parameter (0,1)"); RETURN(0)
 			}
 			break;
-		case 'U': // U$ номер замка
+		case 'U': // U$ РЅРѕРјРµСЂ Р·Р°РјРєР°
 			Apply(&dp->Number,1,Mp,0);
 			break;
-		case 'I': // I$ прорисовать замок на карте
+		case 'I': // I$ РїСЂРѕСЂРёСЃРѕРІР°С‚СЊ Р·Р°РјРѕРє РЅР° РєР°СЂС‚Рµ
 			Apply(&i,4,Mp,0);
 //      csp=&CastleState[dp->Number];
 			if(i<-1) i=-1;
@@ -1903,17 +1905,17 @@ int ERM_Castle(char Cmd,int Num,_ToDo_*sp,Mes *Mp)
 				call   eax
 			}
 			break;
-		case 'N': // N^text^ , M$, M-1 Название
+		case 'N': // N^text^ , M$, M-1 РќР°Р·РІР°РЅРёРµ
 			if(NewMesMan(Mp,&dp->Name,0)){ MError("\"!!CA:N\"-Cannot set a Castle Name."); RETURN(0) }
 			break;
-		case 'P': // P$/$/$ позиция замка
+		case 'P': // P$/$/$ РїРѕР·РёС†РёСЏ Р·Р°РјРєР°
 			Apply(&dp->x,-1,Mp,0); // unsigned 3.58 bug fix
 			Apply(&dp->y,-1,Mp,1); // unsigned 3.58 bug fix
 			Apply(&dp->l,1,Mp,2);
 			break;
-		case 'O': // O$, O-1 хозяин
-			// отбираем, если чей-то
-			if(Mp->VarI[0].Check==0){ // устанавливаем
+		case 'O': // O$, O-1 С…РѕР·СЏРёРЅ
+			// РѕС‚Р±РёСЂР°РµРј, РµСЃР»Рё С‡РµР№-С‚Рѕ
+			if(Mp->VarI[0].Check==0){ // СѓСЃС‚Р°РЅР°РІР»РёРІР°РµРј
 				int _owner,_number;
 				_owner=Mp->n[0];
 				_number=dp->Number;
@@ -1937,22 +1939,22 @@ int ERM_Castle(char Cmd,int Num,_ToDo_*sp,Mes *Mp)
 			mip->OSType=(Word)dp->Type;
 			CastleCheck(0);
 			break;
-//    case 'V': // V$, V-1 таверна ?
+//    case 'V': // V$, V-1 С‚Р°РІРµСЂРЅР° ?
 //      Apply(&dp->Tavern,1,Mp,0);
 //      break;
-		case 'R': // R$, (0,1,2???) 3.58 Возможность строить в этот турн 
+		case 'R': // R$, (0,1,2???) 3.58 Р’РѕР·РјРѕР¶РЅРѕСЃС‚СЊ СЃС‚СЂРѕРёС‚СЊ РІ СЌС‚РѕС‚ С‚СѓСЂРЅ 
 			Apply(&dp->BuiltThisTurn,1,Mp,0);
 			break;
-		case 'G': // маг гильдия
+		case 'G': // РјР°Рі РіРёР»СЊРґРёСЏ
 			switch(Num){
-				case 1: // G$ уровень маг гильдии
+				case 1: // G$ СѓСЂРѕРІРµРЅСЊ РјР°Рі РіРёР»СЊРґРёРё
 					Apply(&dp->MagLevel,1,Mp,0);
 					break;
-				case 2: // G$/$ кол-во закл на уровень уровень маг гильдии
+				case 2: // G$/$ РєРѕР»-РІРѕ Р·Р°РєР» РЅР° СѓСЂРѕРІРµРЅСЊ СѓСЂРѕРІРµРЅСЊ РјР°Рі РіРёР»СЊРґРёРё
 					if((Mp->n[0]<0)||(Mp->n[0]>4)){ MError("\"!!CA:G\"-A level of Magic Guild out of range (0...4)."); RETURN(0) }
 					Apply(&dp->MagicHild[Mp->n[0]],1,Mp,1);
 					break;
-				case 3: // G$/$/$ заклинания
+				case 3: // G$/$/$ Р·Р°РєР»РёРЅР°РЅРёСЏ
 					if((Mp->n[0]<0)||(Mp->n[0]>4)){ EWrongParam(); RETURN(0) }
 					if((Mp->n[1]<0)||(Mp->n[1]>5)){ EWrongParam(); RETURN(0) }
 					Apply(&dp->Spels[Mp->n[0]][Mp->n[1]],4,Mp,2);
@@ -1960,26 +1962,26 @@ int ERM_Castle(char Cmd,int Num,_ToDo_*sp,Mes *Mp)
 				default: MError("\"!!CA:G\"-incorrect command type (1...3)."); RETURN(0)
 			}
 			break;
-		case 'M': // монстры
+		case 'M': // РјРѕРЅСЃС‚СЂС‹
 			switch(Mp->n[0]){
-				case 1: // M1/pos/$/$ рост монстров и тип ?
+				case 1: // M1/pos/$/$ СЂРѕСЃС‚ РјРѕРЅСЃС‚СЂРѕРІ Рё С‚РёРї ?
 					CHECK_ParamsNum(4);
 					if((Mp->n[1]<0)||(Mp->n[1]>6)){ MError("\"!!CA:M\"-level out of range (0...6)."); RETURN(0) }
 					Apply(&dp->Monsters[0][Mp->n[1]],2,Mp,2);
 					Apply(&dp->Monsters[1][Mp->n[1]],2,Mp,3);
 					break;
-				case 2: // M2/pos/$/$ охрана замка тип и кол-во
+				case 2: // M2/pos/$/$ РѕС…СЂР°РЅР° Р·Р°РјРєР° С‚РёРї Рё РєРѕР»-РІРѕ
 					CHECK_ParamsNum(4);
 					if((Mp->n[1]<0)||(Mp->n[1]>6)){ MError("\"!!CA:M\"-position out of range (0...6)."); RETURN(0) }
 					Apply(&dp->GuardsT[Mp->n[1]],4,Mp,2);
 					Apply(&dp->GuardsN[Mp->n[1]],4,Mp,3);
 					break;
-				case 3: // M3/$type/$count монстр в портале призвания
+				case 3: // M3/$type/$count РјРѕРЅСЃС‚СЂ РІ РїРѕСЂС‚Р°Р»Рµ РїСЂРёР·РІР°РЅРёСЏ
 					CHECK_ParamsNum(3);
 					Apply(&dp->MonSummonT,4,Mp,1);
 					Apply(&dp->MonSummonN,2,Mp,2);
 					break;
-				case 4: // M4/pos/$ прирост монстра в неделю
+				case 4: // M4/pos/$ РїСЂРёСЂРѕСЃС‚ РјРѕРЅСЃС‚СЂР° РІ РЅРµРґРµР»СЋ
 					CHECK_ParamsNum(3);
 					if((Mp->n[1]<0)||(Mp->n[1]>6)){ MError("\"!!CA:M\"-level out of range (0...6)."); RETURN(0) }
 					j = Mp->n[1];
@@ -1996,18 +1998,18 @@ int ERM_Castle(char Cmd,int Num,_ToDo_*sp,Mes *Mp)
 				default: MError2("incorrect command type (1...4)."); RETURN(0)
 			}
 			break;
-		case 'B': // здания
+		case 'B': // Р·РґР°РЅРёСЏ
 			if (Mp->n[0] != 3 || Num != 3)
 				CHECK_ParamsNum(2);
 			if((Mp->n[1]<0)||(Mp->n[1]>43)){ MError("\"!!CA:B\"-wrong building number (0...43)."); RETURN(0) }
 			i=Mp->n[1]/8; j=Mp->n[1]%8;
 			b=(Byte)(1<<j);
 			switch(Mp->n[0]){
-				case 1: // B1/$ построить
+				case 1: // B1/$ РїРѕСЃС‚СЂРѕРёС‚СЊ
 					dp->Built[i]|=(Byte)b;
 					dp->Bonus[i]|=(Byte)b;
 					break;
-				case 2: // B2/$ разрушить
+				case 2: // B2/$ СЂР°Р·СЂСѓС€РёС‚СЊ
 					dp->Built[i]&=(Byte)~b;
 					dp->Bonus[i]&=(Byte)~b;
 					b=CSCheckERM[Mp->n[1]].Bits2Build;
@@ -2017,7 +2019,7 @@ int ERM_Castle(char Cmd,int Num,_ToDo_*sp,Mes *Mp)
 						dp->Bonus[i]|=(Byte)b;
 					}
 					break;
-				case 3: // B3/$ проверить
+				case 3: // B3/$ РїСЂРѕРІРµСЂРёС‚СЊ
 					if (Num < 3)  Mp->n[2] = 0;
 					if (Mp->n[2] < 0 || Mp->n[2] > 2){ MError("\"!!CA:B3\"-wrong check number (0...2)."); RETURN(0) }
 					switch (Mp->n[2])
@@ -2028,15 +2030,15 @@ int ERM_Castle(char Cmd,int Num,_ToDo_*sp,Mes *Mp)
 					}
 					if(i&b) ERMFlags[0]=1; else ERMFlags[0]=0;
 					break;
-				case 4: // B4/$ разрешить строить
+				case 4: // B4/$ СЂР°Р·СЂРµС€РёС‚СЊ СЃС‚СЂРѕРёС‚СЊ
 					msk=(Byte *)dp->BMask;
 					msk[i]|=(Byte)b;
 					break;
-				case 5: // B5/$ запретить строить
+				case 5: // B5/$ Р·Р°РїСЂРµС‚РёС‚СЊ СЃС‚СЂРѕРёС‚СЊ
 					msk=(Byte *)dp->BMask;
 					msk[i]&=(Byte)~b;
 					break;
-				case 6: // B6/$ 3.58 построить функцией героев
+				case 6: // B6/$ 3.58 РїРѕСЃС‚СЂРѕРёС‚СЊ С„СѓРЅРєС†РёРµР№ РіРµСЂРѕРµРІ
 					i=dp->BuiltThisTurn;
 					dp->BuiltThisTurn=0;
 					BuildTownStruct(dp,Mp->n[1]);
@@ -2098,12 +2100,12 @@ int LoadCasDem(int /*ver*/)
 	RETURN(0)
 }
 
-int LoadTXTCasDem(void) // загружаем строки
+int LoadTXTCasDem(void) // Р·Р°РіСЂСѓР¶Р°РµРј СЃС‚СЂРѕРєРё
 {
 	STARTNA(__LINE__, 0)
 	int i,j,t;
 
-	// ресурсы на разрушение строений и бонусы
+	// СЂРµСЃСѓСЂСЃС‹ РЅР° СЂР°Р·СЂСѓС€РµРЅРёРµ СЃС‚СЂРѕРµРЅРёР№ Рё Р±РѕРЅСѓСЃС‹
 	if(LoadTXT("ZTBUILD.TXT",&TFile)) RETURN(1) 
 	for(t=0;t<9;t++){
 		for(i=0;i<44;i++){
@@ -2118,8 +2120,8 @@ int LoadTXTCasDem(void) // загружаем строки
 	}
 	UnloadTXT(&TFile);
 	Copy((Byte *)CSCheck,(Byte *)CSCheck_back,sizeof(CSCheck));
-	// позиция на карте битвы с монстрами
-	if(LoadTXT("ZTBATLE.TXT",&TFile)) RETURN(1) // не может загрузить TXT
+	// РїРѕР·РёС†РёСЏ РЅР° РєР°СЂС‚Рµ Р±РёС‚РІС‹ СЃ РјРѕРЅСЃС‚СЂР°РјРё
+	if(LoadTXT("ZTBATLE.TXT",&TFile)) RETURN(1) // РЅРµ РјРѕР¶РµС‚ Р·Р°РіСЂСѓР·РёС‚СЊ TXT
 	for(i=0;i<14;i++){ 
 		BattlePlace[i].x=a2i(ITxt(i+2,1,&TFile));
 		BattlePlace[i].y=a2i(ITxt(i+2,2,&TFile));
@@ -2130,19 +2132,19 @@ int LoadTXTCasDem(void) // загружаем строки
 	UnloadTXT(&TFile);
 	Copy((Byte *)BattlePlace,(Byte *)BattlePlace_back,sizeof(BattlePlace));
 
-	// общие параметры
-	if(LoadTXT("ZTCOMMN.TXT",&TFile)) RETURN(1) // не может загрузить TXT
-	DemPerDay=a2i(ITxt(1,1,&TFile)); // сколько в день
+	// РѕР±С‰РёРµ РїР°СЂР°РјРµС‚СЂС‹
+	if(LoadTXT("ZTCOMMN.TXT",&TFile)) RETURN(1) // РЅРµ РјРѕР¶РµС‚ Р·Р°РіСЂСѓР·РёС‚СЊ TXT
+	DemPerDay=a2i(ITxt(1,1,&TFile)); // СЃРєРѕР»СЊРєРѕ РІ РґРµРЅСЊ
 	DemPerDay_back=DemPerDay;
 	for(i=0;i<DemPerDay;i++){
-		DemNextCost[i]=a2i(ITxt(2,i+1,&TFile)); // цена разрушения
+		DemNextCost[i]=a2i(ITxt(2,i+1,&TFile)); // С†РµРЅР° СЂР°Р·СЂСѓС€РµРЅРёСЏ
 	}
 	Copy((Byte *)DemNextCost,(Byte *)DemNextCost_back,sizeof(DemNextCost));
-	Mov2Lost=a2i(ITxt(3,1,&TFile)); // потеря ходов при битве
+	Mov2Lost=a2i(ITxt(3,1,&TFile)); // РїРѕС‚РµСЂСЏ С…РѕРґРѕРІ РїСЂРё Р±РёС‚РІРµ
 	Mov2Lost_back=Mov2Lost;
-	GrailDemontage=a2i(ITxt(4,1,&TFile)); // демонтаж Грааля
+	GrailDemontage=a2i(ITxt(4,1,&TFile)); // РґРµРјРѕРЅС‚Р°Р¶ Р“СЂР°Р°Р»СЏ
 	UnloadTXT(&TFile);
-	// двелинги
+	// РґРІРµР»РёРЅРіРё
 	if(LoadTXT("ZDWELL8.TXT",&TFile)) RETURN(1) 
 	for(t=0;t<9;t++){
 		for(i=0;i<2;i++){
@@ -2171,17 +2173,17 @@ void ResetDwellings(void)
 	dw=GetDwellingBase();
 	cn=GetDwellingNums();
 	for(i=0;i<cn;i++,dw++){
-		if(dw->Owner==-1) continue; // ничей
+		if(dw->Owner==-1) continue; // РЅРёС‡РµР№
 		t=dw->Mon2Hire[0];
 		if(t==-1) continue;
 		for(k=0;k<9;k++){
-			if(t==RD_MonVsTown[k]){ // какой-то из монстров 8-го уровня
-				ind=AddDwellInfo(dw);    // добавим, если еще не было
-				if(ind==-1) RETURNV // такого не было - такого быть не должно
+			if(t==RD_MonVsTown[k]){ // РєР°РєРѕР№-С‚Рѕ РёР· РјРѕРЅСЃС‚СЂРѕРІ 8-РіРѕ СѓСЂРѕРІРЅСЏ
+				ind=AddDwellInfo(dw);    // РґРѕР±Р°РІРёРј, РµСЃР»Рё РµС‰Рµ РЅРµ Р±С‹Р»Рѕ
+				if(ind==-1) RETURNV // С‚Р°РєРѕРіРѕ РЅРµ Р±С‹Р»Рѕ - С‚Р°РєРѕРіРѕ Р±С‹С‚СЊ РЅРµ РґРѕР»Р¶РЅРѕ
 				di=&DwellMapInfo[ind];
 				di->GotDay=0;
-				di->Mon2Town=1; // включится с этой недели
-				// покажем всем
+				di->Mon2Town=1; // РІРєР»СЋС‡РёС‚СЃСЏ СЃ СЌС‚РѕР№ РЅРµРґРµР»Рё
+				// РїРѕРєР°Р¶РµРј РІСЃРµРј
 				for(j=0;j<8;j++){
 					ShowArea(dw->x,dw->y,dw->l,j,1);
 				}
@@ -2229,11 +2231,11 @@ void InitCastles(void)
 	RETURNV
 }
 
-// надо сбрасывать в начальное состояние для новой карты
+// РЅР°РґРѕ СЃР±СЂР°СЃС‹РІР°С‚СЊ РІ РЅР°С‡Р°Р»СЊРЅРѕРµ СЃРѕСЃС‚РѕСЏРЅРёРµ РґР»СЏ РЅРѕРІРѕР№ РєР°СЂС‚С‹
 //struct _CSCheck_{
-//  Byte Mon;         // тип монстров для драки
-//  Byte Bits2Build;  // после разрушения нужно строить след здания ...
-//  Byte Byte2Build;  // ... в след байте
+//  Byte Mon;         // С‚РёРї РјРѕРЅСЃС‚СЂРѕРІ РґР»СЏ РґСЂР°РєРё
+//  Byte Bits2Build;  // РїРѕСЃР»Рµ СЂР°Р·СЂСѓС€РµРЅРёСЏ РЅСѓР¶РЅРѕ СЃС‚СЂРѕРёС‚СЊ СЃР»РµРґ Р·РґР°РЅРёСЏ ...
+//  Byte Byte2Build;  // ... РІ СЃР»РµРґ Р±Р°Р№С‚Рµ
 //  struct {
 //    Byte  Depend[6];
 //    int   Cost2Break;

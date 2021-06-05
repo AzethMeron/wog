@@ -7504,14 +7504,17 @@ int 3
 							}
 							break;
 						case 'W': // установить индекс героя для переменных
-							if(M.n[0]==-1){ // текущий герой
+							{
+							int param = ERMW;
+							int res = Apply(&param,sizeof(param),&M,0);
+							if(param==-1){ // текущий герой
 								struct _Hero_ *p=ERM_HeroStr;
 								if(p==0){ MError("\"IF:W\"-cannot find hero."); goto l_exit; }
-								M.n[0]=p->Number;
+								param=p->Number;
 							}
-							if((M.n[0]<0)||(M.n[0]>=HERNUM)){ MError("\"IF:W\"-hero number out of range."); goto l_exit; }
-							ERMW=M.n[0];
-							break;
+							if((param<0)||(param>=HERNUM)){ MError("\"IF:W\"-hero number out of range."); goto l_exit; }
+							if(!res) { ERMW=param; }
+							} break;
 						case 'P': // картинка/видео
 							CustomPic(M.n[0],0);
 							break;

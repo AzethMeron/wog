@@ -39,6 +39,7 @@ struct _DataBlock_ {
 	}
 	// remove copy-able
 	private: _DataBlock_(const _DataBlock_&);
+	private: _DataBlock_();
 };
 
 _List_<_DataBlock_> datablocks_stored;
@@ -527,7 +528,7 @@ int load_SkelPatches()
 	}
 	// end of data
 	if(Loader(&head_buf,4)) RETURN(1);
-	if(head_buf[0] != 'l' || head_buf[1] != 'e' || head_buf[2] != 'k' || head_buf[3] != 's') { MError("Malformed savefile - failed to load Skeleton Patch List header"); RETURN(1); }
+	if(head_buf[0] != 'l' || head_buf[1] != 'e' || head_buf[2] != 'k' || head_buf[3] != 's') { MError("Malformed savefile - failed to load Skeleton Patch List end mark"); RETURN(1); }
 	RETURN(0);
 }
 

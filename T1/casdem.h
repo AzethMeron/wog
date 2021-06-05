@@ -22,7 +22,6 @@ int SaveCasDem(void);
 int ERM_CasDem(char,int,_ToDo_ *sp,Mes *Mp);
 
 void PrepareCastle(Byte *CStructure);
-void CastleCheck(int flag);
 void CastleService(void);
 void CastleService2(void);
 void CastleExit(Dword Pointer);
