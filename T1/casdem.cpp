@@ -332,7 +332,11 @@ void SetBonRes(short *Bonus)
 	RETURNV
 }
 
-void CastleCheckDemolition(void)
+void CastleCheckDemolition(void) 
+// looks like it happens when you click on townscreen
+// flag means type of click: 0 - leftclick, 1 - rightclick
+// Zpointer - no idea
+// Btype - Item (area) of the Town screen. Exactly the same as for CM receiver
 {
 	int    i,j,t,flag,Btype,Date,Rebuild,CType,CNewType,Mn,MCt,Mt,VHero,LCost,LCost2;
 	int    Cnum,tval,GrailDemFlag;
@@ -347,14 +351,15 @@ void CastleCheckDemolition(void)
 	_MapItem_  *MIp;
 	int    ex,ey,el;
 	
-	_EAX(flag);
-	_EBX(ZPointer);
-	_EDI(Btype);
+	// PREPARATIONS
+	_EAX(flag); // 'flag' means type of click, 0 left, 1 right 
+	_EBX(ZPointer); // no idea what it is
+	_EDI(Btype); // 'Btype' is building clicked, like in CM receiver
 	STARTNA(__LINE__, 0)
 	CSval=0;
 	//if(WoG==0) RETURNV
 	if(PL_NoTownDem) RETURNV
-	if(IsThis(CurrentUser())==0){  // не тот игрок
+	if(IsThis(CurrentUser())==0){  // не тот игрок, wrong player
 		RETURNV
 	}
 	// 3.58f fix - disable demolition in allied town
@@ -364,7 +369,7 @@ void CastleCheckDemolition(void)
 		mov   CStructure,ecx
 	}
 	if(CStructure->Owner!=CurrentUser()) RETURNV // not our town
-	if((Btype<0)||(Btype>48)) RETURNV
+	if((Btype<0)||(Btype>48)) RETURNV // leave if it isn't a building
 	__asm{
 		mov   edx,Btype
 		mov   ebx,ZPointer
@@ -375,18 +380,19 @@ void CastleCheckDemolition(void)
 		mov   eax,0x5D2E40
 		call  eax
 	}
-	_EAX(tstr);
+	_EAX(tstr); // it's a pointer, but a pointer to what???
 	if((Cnum=GetCastleNumber(CStructure))<0) RETURNV
 
-	Rebuild=0;
-	csp=&CastleState[Cnum];
-	Date=GetCurDate();
-	CType=CStructure->Type;
-	CNewType=CType;
-	VHero=CStructure->VHero;
-	Building=CStructure->Built;
-	Bonus=CStructure->Bonus;
-	Mn=csp->Ghost;
+	// GATHERING DATA
+	Rebuild=0;					// Rebuild - ??? 
+	csp=&CastleState[Cnum];		// csp - pointer to _CastleState_ for this castle (it is WoG extension, not native H3 struct)
+	Date=GetCurDate();			// Date - current date
+	CType=CStructure->Type;		// CType - type of town
+	CNewType=CType;				// CNewType - ???
+	VHero=CStructure->VHero;	// VHero - index of visiting hero i guess
+	Building=CStructure->Built;	// Pointer to 8 byte long array, don't know purpose
+	Bonus=CStructure->Bonus;	// ???
+	Mn=csp->Ghost;				// ???
 	__asm{ 
 		mov  eax,BASE
 		mov  eax,[eax]
@@ -394,7 +400,7 @@ void CastleCheckDemolition(void)
 		mov  Hp0,eax
 	}
 	if(VHero==-1) Hp=0;
-	else Hp=&Hp0[VHero];
+	else Hp=&Hp0[VHero]; // Hp - Visiting hero, NULL pointer if there's none 
 	if(flag!=1){ // левая мышь
 		if(Btype!=16) RETURNV // не кузница
 		if(csp->State!=-1) RETURNV // не разрушено
