@@ -88,9 +88,9 @@ Dword UniqBuildingsMask[9][2]={{0xC46FFBEF,0x00000FFF},
 															 {0xC46FFBE7,0x00000FFF},
 															 {0xC42FFBFF,0x00000FFF}};
 struct _CSCheck_{
-	Byte Mon;         // тип монстров для драки
-	Byte Bits2Build;  // после разрушения нужно строить след здания ...
-	Byte Byte2Build;  // ... в след байте
+	Byte Mon;         // тип монстров для драки, type of monsters to fight 
+	Byte Bits2Build;  // после разрушения нужно строить след здания ... , after destruction, you need to build a trail of the building ...
+	Byte Byte2Build;  // ... в след байте , in after bytes 
 	struct {
 		Byte  Depend[6];
 		int   Cost2Break;
@@ -658,27 +658,39 @@ void CastleCheckDemolition(void)
 		LCost2=DemNextCost[csp->Cost]+CSCheck[Btype].Town[CType].Cost2Break;
 	}
 
+	/********************************************************************************************/
+	// Destruction of clicked building - Dealing with habitants (monsters in dwelling)
+	/********************************************************************************************/
 //  Monst=((Word *)&CStructure[0x16]);
-	Monst=(Word *)CStructure->Monsters;
-	i=CSCheck[Btype].Mon;
+	Monst=(Word *)CStructure->Monsters;		// pretty sure it is pointer to ARRAY of monsters available to be recruited in this town
+	i=CSCheck[Btype].Mon;					// This numbers informs you about "tier" of monster, but i don't think it is of any "standard" format
+											// Esentially, it's 1 to 7 for creatures (number matches their tier), 8 to 14 for upgraded creatures, and >100 for special cases (Horde buildings)
 //  d=(Btype-0x1E); // тип строения для получения типа монстра
 	if(i>=100){ // тип монстра зависит от типа города, the type of monster depends on the type of city 
 		i-=100;
 		i=CSMTran[i][CType];
 	}
-	if(i!=0){ // могут быть монстры - просим денег
-		MCt=i-1;
-		Mnp=&Monst[MCt];
-		Mn=Monst[MCt];
-		// Получим тип монстра
-		i=(MCt+CType*14)*4;
+	if(i!=0){ // могут быть монстры - просим денег, there may be monsters - we ask for money 
+		MCt=i-1;			// MCt - 1..14 -> 0..13, which can be used as index
+		Mnp=&Monst[MCt];	// Mnp - pointer to number of monsters of given tier available in town 
+		Mn=Monst[MCt];		// Mn - number of monsters of given tier available in town
+		// Получим тип монстра, Get the type of monster 
+		i=(MCt+CType*14)*4; // 
 		__asm{
 			mov   eax,i
 			add   eax,0x6747B4
 			mov   eax,[eax]
 		}
-		_EAX(Mt);
-		if(Mn!=0){
+		_EAX(Mt); // Mt - Type (Format C) of creature
+
+		/////////////////////////////////////////////////////////////////////////////////////////
+		// Let's recap
+		// MCt - 1..14 -> 0..13, which can be used as index
+		// Mnp - pointer to number of monsters of given tier available in town
+		// Mn - number of monsters of given tier available in town
+		// Mt - Type (Format C) of creature
+
+		if(Mn!=0){ // If there're monsters in
 			LCost=Mn*CSMonst[MCt];
 			if(CheckRes(-1,6,-LCost)){
 				// не хватает ресурсов
