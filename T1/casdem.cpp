@@ -352,9 +352,9 @@ void CastleCheckDemolition(void)
 	int    ex,ey,el;
 	
 	// PREPARATIONS
-	_EAX(flag); // 'flag' means type of click, 0 left, 1 right 
-	_EBX(ZPointer); // no idea what it is
-	_EDI(Btype); // 'Btype' is building clicked, like in CM receiver
+	_EAX(flag);
+	_EBX(ZPointer);
+	_EDI(Btype);
 	STARTNA(__LINE__, 0)
 	CSval=0;
 	//if(WoG==0) RETURNV
@@ -383,36 +383,49 @@ void CastleCheckDemolition(void)
 	_EAX(tstr); // it's a pointer, but a pointer to what???
 	if((Cnum=GetCastleNumber(CStructure))<0) RETURNV
 
+	/********************************************************************************************/
 	// GATHERING DATA
+	/********************************************************************************************/
+								// flag - means type of click, 0 left, 1 right 
+								// ZPointer - ???
+								// Btype - is building clicked, like in CM receiver
+								// CStructure - pointer to _CastleSetup_ of this Town (native H3 struct)
 	Rebuild=0;					// Rebuild - ??? 
 	csp=&CastleState[Cnum];		// csp - pointer to _CastleState_ for this castle (it is WoG extension, not native H3 struct)
-	Date=GetCurDate();			// Date - current date
+	Date=GetCurDate();			// Date - current date (number of day, week 2 day 1 means Date=8)
 	CType=CStructure->Type;		// CType - type of town
-	CNewType=CType;				// CNewType - ???
+	CNewType=CType;				// CNewType - ??? Probably type of town after rebuilding.
 	VHero=CStructure->VHero;	// VHero - index of visiting hero i guess
-	Building=CStructure->Built;	// Pointer to 8 byte long array, don't know purpose
-	Bonus=CStructure->Bonus;	// ???
-	Mn=csp->Ghost;				// ???
+	Building=CStructure->Built;	// Building - Pointer to 8 byte long array, don't know purpose
+	Bonus=CStructure->Bonus;	// Bonus - ???
+	Mn=csp->Ghost;				// Mn - Number of ghosts (when you destroy last building, it is set and removed when you buy ghosts from abandoned blacksmith)
 	__asm{ 
 		mov  eax,BASE
 		mov  eax,[eax]
 		add  eax,0x21620
 		mov  Hp0,eax
 	}
-	if(VHero==-1) Hp=0;
-	else Hp=&Hp0[VHero]; // Hp - Visiting hero, NULL pointer if there's none 
-	if(flag!=1){ // левая мышь
-		if(Btype!=16) RETURNV // не кузница
-		if(csp->State!=-1) RETURNV // не разрушено
-		if(VHero==-1) RETURNV // героя в городе нет
-		if(Mn!=0){ // Прив. есть
-			if((Date-csp->Destroyed)>=GHOSTDAYS){ // и можно нанять
+	if(VHero==-1) Hp=0;			// setting to NULL pointer
+	else Hp=&Hp0[VHero];		// Hp - Visiting hero, NULL pointer if there's none 
+
+	/********************************************************************************************/
+	// MEAT STARTS HERE
+	/********************************************************************************************/
+	if(flag!=1){				// левая мышь, 1 means rightclick
+		if(Btype!=16) RETURNV	// не кузница, not a blacksmith
+		if(csp->State!=-1) RETURNV // не разрушено, not destroyed
+		if(VHero==-1) RETURNV	// героя в городе нет, no hero in the city
+
+		/////////////////////////////////////////////////////////////////////////////////////////
+		// This block of code will execute only after town is already destroyed
+		if(Mn!=0){ // Прив. есть, If there're ghosts in the town - effectively, is the own destroyed?
+			if((Date-csp->Destroyed)>=GHOSTDAYS){ // и можно нанять, Can you hire the ghosts?
 				__asm{
-					lea    eax,Mn // -> число монстров (dw)
-					mov    ebx,Hp // -> Герой
+					lea    eax,Mn // -> число монстров (dw), number of monsters (dw)
+					mov    ebx,Hp // -> Герой, Hero
 					add    ebx,0x91 // -> слоты для армий у героя (ebx->Герой)
 					mov    edi,GHOSTTYPE
-					lea    ecx,CSBuffer // -> буфер на ~20h байт
+					lea    ecx,CSBuffer // -> буфер на ~20h байт, buffer? What kind of buffer?
 // четвертый монстр для наема
 					push   0
 					push   -1
@@ -423,8 +436,8 @@ void CastleCheckDemolition(void)
 					push   0
 					push   -1
 // первый монстр для наема
-					push   eax // -> количество
-					push   edi // = тип монстров
+					push   eax // -> количество, quantity
+					push   edi // = тип монстров, type of monster
 					push   0
 					push   ebx
 					mov    eax,0x0551750
@@ -436,8 +449,8 @@ void CastleCheckDemolition(void)
 					mov    eax,0x04B0770
 					call   eax
 				}
-				CastleCheck(-1); // оставим мрачный вид
-				if(Mn!=csp->Ghost){ // надо перерисовать героя
+				CastleCheck(-1); // оставим мрачный вид, let's leave a gloomy look
+				if(Mn!=csp->Ghost){ // надо перерисовать героя, NOT SURE ABOUT THAT ONE - Whether ghost was recruited (if that's the case, Hero must be redrawn!)
 					for(i=0;i<6;i++){
 						Building[i]=0;
 						Bonus[i]=0;
@@ -451,41 +464,46 @@ void CastleCheckDemolition(void)
 				}
 				csp->Ghost=Mn;
 			}else{ // еще нельзя набрать
-				Message(ITxt(4,0,&Strings),1);
+				Message(ITxt(4,0,&Strings),1); // "You walked up to the familiar building but stopped short. You've never seen such strange creatures..."
 			}  
-		}else{ // Прив. нет
-			Message(ITxt(7,0,&Strings),1);
+		}else{ // Прив. нет. No ghosts in this town
+			Message(ITxt(7,0,&Strings),1); // "It used to be a useful building once, but is completely abandoned now"
 		}
 		CSval=0x5D4617;
 		RETURNV
-	}
+	} // endof "if(flag!=1)"
 
+	/********************************************************************************************/
+	// Click on Blacksmith, No idea what the second condition means yet
+	/********************************************************************************************/
 	if((Btype==16)&&((Building[1]&0x3C)==0)){
-// разрушаем кузницу, города уже нет - это дом с привидениями
-		if(csp->Ghost){ // есть привидения
-			if((Date-csp->Destroyed)>=GHOSTDAYS){ // 6 дней прошло - можно нанимать
-				RequestPic(ITxt(3,0,&Strings),0x15,GHOSTTYPE,1);
+// разрушаем кузницу, города уже нет - это дом с привидениями, we destroy the forge, the city is gone - this is a haunted house 
+		if(csp->Ghost){ // есть привидения, there are ghosts
+			if((Date-csp->Destroyed)>=GHOSTDAYS){ // 6 дней прошло - можно нанимать, 6 days have passed - can be hired 
+				RequestPic(ITxt(3,0,&Strings),0x15,GHOSTTYPE,1); // "Taking a look at the neglected building you could not see anyone. Very strange..."
 				CSval=0x5D4617;
 				RETURNV
-			}else{ // еще не время
-				Message(ITxt(4,0,&Strings),1);
-				CSval=0x5D4617;
-				RETURNV
-			}
-		}else{ // нет - можно восстанавливать
-			if(RequestPic(ITxt(5,0,&Strings),CType+0x16,10,2)==0){
+			}else{ // еще не время, not yet
+				Message(ITxt(4,0,&Strings),1); // "You walked up to the familiar building but stopped short. You've never seen such strange creatures..."
 				CSval=0x5D4617;
 				RETURNV
 			}
+		}else{ // нет - можно восстанавливать, no ghosts - can be restored
+			if(RequestPic(ITxt(5,0,&Strings),CType+0x16,10,2)==0){ // "There's nobody around. It seems that this formerly beautiful place can be restored now. Do you want to start the City again?"
+				CSval=0x5D4617;
+				RETURNV
+			}
+			// If chosen "yes", then code proceeds
+			// rebuilding
 			if(Hp!=0){
-				// в городе есть герой - можно сменить тип.
-				// проверим на строителя
+				// в городе есть герой - можно сменить тип. there is a hero in the city - you can change the type 
+				// проверим на строителя, check on the builder 
 				CNewType=CType;
 				if((HSpecTable[Hp->Number].Spec==HSUPERSPEC)&&(HSpecTable[Hp->Number].Spec1==HSPEC_ANYTOWN)){
 					CNewType=ChooseCastle();
 				}else{
 					i=Hp->Spec/2;
-					if(CType!=i){ // если типы городов различаются
+					if(CType!=i){ // если типы городов различаются, if the types of cities are different 
 						if(Request2Pic(ITxt(14,0,&Strings),CType+0x16,10,0x16+i,10,7)==0){
 							 // меняем тип
 							 CNewType=i;
