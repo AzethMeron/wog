@@ -27,6 +27,7 @@ static TxtFile TFile;
 //#define CASTLESNUM 48
 struct _CastleState_{ 
 	// Castle destruction
+	//int    DestructionScale; // Increase every time building is destroyed, decreses over time and each time you build any building.
 	int    State;		//0 - Ok, 1,2,3,... -1 - broken
 	int    Date;		// Date of last destruction
 	int    Cost;		// How many buildings were destroyed this day (cost of destruction depends on that number)
@@ -257,17 +258,17 @@ void CastleCheck(int flag)
 
 void __stdcall CastleServiceRedraw(Dword,Dword)
 {
-	Byte *Castle;
-	int tn;
 	_CastleState_ *csp;
+	_CastleSetup_ *CStructure;
 
 	__asm pusha
 	STARTNA(__LINE__, 0)
-//  Castle=(Byte *)_ECX;
-	_ECX(Castle)
-	tn=Castle[0];
-	csp=&CastleState[tn];
+
+	_ECX(CStructure)
+	
+	csp=&CastleState[GetCastleNumber(CStructure)];
 	CastleCheck(csp->State);
+
 	STOP
 	OriginalCallPointer=Callers[9].forig;
 	__asm popa
