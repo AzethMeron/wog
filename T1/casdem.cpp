@@ -334,8 +334,9 @@ void SetBonRes(short *Bonus)
 	RETURNV
 }
 
-void CastleCheckDemolition(void) 
 // looks like it happens when you click on townscreen
+// Most of comments are handwritten, some are machine-translated comments. This function is monster
+void CastleCheckDemolition(void) 
 // flag means type of click: 0 - leftclick, 1 - rightclick
 // Zpointer - no idea
 // Btype - Item (area) of the Town screen. Exactly the same as for CM receiver
@@ -352,7 +353,7 @@ void CastleCheckDemolition(void)
 	char  *tstr,ch;
 	_MapItem_  *MIp;
 	int    ex,ey,el;
-
+	
 	// PREPARATIONS
 	_EAX(flag);
 	_EBX(ZPointer);
@@ -478,6 +479,7 @@ void CastleCheckDemolition(void)
 
 	/********************************************************************************************/
 	// Click on Blacksmith, No idea what the second condition means yet
+	// Looks like this part of code is responsible for initialisation of rebuilding - rebuilding itself happens later
 	/********************************************************************************************/
 	if((Btype==16)&&((Building[1]&0x3C)==0)){
 // разрушаем кузницу, города уже нет - это дом с привидениями, we destroy the forge, the city is gone - this is a haunted house 
@@ -657,9 +659,10 @@ void CastleCheckDemolition(void)
 	}else{
 		LCost2=DemNextCost[csp->Cost]+CSCheck[Btype].Town[CType].Cost2Break;
 	}
+	// LCost2 - looks like additional cost, based on how many buildings were destroyed recently.
 
 	/********************************************************************************************/
-	// Destruction of clicked building - Dealing with habitants (monsters in dwelling)
+	// Destruction of clicked building - Dealing with habitants (monsters in building)
 	/********************************************************************************************/
 //  Monst=((Word *)&CStructure[0x16]);
 	Monst=(Word *)CStructure->Monsters;		// pretty sure it is pointer to ARRAY of monsters available to be recruited in this town
@@ -689,40 +692,47 @@ void CastleCheckDemolition(void)
 		// Mnp - pointer to number of monsters of given tier available in town
 		// Mn - number of monsters of given tier available in town
 		// Mt - Type (Format C) of creature
+		// Mn, Mnp, MCt, Mt are about creatures in this building. Used for dwellings and horde buildings
 
 		if(Mn!=0){ // If there're monsters in
-			LCost=Mn*CSMonst[MCt];
-			if(CheckRes(-1,6,-LCost)){
-				// не хватает ресурсов
-				Request2Pic(ITxt(10,0,&Strings),6,LCost,0x15,Mt+(Mn<<16),1); // не хватает
-			}else{
-				if(Request2Pic(ITxt(8,0,&Strings),6,LCost,0x15,Mt+(Mn<<16),(int)2)==0){
-					// платить не хочет
+			/////////////////////////////////////////////////////////////////////////////////////////
+			// Calculate cost, show dialog about buying creatures
+			LCost=Mn*CSMonst[MCt]; // LCost - cost in gold 
+			if(CheckRes(-1,6,-LCost)){ // не хватает ресурсов, not enough resources 
+				Request2Pic(ITxt(10,0,&Strings),6,LCost,0x15,Mt+(Mn<<16),1); // не хватает, not enough
+			}else{ //  sufficent resources
+				if(Request2Pic(ITxt(8,0,&Strings),6,LCost,0x15,Mt+(Mn<<16),(int)2)==0){ 
+					// платить не хочет, does not want to pay
 				}else{
-					// здесь отнимаем деньги у героя
+					// здесь отнимаем деньги у героя, here we take money from the hero 
 					AddRes(-1,6,-LCost);
-					Mn=*Mnp=0; // убираем монстров
+					Mn=*Mnp=0; // убираем монстров, remove monsters
 				}
 			}
-			if((Hp!=0)&&(Mn!=0)){
-				// если есть герой в замке
-				if(RequestPic(ITxt(11,0,&Strings),0x15,Mt+(Mn<<16),2)==1){
-					// здесь должна быть драка
-					if(Hp->Movement<Mov2Lost){ // есть свободные движения у Героя
-						Message(ITxt(18,0,&Strings),1);
+			/////////////////////////////////////////////////////////////////////////////////////////
+			// If there're still monsters in building, then it means player refused to buy them out.
+			if((Hp!=0)&&(Mn!=0)){// если есть герой в замке, if there's hero and monsters in the castle
+				if(RequestPic(ITxt(11,0,&Strings),0x15,Mt+(Mn<<16),2)==1){ // "You can still disperse the creatures. But battle is the only way! Are you ready for battle?"
+					// здесь должна быть драка, there must be a fight 
+					if(Hp->Movement<Mov2Lost){ // есть свободные движения у Героя, the Hero has free movements 
+						Message(ITxt(18,0,&Strings),1); // "You are weary from travelling. Return in the morning."
 						CSval=0x5D4617;
 						RETURNV
 					}
-					Hp->Movement-=Mov2Lost; if(Hp->Movement<0) Hp->Movement=0;
-					// вычисляем координату привязки на карте
-					if(BattlePlace[MCt].abs){ // абсолютные координаты
+					Hp->Movement-=Mov2Lost; if(Hp->Movement<0) Hp->Movement=0;  
+					// вычисляем координату привязки на карте, calculate the anchor coordinate on the map.
+					if(BattlePlace[MCt].abs){ // абсолютные координаты, absolute coordinates 
 						PosMixed=((Dword)BattlePlace[MCt].y<<16)+(Dword)BattlePlace[MCt].x;
 						if(BattlePlace[MCt].l) PosMixed+=0x04000000;
-					}else{ // относительно входа
+					}else{ // относительно входа, relative coordinates
 						PosMixed=((CStructure->y+(Dword)BattlePlace[MCt].y)<<16)+CStructure->x+(Dword)BattlePlace[MCt].x;
 						if(CStructure->l+BattlePlace[MCt].l) PosMixed+=0x04000000;
-					}
-					if(QuickBattle()){
+					} 
+					// PosMixed - Dword, stores information about (absolute) coordinates, mixed into single variable
+					// It's position on the map on which the battle will happen - i suppose it allows to set background picture, modifiers and stuff
+
+					// Somewhere in this assembler battle happens
+					if(QuickBattle()){ // is the QuickBattle on?
 						__asm{
 						 mov    ebx,0x5C7603
 						 mov    eax,0x90909090
@@ -748,21 +758,21 @@ void CastleCheckDemolition(void)
 					 mov    ebx,0x4AE3A4
 					 mov    ax,0x4CEB
 					 mov    [ebx],ax
-						lea    eax,Mn // -> число монстров (dw)
-						mov    ebx,Hp // -> Герой
+						lea    eax,Mn // -> число монстров (dw), number of monsters (dw) 
+						mov    ebx,Hp // -> Герой, Hero
 						mov    edi,Mt
-						mov    edx,PosMixed // позиция замка
-						lea    ecx,CSBuffer // -> буфер на ~20h байт
+						mov    edx,PosMixed // позиция замка, position of battleground (usually of Castle, but can be customized via ERM)
+						lea    ecx,CSBuffer // -> буфер на ~20h байт, buffer at ~ 20h bytes 
 						push   0
 						push   0
 						push   -1
 						push   0
 						push   0
 						push   -1
-						push   edx  // позиция на карте
-						push   ecx  // ук на клетку на карте
-						push   eax  // ук на число монстров
-						push   edi   // = тип монстров
+						push   edx  // позиция на карте, position on the map 
+						push   ecx  // ук на клетку на карте, uk on the cage on the map ???
+						push   eax  // ук на число монстров, uk for the number of monsters  ???
+						push   edi   // = тип монстров, type of monsters 
 						push   ebx
 //            mov    ecx,0x1A00020
 						mov    ecx,0x6992B8 // [BASE]+ 109700h
@@ -807,21 +817,29 @@ void CastleCheckDemolition(void)
 						 mov    [ebx+10],al
 						}
 					}
-					_ECX(Dummy);
+					_ECX(Dummy); // Dummy stores result of the battle, probably (0) if won, (1) if lost
+					Message(Dummy);
 					if(Dummy==0) Mn=*Mnp=0;
 					else{
-						Message(ITxt(13,0,&Strings),1);
+						Message(ITxt(13,0,&Strings),1); // creatures still allows you to run away (and you actually can keep your army)
 					}
 				}
 			}
 		}
 	}
+	/////////////////////////////////////////////////////////////////////////////////////////
+	// Aftermatch - are habitants still in the building?
 	if(Mn!=0){
 		CSval=0x5D4617;
-		RETURNV
+		RETURNV // then leave
 	}
+
+	/********************************************************************************************/
+	// Additional cost, due to recent destruction in this town.
+	// LCost2 - looks like additional cost, based on how many buildings were destroyed recently.
+	/********************************************************************************************/
 	if(LCost2!=0){
-		// надо доплатить за повторное разрушение
+		// надо доплатить за повторное разрушение, you have to pay extra for re-destruction 
 		if(CheckRes(-1,6,-LCost2)){
 			// не хватает ресурсов
 			RequestPic(ITxt(10,0,&Strings),6,LCost2,1); // не хватает
@@ -837,7 +855,9 @@ void CastleCheckDemolition(void)
 		}
 	}
 
-// ...
+	/********************************************************************************************/
+	// Looks like actual destruction happens here
+	/********************************************************************************************/
 	i=Btype/8; j=Btype%8;
 	Zb=(Byte)(1<<j);
 	Building[i]&=(Byte)~Zb;
@@ -850,10 +870,10 @@ void CastleCheckDemolition(void)
 //    Building[i]&=(Byte)~b;
 //    Bonus[i]&=(Byte)~b;
 	}
-	if(Btype<5){ // разрушаем магическую гильдию
-		CStructure->MagLevel=(Byte)Btype; // уменьшим уровень гильдии
+	if(Btype<5){ // разрушаем магическую гильдию, we destroy the magic guild 
+		CStructure->MagLevel=(Byte)Btype; // уменьшим уровень гильдии, decrease the level of the guild 
 		for(i=Btype;i<5;i++)
-			CStructure->MagicHild[i]=0; // запретим магию всю, что выше
+			CStructure->MagicHild[i]=0; // запретим магию всю, что выше, forbid all magic above 
 	}
 
 	Zb=(Byte)(Building[1]&0x3C);
@@ -865,8 +885,9 @@ void CastleCheckDemolition(void)
 	else if(Zb&0x20) Zb=13;
 	else Zb=0;
 
-	if(Rebuild==0){
-		if(Zb==0){ // все разрушили
+	if(Rebuild==0) // No rebuilding in this call, Rebuild=0
+	{
+		if(Zb==0){ // все разрушили, destroyed everything 
 			t=-1;
 			csp->Destroyed=Date;
 			csp->Ghost=GHOSTNUM;
@@ -882,11 +903,13 @@ void CastleCheckDemolition(void)
 		CastleCheck(t);
 		csp->State=t;
 		csp->Date=Date;
-		csp->Cost+=1; // след разрушение будет стоить
-	}else{ // восстанавливаем
+		csp->Cost+=1; // след разрушение будет стоить, increase cost for future destruction during the same day
+	}
+	else // восстанавливаем, rebuilding of town, Rebuild=1
+	{ 
 		csp->Ghost=0;
 		csp->State=0;
-		Zb=10; // сельская управа
+		Zb=10; // сельская управа, village council 
 		for(i=0;i<6;i++){
 			Building[i]=0;
 			Bonus[i]=0;
@@ -897,7 +920,7 @@ void CastleCheckDemolition(void)
 		MIp->OSType=(Word)CNewType;
 	}
 	if(Zb==0){
-		Zb=16; // все. строим кузнецу.
+		Zb=16; // все. строим кузнецу. everything. building a blacksmith 
 		for(i=0;i<6;i++){
 			Building[i]=0;
 			Bonus[i]=0;
@@ -913,8 +936,8 @@ void CastleCheckDemolition(void)
 		call   eax
 	}
 	CastleCheck(0);
-	// Надо ли бонус?
-	if(GrailDemFlag==0){ // Грааль демонтирован
+	// Надо ли бонус? Do I need a bonus? 
+	if(GrailDemFlag==0){ // Грааль демонтирован, The grail is dismantled 
 		SetBonRes(CSCheck[Btype].Town[CType].Bonus);
 	}
 	CSval=0x5D4617;
