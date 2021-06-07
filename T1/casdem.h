@@ -10,11 +10,11 @@ struct _BuildMask_{
 	Dword Lo,Hi;
 };
 
-extern struct _BuildMask_ AllEnBuildings[TOWNNUM];
-extern struct _BuildMask_ BuildDepends[TOWNNUM][44];
-extern struct _BuildMask_ BuildExclusions[TOWNNUM][44];
-extern Byte TownStructOnScreen[TOWNNUM][18];
-extern  Byte TownStructOnScreenNum[TOWNNUM];
+//extern struct _BuildMask_ AllEnBuildings[TOWNNUM];
+//extern struct _BuildMask_ BuildDepends[TOWNNUM][44];
+//extern struct _BuildMask_ BuildExclusions[TOWNNUM][44];
+//extern Byte TownStructOnScreen[TOWNNUM][18];
+//extern  Byte TownStructOnScreenNum[TOWNNUM];
 
 int LoadTXTCasDem(void); // загружаем строки
 int LoadCasDem(int ver);
@@ -36,6 +36,7 @@ int __fastcall CorrectTownIncome(_CastleSetup_ * town, int income);
 int __fastcall CorrectTownGrowth(_CastleSetup_ * town, int income, int level);
 int ERM_CastleIncome(char Cmd, int Num, _ToDo_*, Mes *Mp);
 int ERM_Castle(char Cmd,int Num,_ToDo_*sp,Mes *Mp);
+int ERM_CastleAppearanceUpdate(char Cmd, int Num, _ToDo_*, Mes* Mp);
 void SetTowerBunus(_CastleSetup_ *Castle,Byte *MonStr);
 void NextTowerState(_CastleSetup_ *Castle);
 void CastleTowers(void);

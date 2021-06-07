@@ -40,7 +40,7 @@
 
 // true - different
 // false - same
-bool compare(const char* a, const char* b, int len)
+inline bool compare(const char* a, const char* b, int len)
 {
 	STARTNA(__LINE__, 0)
 	for(int i = 0; i < len; ++i)

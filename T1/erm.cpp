@@ -4687,7 +4687,7 @@ struct _ERM_Trigger_{ // triggers with 1 or no parameters
 	{'AI',30377},              // AI; Get Map Position Importance
 // WoG Legacy
 	{'UU',30378},			   // Trigger for tests ~!!!
-	{'SI',30379},
+	{'CU',30379},			   // Trigger for castle display update
 	{0,0}
 };
 
@@ -4857,6 +4857,7 @@ struct _ERM_Addition_{
 	{'CR',ERM_CurseSetup,1},
 	{'MK',ERM_BlackMarket,2},
 	{'VA',ERM_VarList,0},
+	{'CU',ERM_CastleAppearanceUpdate,0},
 	//{'SI',ERM_Signal,0},
 	
 	{0,0} // remove this and you get segfault

@@ -365,65 +365,6 @@ int ERM_BlackMarket(char Cmd,int Num,_ToDo_* sp,Mes *Mp)
 }
 
 /****************************************************************************************/
-// Signals
-/*#define SIGNAL_buffer_size (64)
-bool SIGNAL_entered_block = false;
-char SIGNAL_raised[SIGNAL_buffer_size]="";
-
-int ERM_Signal(char Cmd,int Num,_ToDo_* sp,Mes *Mp)
-// doesn't fully operational yet
-// Y-vars are not supported properly yet - keeps value between signal block and block above, which is a bug, not a feature here
-{
-	STARTNA(__LINE__, 0)
-
-	switch(Cmd)
-	{
-		case 'R': 
-		{
-			CHECK_ParamsNum(1);
-			// Manage parameter
-			char buffer[SIGNAL_buffer_size]="";
-			if(StrMan::Apply(buffer,Mp,0,SIGNAL_buffer_size) == 0) { MError2("Cannot get signal"); RETURN(0); }
-			// backing up previously called signal
-			char last_signal[SIGNAL_buffer_size]=""; // i gave you my heart
-			memcpy(last_signal,SIGNAL_raised,SIGNAL_buffer_size);
-			memcpy(SIGNAL_raised,buffer,SIGNAL_buffer_size);
-			// preparing before signal execution
-			Mes *lastMp = LastFUMes;
-			int lastNum = LastFUNum;
-			LastFUMes = Mp;
-			LastFUNum = Num;
-			SIGNAL_entered_block = true;
-			int last_ptr = pointer;
-			int yvars = AccessYVarInsideFunction();
-			AccessYVarInsideFunction() = 1;
-			pointer = 30379;
-			// execution
-			ProcessERM(true);
-			// cleaning after signal execution
-			pointer = last_ptr;
-			AccessYVarInsideFunction() = yvars;
-			SIGNAL_entered_block = false;
-			LastFUMes = lastMp;
-			LastFUNum = lastNum;
-			memcpy(SIGNAL_raised,last_signal,SIGNAL_buffer_size);
-		} break;
-
-		case 'G':
-		{
-			CHECK_ParamsNum(1);
-			if(!SIGNAL_entered_block) { MError2("Cannot get raised signal outside of signal trigger"); RETURN(0); }
-			char buffer[SIGNAL_buffer_size]="";
-			memcpy(buffer,SIGNAL_raised,SIGNAL_buffer_size);
-			if(StrMan::Apply(buffer,Mp,0,SIGNAL_buffer_size)) { MError2("Cannot set signal"); RETURN(0); }
-		} break;
-
-		default:
-			{ EWrongCommand(); RETURN(0); } break;
-	}
-
-	RETURN(1)
-}*/
 
 /****************************************************************************************/
 

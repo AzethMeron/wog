@@ -8,6 +8,7 @@
 #include "b1.h"
 #include "npc.h"
 #include "casdem.h"
+#include "string.h"
 #define __FILENUM__ 5
 
 //char ttt[]="Title";
@@ -26,25 +27,27 @@ static TxtFile TFile;
 // 3.59 reduce
 //#define CASTLESNUM 48
 struct _CastleState_{ 
-	// Castle destruction
-	//int    DestructionScale; // Increase every time building is destroyed, decreses over time and each time you build any building.
 	int    State;		//0 - Ok, 1,2,3,... -1 - broken
 	int    Date;		// Date of last destruction
 	int    Cost;		// How many buildings were destroyed this day (cost of destruction depends on that number)
 	int    Destroyed;	// когда был разрушен - when it was destroyed
 	int    DestroyedBy;	// кем был разрушен - who destroyed
 	int    Ghost;		// Number of ghosts present in the town (or rather, in abandoned blacksmith/forge)
-	// Tower bonus?
 	short  TCenter,TSide; // бонус боковых башен - side tower bonus?
 	short  TLastOwner;
+//	int    DestructionScale; // Increase every time building is destroyed, decreses over time and each time you build any building.
 //  Byte   Creat[7][2];
 } CastleState[CASTLESNUM];
 
-const char *CastleDefs[7][9]={ // [i][j] 
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+// it MUST be char*, NOT char[], if unsure why - check IDA. TL:DR char[] will cause segmentation fault
+// 
+const char* o_CastleDefs[7][9]={ // [i][j] 
 	// i stands for tier/destruction
 	// j stands for Town Type
 	{"AVCcasz0.def","AVCramz0.def","AVCtowz0.def","AVCinfz0.def","AVCnecz0.def","AVCdunz0.def","AVCstrz0.def","AVCforz0.def","AVChforz.def"}, // 0 castle tier
-	{"AVCcasx0.def","AVCramx0.def","AVCtowx0.def","AVCinfx0.def","AVCnecx0.def","AVCdunx0.def","AVCstrx0.def","AVCforx0.def","AVChforx.def"}, // 1 fort tier
+	{"AVCcasx0.def","AVCramx0.def","AVCtowx0.def","AVCinfx0.def","AVCnecx0.def","AVCdunx0.def","AVCstrx0.def","AVCftrc0.def","AVChforx.def"}, // 1 fort tier
 	{"AVCcast0.def","AVCramp0.def","AVCtowr0.def","AVCinft0.def","AVCnecr0.def","AVCdung0.def","AVCstro0.def","AVCftrt0.def","AVChfor0.def"}, // 2 town hall tier
 
 	{"AVCcast1.def","AVCramp1.def","AVCtowr1.def","AVCinfr1.def","AVCnecr1.def","AVCdung1.def","AVCstrn1.def","AVCfort1.def","AVCconf1.def"}, // 3 minor destruction
@@ -52,6 +55,44 @@ const char *CastleDefs[7][9]={ // [i][j]
 	{"AVCcast3.def","AVCramp3.def","AVCtowr3.def","AVCinfr3.def","AVCnecr3.def","AVCdung3.def","AVCstrn3.def","AVCfort3.def","AVCconf3.def"}, // 5 major destruction
 	{"AVCcast4.def","AVCramp4.def","AVCtowr4.def","AVCinfr4.def","AVCnecr4.def","AVCdung4.def","AVCstrn4.def","AVCfort4.def","AVCconf4.def"}  // 6 total destruction
 };
+
+#define CASTLE_DEF_NUM (9)
+#define CASTLE_DEF_CLENGTH (32)
+#define CASTLE_DEF_DEFAULT ("AVCRANZ0.def")
+
+struct unnamed {
+	private:
+		unnamed(const unnamed&);
+		unnamed& operator = (const unnamed&);
+	public:
+		char** defs;
+		void set(char** d)
+		{
+			for(int i = 0; i < CASTLE_DEF_NUM; ++i)
+			{
+				sprintf_s(defs[i],CASTLE_DEF_CLENGTH,"%s",d[i]);
+			}
+		}
+		unnamed() {
+			defs = new char*[CASTLE_DEF_NUM];
+			for(int i = 0; i < CASTLE_DEF_NUM; ++i)
+			{
+				defs[i] = new char[CASTLE_DEF_CLENGTH];
+				for(int j = 0; j < CASTLE_DEF_CLENGTH; ++j) { defs[i][j] = '\0'; }
+				sprintf_s(defs[i],CASTLE_DEF_CLENGTH,"%s",CASTLE_DEF_DEFAULT);
+			}
+		}
+		~unnamed()
+		{
+			for(int i = 0; i < CASTLE_DEF_NUM; ++i)
+			{
+				delete[] defs[i];
+			}
+			delete[] defs;
+		}
+} CastleAppearance;
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 struct _BattlePlace_{
 	int x;
@@ -228,16 +269,145 @@ void static MakeCheck(int item,int town,char *depend)
 	RETURNV
 }
 
-void CastleCheck(int flag)
+/////////////////////////////////////////////////////////////////
+bool InsideCUtrigger = false;
+char original_filename[CASTLE_DEF_CLENGTH];
+char modified_filename[CASTLE_DEF_CLENGTH];
+int town_state = -2;
+int town_type = -1;
+char* CallCUTrigger(_CastleSetup_* CStructure, _CastleState_* csp, const char* filename)
+{
+	STARTNA(__LINE__, 0)
+	// I don't know what is safe and what's not, so i'll backup as much as possible
+	Dword last_pointer = pointer;
+	int last_x = ERM_PosX, last_y = ERM_PosY, last_l = ERM_PosL;
+	// Meat goes here
+	pointer = 30379;
+	ERM_PosX = CStructure->x;
+	ERM_PosY = CStructure->y;
+	ERM_PosL = CStructure->l;
+	town_state = csp->State;
+	town_type = CStructure->Type;
+	for(int i = 0; i < CASTLE_DEF_CLENGTH; ++i) { original_filename[i] = NULL; modified_filename[i] = NULL; }
+	sprintf_s(original_filename,CASTLE_DEF_CLENGTH,"%s", filename);
+	sprintf_s(modified_filename,CASTLE_DEF_CLENGTH,"%s", filename);
+	InsideCUtrigger = true;
+	ProcessERM(true);
+	InsideCUtrigger = false;
+	// Reversing changes
+	pointer = last_pointer;
+	ERM_PosX = last_x;
+	ERM_PosY = last_y;
+	ERM_PosL = last_l;
+	RETURN(modified_filename)
+}
+
+int ERM_CastleAppearanceUpdate(char Cmd, int, _ToDo_*, Mes* Mp)
+{
+	STARTNA(__LINE__, 0)
+	if(InsideCUtrigger == false) { MError2("Not inside CU trigger"); RETURN(0) }
+	switch(Cmd)
+	{
+		case 'O': {
+			char buffer[CASTLE_DEF_CLENGTH] = "";
+			sprintf_s(buffer,CASTLE_DEF_CLENGTH,"%s",original_filename);
+			if(StrMan::Apply(buffer,Mp,0,CASTLE_DEF_CLENGTH)) { MError2("Original DEF name is get-only, cannot be changed."); RETURN(0); }
+		} break;
+
+		case 'M': {
+			StrMan::Apply(modified_filename,Mp,0,CASTLE_DEF_CLENGTH);
+		} break;
+
+		case 'S':{
+			int buffer = town_state;
+			if(Apply(&buffer,sizeof(buffer),Mp,0) == 0) { MError2("Castle state is get-only, cannot be set"); RETURN(0) }
+		} break;
+
+		case 'T':{
+			int buffer = town_type;
+			if(Apply(&buffer,sizeof(buffer),Mp,0) == 0) { MError2("Castle state is get-only, cannot be set"); RETURN(0) }
+		} break;
+	}
+	RETURN(1);
+}
+
+/////////////////////////////////////////////////////////////////
+
+/*void CastleCheck(int flag)
 {
 	STARTNA(__LINE__, 0)
 	switch(flag){
-		case  1: CCval=(Dword)CastleDefs[3]; break;
-		case  2: CCval=(Dword)CastleDefs[4]; break;
-		case  3: CCval=(Dword)CastleDefs[5]; break;
-
-		case -1: CCval=(Dword)CastleDefs[6]; break;
+		case  1: CCval=(Dword)3; break;
+		case  2: CCval=(Dword)4; break;
+		case  3: CCval=(Dword)5; break;
+		case  0: CCval=(Dword)0; break;
+		case -1: CCval=(Dword)6; break;
 	}
+
+	CastleAppearance.set((char**)o_CastleDefs[CCval]);
+	CCval = (Dword) CastleAppearance.defs;
+
+	if(flag!=0){
+		__asm mov eax,CCval
+		__asm mov ecx,0x4C97C1+3
+		__asm mov [ecx],eax
+		__asm mov ax,0x9090
+		__asm mov ecx,0x4C97B5
+		__asm mov word ptr [ecx],ax
+	}else{
+		__asm mov eax,0x677A54
+		__asm mov ecx,0x4C97C1+3
+		__asm mov [ecx],eax
+		__asm mov ax,0x1374
+		__asm mov ecx,0x4C97B5
+		__asm mov word ptr [ecx],ax
+	}
+	RETURNV
+}*/
+
+void ResetCastleDisplay()
+{
+	STARTNA(__LINE__, 0)
+	__asm mov eax,0x677A54
+	__asm mov ecx,0x4C97C1+3
+	__asm mov [ecx],eax
+	__asm mov ax,0x1374
+	__asm mov ecx,0x4C97B5
+	__asm mov word ptr [ecx],ax
+	RETURNV
+}
+
+// mode - (0) BA:B3/#, (1) BA:B3/#/1, (2) BA:B3/#/2
+// structure_index - Format U
+bool CheckBuilding(int mode, int structure_index, _CastleSetup_* dp)
+{
+	STARTNA(__LINE__, 0)
+	int i=structure_index/8, j=structure_index%8;
+	Byte b=(Byte)(1<<j);
+
+	switch (mode)
+	{
+		case 0:  i = dp->Built[i];  break;
+		case 1:  i = dp->Bonus[i];  break;
+		case 2:  i = ((byte*)&dp->BMask)[i];  break;
+	}
+	if(i&b) {RETURN(true)} else {RETURN(false)}
+}
+
+void SetStateDisplay(int flag)
+{
+	STARTNA(__LINE__, 0)
+	Dword CCval;
+	switch(flag){
+		case  1: CCval=(Dword)3; break;
+		case  2: CCval=(Dword)4; break;
+		case  3: CCval=(Dword)5; break;
+		case -1: CCval=(Dword)6; break;
+	}
+
+	CastleAppearance.set((char**)o_CastleDefs[CCval]);
+	CCval = (Dword) CastleAppearance.defs;
+
 	if(flag!=0){
 		__asm mov eax,CCval
 		__asm mov ecx,0x4C97C1+3
@@ -256,7 +426,55 @@ void CastleCheck(int flag)
 	RETURNV
 }
 
-void __stdcall CastleServiceRedraw(Dword,Dword)
+// This one will replace the old one
+void UpdateCastleDisplay(_CastleSetup_* CStructure, _CastleState_* csp)
+{
+	STARTNA(__LINE__, 0)
+	int TownType = CStructure->Type;
+	int TownState = csp->State;
+
+	Dword FileArrayPtr;
+	switch(TownState)
+	{
+		case 0: {
+			CastleAppearance.set((char**)o_CastleDefs[2]); // Town Hall
+			if(CheckBuilding(1,7,CStructure)) { CastleAppearance.set((char**)o_CastleDefs[1]); } // Fort
+			if(CheckBuilding(1,9,CStructure)) { CastleAppearance.set((char**)o_CastleDefs[0]); } // Castle
+		} break;
+
+		case 1: {
+			CastleAppearance.set((char**)o_CastleDefs[3]); 
+		} break;
+
+		case 2: {
+			CastleAppearance.set((char**)o_CastleDefs[4]); 
+		} break;
+
+		case 3: {
+			CastleAppearance.set((char**)o_CastleDefs[5]); 
+		} break;
+
+		case -1: {
+			CastleAppearance.set((char**)o_CastleDefs[6]); 
+		} break;
+	}
+
+	sprintf_s(CastleAppearance.defs[TownType],CASTLE_DEF_CLENGTH,"%s",CallCUTrigger(CStructure,csp,CastleAppearance.defs[TownType]));
+
+
+	FileArrayPtr = (Dword) CastleAppearance.defs;
+	{
+		__asm mov eax,FileArrayPtr
+		__asm mov ecx,0x4C97C1+3
+		__asm mov [ecx],eax
+		__asm mov ax,0x9090
+		__asm mov ecx,0x4C97B5
+		__asm mov word ptr [ecx],ax
+	}
+	RETURNV
+}
+
+void __stdcall CastleServiceRedraw(Dword,Dword) // Building?
 {
 	_CastleState_ *csp;
 	_CastleSetup_ *CStructure;
@@ -267,7 +485,7 @@ void __stdcall CastleServiceRedraw(Dword,Dword)
 	_ECX(CStructure)
 	
 	csp=&CastleState[GetCastleNumber(CStructure)];
-	CastleCheck(csp->State);
+	UpdateCastleDisplay(CStructure,csp);
 
 	STOP
 	OriginalCallPointer=Callers[9].forig;
@@ -297,6 +515,7 @@ void CastleSkipDemolition(void)
 	csp=&CastleState[Cnum];
 	csp->State=0; // снимаем разрущения
 	csp->Ghost=0; // убираем привидений
+	UpdateCastleDisplay(CStructure,csp);
 	RETURNV
 }
 
@@ -454,7 +673,6 @@ void CastleCheckDemolition(void)
 					mov    eax,0x04B0770
 					call   eax
 				}
-				CastleCheck(-1); // оставим мрачный вид, let's leave a gloomy look
 				if(Mn!=csp->Ghost){ // надо перерисовать героя, NOT SURE ABOUT THAT ONE - Whether ghost was recruited (if that's the case, Hero must be redrawn!)
 					for(i=0;i<6;i++){
 						Building[i]=0;
@@ -468,6 +686,7 @@ void CastleCheckDemolition(void)
 					}  
 				}
 				csp->Ghost=Mn;
+				UpdateCastleDisplay(CStructure,csp); // State = -1 (always)
 			}else{ // еще нельзя набрать
 				Message(ITxt(4,0,&Strings),1); // "You walked up to the familiar building but stopped short. You've never seen such strange creatures..."
 			}  
@@ -530,7 +749,9 @@ void CastleCheckDemolition(void)
 				}
 			}
 			Rebuild=1;
-			CastleCheck(0); // сделаем нормальный вид, let's make it look normal 
+			//CastleCheck(0); // сделаем нормальный вид, let's make it look normal
+			// JEGER State = undefined ???
+			UpdateCastleDisplay(CStructure,csp);
 		}
 	}
 
@@ -819,7 +1040,6 @@ void CastleCheckDemolition(void)
 						}
 					}
 					_ECX(Dummy); // Dummy stores result of the battle, probably (0) if won, (1) if lost
-					Message(Dummy);
 					if(Dummy==0) Mn=*Mnp=0;
 					else{
 						Message(ITxt(13,0,&Strings),1); // creatures still allows you to run away (and you actually can keep your army)
@@ -901,10 +1121,10 @@ void CastleCheckDemolition(void)
 			case  2:
 			default: t= 3; break;
 		}
-		CastleCheck(t);
 		csp->State=t;
 		csp->Date=Date;
 		csp->Cost+=1; // след разрушение будет стоить, increase cost for future destruction during the same day
+		UpdateCastleDisplay(CStructure,csp);
 	}
 	else // восстанавливаем, rebuilding of town, Rebuild=1
 	{ 
@@ -936,7 +1156,7 @@ void CastleCheckDemolition(void)
 		mov    eax,0x5D6E80
 		call   eax
 	}
-	CastleCheck(0);
+	UpdateCastleDisplay(CStructure,csp); // State is correct inside
 	// Надо ли бонус? Do I need a bonus? 
 	if(GrailDemFlag==0){ // Грааль демонтирован, The grail is dismantled 
 		SetBonRes(CSCheck[Btype].Town[CType].Bonus);
@@ -945,6 +1165,7 @@ void CastleCheckDemolition(void)
 	RETURNV
 }
 
+// Called when player exits town screen
 void CastleExit(Dword/* Manager*/)
 {
 	STARTNA(__LINE__, 0)
@@ -1062,7 +1283,7 @@ void CastleExit(Dword/* Manager*/)
 	RETURNV
 }
 
-__declspec( naked ) void CastleService(void)
+__declspec( naked ) void CastleService(void) // Seems like mouse click
 {
 	__asm pusha
 //  asm mov CSval,ebx
@@ -1082,11 +1303,14 @@ l_cont:
 	__asm ret
 }
 
-void CastleService2(void)
+void CastleService2(void) // Building ???
 {
+	//int building;
 	__asm pusha
-//  edx - указатель на менеджер (+38 -> замок)
-//  ecx - построенное здание
+//  edx - указатель на менеджер (+38 -> замок), pointer to manager (+38 -> lock (castle? zamok)) 
+//  ecx - построенное здание (constructed building)
+	//_ECX(building);
+	// calling Message here caused segfault, why tho?
 	CastleSkipDemolition();
 	__asm popa
 	__asm mov [edx+0x1B8],ecx
@@ -1967,7 +2191,7 @@ int ERM_Castle(char Cmd,int Num,_ToDo_*sp,Mes *Mp)
 //005BF4B4 8D0442         lea    eax,[edx+2*eax]
 //005BF4B7 50             push   eax
 //005BF4B8 E893A1F0FF     call   H3WOG.004C9650
-			CastleCheck(i);
+			SetStateDisplay(i);
 			__asm{
 				mov    ecx,BASE
 				mov    ecx,[ecx]
@@ -2006,11 +2230,12 @@ int ERM_Castle(char Cmd,int Num,_ToDo_*sp,Mes *Mp)
 			}
 			Apply(&dp->Owner,1,Mp,0);
 			break;
-		case 'T': // Ttype
+		case 'T': { // Ttype
 			if(Apply(&dp->Type,1,Mp,0)) break;
 			mip->OSType=(Word)dp->Type;
-			CastleCheck(0);
-			break;
+			_CastleState_* csp = &CastleState[GetCastleNumber(dp)];
+			UpdateCastleDisplay(dp,csp);
+			} break;
 //    case 'V': // V$, V-1 таверна ?
 //      Apply(&dp->Tavern,1,Mp,0);
 //      break;
@@ -2151,6 +2376,7 @@ int SaveCasDem(void)
 	// Dwellings
 	if(Saver(DwellMapInfo,sizeof(DwellMapInfo))) RETURN(1)
 	if(Saver(MonInTownBase(0),sizeof(MonInTownsBack))) RETURN(1)
+	if(Saver("MDCL",4)) RETURN(1)
 	RETURN(0)
 }
 
@@ -2169,6 +2395,9 @@ int LoadCasDem(int /*ver*/)
 	// Dwellings
 	if(Loader(DwellMapInfo,sizeof(DwellMapInfo))) RETURN(1)
 	if(Loader(MonInTownBase(0),sizeof(MonInTownsBack))) RETURN(1)
+	if(Loader(buf,4)) RETURN(1)
+	if(buf[0]!='M'||buf[1]!='D'||buf[2]!='C'||buf[3]!='L')
+			{MError("LoadCusDem cannot load endmark"); RETURN(1)}
 	RETURN(0)
 }
 
@@ -2271,6 +2500,7 @@ void ResetCastles(void)
 	STARTNA(__LINE__, 0)
 	int i;
 	for(i=0;i<CASTLESNUM;i++){
+		//CastleState[i].DestructionScale=0;
 		CastleState[i].State=0;
 		CastleState[i].Date=0;
 		CastleState[i].Cost=0;
@@ -2280,11 +2510,14 @@ void ResetCastles(void)
 		CastleState[i].TSide=0;
 		CastleState[i].TLastOwner=-2;
 	}
-	CastleCheck(0);
+
+	ResetCastleDisplay();
+	
 	if(MonInTownsBack_Saved==0){
 		Copy((Byte *)0x6747B4,(Byte *)MonInTownsBack,sizeof(MonInTownsBack));
 		MonInTownsBack_Saved=1;
 	}
+
 	Copy((Byte *)MonInTownsBack,(Byte *)0x6747B4,sizeof(MonInTownsBack));
 // ZVS 21.02.02
 	ResetDwellings();
