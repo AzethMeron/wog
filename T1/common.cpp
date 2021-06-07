@@ -846,6 +846,9 @@ int CurrentUser(void)
 	RETURN(IDummy)
 }
 
+// Check if Quick Battle is on.
+// 0 - off
+// 1 - on
 int QuickBattle(void)
 {
 	STARTNA(__LINE__, 0)
