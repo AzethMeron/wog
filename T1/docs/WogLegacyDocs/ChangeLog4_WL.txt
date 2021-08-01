@@ -8,13 +8,12 @@ Changelog AFTER Alpha 8.0, by WoG Legacy Team
 [+] In Lua/ERM you can use ".pre" ".firstpre" ".post" instead of ".?" ".first?" ".$".
 [+] In Lua/ERM trigger type (pre, firstpost) letter case no longer matters. You can use "FirstPost", or "FiRsTpOsT".
 [-+] AI:M and AI:W, when used with base value, accepts ONLY get syntax. 
-[+] MR:N displays error when used with set syntax. 
-[+] BG:Q displays error when used with set syntax
+[+] MR:N, BG:Q displays error when used with set syntax. 
 [+] Logs moved to woglogs/ folder. It's created automatically by exec at setup
 [+] We have now LuaLog, WOGERMLOG, WOGVARLOG, WOGCRASHLOG and WOGCRASHDUMP. A lot, but each of them makes sense.
-[+] Added struct that's automatically saved to (and loaded from) savefile. Proven to work in singleplayer, doesn't know if it works in multi. 
 [+] Many Lua/ERM errors are managed by C code now and doesn't cause crash (when managed by Lua, they caused crashes...) Additionally allows me to immediately show argument and parameter values. Note: can be disabled via commenting 1 line in C++ code
 [+] Lua StdLib created. Contains some functions (loading/unloading lods, interating through objects, checking if file exists)
+[+] CU trigger & receiver (barely tested and pretty invasive, but awesome)
 [ ] Curses separated from herospec.
 [ ] I kinda don't understand purpose of h3std, so i've moved everything to h3wog EXCEPT txt files. So all text files can be put in h3std for easier translation,
 [ ] Old saves will NOT work.
@@ -109,15 +108,27 @@ If you add curse to pool it's already in, it doesn't create new entry but overri
 	= 1 blocks are temporary, removed every time game is started or loaded
 	= 2 blocks are permanent, not bound to savefile and are not removed automatically
 VA(mode):C(name,?val,?val) // Check whether named block exists (returns address, then length)
-VA(mode):R(name) // Remove datablock with given name
-VA(mode):B(name, n) // Initialise (create) array of bytes
-VA(mode):B(name, i, ?val) // Get/set value of byte in array
-VA(mode):V(name, n) // Initialise (create) array of v-vars (integers)
-VA(mode):V(name, i, ?val) // Get/set value of v-var in array
-VA(mode):Z(name, n) // // Initialise (create) array of z-strings
-VA(mode):Z(name, i, ?z) // Get/set value of z-var in array 
+VA(mode):R(name) 		// Remove datablock with given name
+VA(mode):B(name, n) 		// Initialise (create) array of bytes
+VA(mode):B(name, i, ?val) 	// Get/set value of byte in array
+VA(mode):V(name, n) 		// Initialise (create) array of v-vars (integers)
+VA(mode):V(name, i, ?val) 	// Get/set value of v-var in array
+VA(mode):Z(name, n) // 		// Initialise (create) array of z-strings
+VA(mode):Z(name, i, ?z) 	// Get/set value of z-var in array 
 Name must be unique within "mode". You can have variables with the same name in different "modes" though.
 It's best to use "modular" naming convention, to prevent overlapping. For example, name "wog_name" would be WoG variable. Limit is 31 characters, so you have some space for ya.
+
+!?CU; Castle Update appearance. Triggered every time something is built/destroyed in town.
+v998/v999/v1000 stores coords of Castle, but !!OB998:T,U sometimes returns wrong value (hero on top of castle)
+Displaying messages within this trigger sometimes causes segfault. It may be caused by some bigger problem (like calling ERM from not-main thread) but I lack knowledge to say for sure... or fix.
+!!CU:O?$; Get original (unmodified) DEF to be used
+	$ - string with DEF filename  
+!!CU:M$; Get/Set DEF filename to be used
+	$ - string with DEF filename
+!!CU:S?$; Get state of town
+	$ - integer, state of town (0 means normal, 1,2,3 means partially destroyed, -1 means totally destroyed)
+!!CU:T?$; Get Town type
+	$ - integer, town type (Format T)
 
 Self-caused bugs
 [-] options.lua was scrapping Wog Options. Now fixed, options.lua has access to value of PL_WONUM, so no need to manually change it every time.
@@ -126,7 +137,7 @@ Found bugs:
 [-] When using Lua/ERM, post triggers ($) cause error with _NOGLOBALS macro. I believe game mistake them as macros. Not fixed, but i have added .pre and .post syntax - those works. For example, now you can use OB(11).pre = function() 
 [-+] When using Lua/ERM, BA:B(string) is broken. Not fixed, instead used StrMan::Apply in extended syntax - that does work well
 [-+] Lua/ERM errors can cause segmentation fault, due to accessing EAX=0x03. Replacing those errors with ERM errors fixes that.
-Not-fixed bugs
+Not-fixed bugs (workaround added)
 [ ] Using BA:B - no matter, old or new syntax - while using HD Mod opens a terminal with filename. Closing this terminal closes the game aswell. Not fixed
 [ ] WoG options - at least, the hardcoded ones - are scrapped when starting WoG map. On other maps works fine. Not fixed
 [ ] Dumping values can cause game crash (to be precise: loop responsible for ERM traceback causes crash) Commented both traceback loops.

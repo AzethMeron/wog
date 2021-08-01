@@ -325,7 +325,7 @@ int ERM_CastleAppearanceUpdate(char Cmd, int, _ToDo_*, Mes* Mp)
 
 		case 'T':{
 			int buffer = town_type;
-			if(Apply(&buffer,sizeof(buffer),Mp,0) == 0) { MError2("Castle state is get-only, cannot be set"); RETURN(0) }
+			if(Apply(&buffer,sizeof(buffer),Mp,0) == 0) { MError2("Castle type is get-only, cannot be set"); RETURN(0) }
 		} break;
 	}
 	RETURN(1);
@@ -433,7 +433,6 @@ void UpdateCastleDisplay(_CastleSetup_* CStructure, _CastleState_* csp)
 	int TownType = CStructure->Type;
 	int TownState = csp->State;
 
-	Dword FileArrayPtr;
 	switch(TownState)
 	{
 		case 0: {
@@ -462,7 +461,7 @@ void UpdateCastleDisplay(_CastleSetup_* CStructure, _CastleState_* csp)
 	sprintf_s(CastleAppearance.defs[TownType],CASTLE_DEF_CLENGTH,"%s",CallCUTrigger(CStructure,csp,CastleAppearance.defs[TownType]));
 
 
-	FileArrayPtr = (Dword) CastleAppearance.defs;
+	Dword FileArrayPtr = (Dword) CastleAppearance.defs;
 	{
 		__asm mov eax,FileArrayPtr
 		__asm mov ecx,0x4C97C1+3
