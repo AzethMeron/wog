@@ -102,6 +102,8 @@ IDA Database
 My database of executable can be found at https://www.dropbox.com/s/wl84icfyxz92ns0/Heroes3f.rar?dl=1  
 I update it very rarely.
 
+Reupload, for safety: https://drive.google.com/file/d/145DBvGLjz81-u7NhKjdgLZYKhu9n98El/view?usp=sharing
+
 About Git
 ---
 
