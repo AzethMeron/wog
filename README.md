@@ -1,6 +1,13 @@
 Heroes 3.5: In the Wake of Gods 3.59 alpha.
 ===
 
+About this branch
+---
+So I've decided to add new feature: change appearance of town based on buildings built in it.  
+Castle demolition mechanic allows you to do pretty similar thing (although in reverse) so it shouldn't be too hard.  
+I did succeed. I can 100% confirm that new receiver and trigger does work. But i can also confirm that using IO (like IF:M) within that trigger can cause segmentation fault. If you ask me, this might be caused by trigger being called from not-main thread (which is known to fuck up ERM) but I've nothing concrete to back it up.  
+Anyway this feature isn't really worth fighting for, you can get same results by using other ERM receivers.  
+
 WoG Legacy docs
 ---
 Most important features: https://drive.google.com/file/d/1QxOKFQ6G0NerG8xEb-2iGE-DhmcAEtQO/view
