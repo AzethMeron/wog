@@ -5364,12 +5364,13 @@ int ERM_BRound(char Cmd,int Num,_ToDo_*sp,Mes *Mp) //!!BM
 		MError("ERROR! Attempt to use \"!!BM\" in non-human battle (use flag 1000 for checking).");
 		RETURN(0)
 	}
-	int mn=GetVarVal(&sp->Par[0]);
-	//  if(Num<2){ MError("\"!!BR:\"-wrong syntax."); return 0; }
+
+	int mn=GetVarVal(&sp->Par[0]); // So mn is index of stack
 	if((mn<-1)||(mn>41)){
 		MError("\"!!BM:\"-monster index is incorrect (-1, 0...41).");
 		RETURN(0)
 	}
+
 	bm = combatManager;
 	if (mn == -1)
 		if (CurrentMon)

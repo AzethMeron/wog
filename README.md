@@ -15,6 +15,8 @@ How WoG was made. Curses: https://drive.google.com/file/d/18lcUWCP8VEkF_i9x3dJA8
 
 Basics of reverse engineering - usage of IDA: https://drive.google.com/file/d/1adlvLPPSVqQyk_ViZWUxlG_-Rhz1psxY/view?usp=sharing
 
+Basics of reverse engineering - Combat Monsters: https://drive.google.com/file/d/196HEyyHB4vNiz-7FZ3qrSUW44orKmQpk/view?usp=sharing
+
 Always up-to-date ERM/Lua Help: https://azethmeron.github.io
 
 (Polish) ERM tutorial: https://drive.google.com/open?id=1L8I4NZUse8CTkazf7BCal9WEhZPrGJPQ&fbclid=IwAR10yjwbRjQhgGfTDaNN34BVghvbe1zJlyVLDTRrKCsG-jMrE-t1bEIb1Ls
