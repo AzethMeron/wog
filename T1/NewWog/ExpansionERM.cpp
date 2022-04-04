@@ -245,6 +245,12 @@ int ERM_VarList(char Cmd,int Num,_ToDo_* sp,Mes *Mp)
 				if(Apply(&index,sizeof(index),Mp,1)) { MError2("Cannot get index"); RETURN(0); }
 				_DataBlock_* block = list->find(name);
 				if(!block) { MError2("DataBlock with given name doesn't exist"); RETURN(0); }
+				// optimalisation trick: let's move _DataBlock_ to the beginning, so next access will be O(1) instead of O(n)
+				if(block != list->front()) {
+					if(!list->remove(name)) { MError2("Internal error (can't move datablock to front"); RETURN(0); }
+					list->push_front(name, block);
+				}
+				// end of optimalisation trick
 				if(index > block->length - sizeof(Byte) || index < 0) { MError2("Invalid index (out of boundaries)"); RETURN(0); }
 				Apply(&block->data[index],sizeof(Byte),Mp,2);
 			}
@@ -268,6 +274,12 @@ int ERM_VarList(char Cmd,int Num,_ToDo_* sp,Mes *Mp)
 				if(Apply(&index,sizeof(index),Mp,1)) { MError2("Cannot get index"); RETURN(0); }
 				_DataBlock_* block = list->find(name);
 				if(!block) { MError2("DataBlock with given name doesn't exist"); RETURN(0); }
+				// optimalisation trick: let's move _DataBlock_ to the beginning, so next access will be O(1) instead of O(n)
+				if(block != list->front()) {
+					if(!list->remove(name)) { MError2("Internal error (can't move datablock to front"); RETURN(0); }
+					list->push_front(name, block);
+				}
+				// end of optimalisation trick
 				index = index * sizeof(int);
 				if(index > block->length - sizeof(int) || index < 0) { MError2("Invalid index (out of boundaries)"); RETURN(0); }
 				Apply(&block->data[index],sizeof(Byte),Mp,2);
@@ -293,6 +305,12 @@ int ERM_VarList(char Cmd,int Num,_ToDo_* sp,Mes *Mp)
 				if(Apply(&index,sizeof(index),Mp,1)) { MError2("Cannot get index"); RETURN(0); }
 				_DataBlock_* block = list->find(name);
 				if(!block) { MError2("DataBlock with given name doesn't exist"); RETURN(0); }
+				// optimalisation trick: let's move _DataBlock_ to the beginning, so next access will be O(1) instead of O(n)
+				if(block != list->front()) {
+					if(!list->remove(name)) { MError2("Internal error (can't move datablock to front"); RETURN(0); }
+					list->push_front(name, block);
+				}
+				// end of optimalisation trick
 				if(index > block->length - 512 || index < 0) { MError2("Invalid index (out of boundaries)"); RETURN(0); }
 				index = index * 512;
 				StrMan::Apply((char*)&block->data[index],Mp,2,512);
