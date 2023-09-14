@@ -366,6 +366,7 @@ void RemoveCurseBlockObject(int index, int type, int subtype)
 	if(entry == -1) return;
 	int end = FindEndOfBlockedObjects(); 
 	if(end == -1) end = CURSE_BLOCKS;
+	if(end == 0) return;
 	for(int i = 0; i < 3; ++i)
 	{
 		DHVC_Table[entry][i] = DHVC_Table[end-1][i];
