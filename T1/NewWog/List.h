@@ -26,7 +26,7 @@
 // char buffer[ID_LENGTH] = "";
 //
 // Methods: 
-// unsigned int size() const - measure number of items in List (complexity depends on number of items O(n))
+// unsigned int size() const - measure number of items in List (complexity now O(1))
 // const char* id_front() const - get name of first item (c-string)
 // Type* front() - get pointer to first object (NULL if none)
 // Type* find(const char* id) - get pointer to object with given name (NULL if not found)
@@ -78,6 +78,7 @@ class _List_
 	private:
 		_ListObject_<Type>* top;
 		_List_<Type>(const _List_<Type>&); // disable copying
+		unsigned int _size;
 	public:
 		unsigned int size() const;
 		const char* id_front() const;
@@ -87,19 +88,20 @@ class _List_
 		bool pop_front();
 		bool remove(const char* id);
 		_ListIterator_<Type> begin() { _ListIterator_<Type> output(top); return output; }
-		_List_<Type>() { top = NULL; }
+		_List_<Type>() { this->top = NULL; }
 };
 
 template<typename Type>
 unsigned int _List_<Type>::size() const
 {
-	STARTNA(__LINE__, 0)
+	/*STARTNA(__LINE__, 0)
 	unsigned int output = 0;
 	for(_ListObject_<Type>* current = this->top; current != NULL; current = current->next)
 	{
 		++output;
 	}
-	RETURN(output);
+	RETURN(output);*/
+	return this->_size;
 }
 
 template<typename Type>
@@ -124,6 +126,7 @@ bool _List_<Type>::push_front(const char* id, Type* ob) // false - already in li
 	sprintf_s(object->id,ID_LENGTH,"%s",id);
 	object->next = this->top;
 	this->top = object;
+	this->_size = this->_size + 1;
 	RETURN(true);
 }
 
@@ -137,6 +140,7 @@ bool _List_<Type>::pop_front() // false - list is empty
 		next = top->next;
 		delete top;
 		top = next;
+		this->_size = this->_size - 1;
 		RETURN(true);
 	}
 	RETURN(false);
@@ -157,6 +161,7 @@ bool _List_<Type>::remove(const char* id) // false - there is no object with suc
 		{
 			current->next = next->next;
 			delete next;
+			this->_size = this->_size - 1;
 			RETURN(true); // successfully removed
 		}
 		current = next;
