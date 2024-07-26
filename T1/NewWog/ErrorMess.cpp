@@ -20,6 +20,7 @@
 // Created for arguments and parameters of receiver. Doesn't support 'dependencies flags' 
 // Oh god this function is TRASH! Please smb remake this
 // No support for constant ^^ strings
+// and strings in general are not displayed, should be improved
 void MakeErmVarNumDescription(char* destination, int length, VarNum& var)
 {
 	sprintf_s(destination, length, "GetVarNumDescription error: report this");
