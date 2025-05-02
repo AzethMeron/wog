@@ -210,6 +210,15 @@ int ERM_VarList(char Cmd,int Num,_ToDo_* sp,Mes *Mp)
 			}
 		} break;
 
+		case 'S': {
+			CHECK_ParamsNum(2);
+			int input = 0;
+			if(Apply(&input,sizeof(input),Mp,0)) { MError2("You must specify which type of variable you want to test for size. Get-syntax here doesn't make sense."); RETURN(0); }
+			int value = -1;
+			switch(input) { default:{ MError2("Unsupported mode"); RETURN(0); } break; case 1: { value = sizeof(int); } break; case 2: { value = 512; } break; }
+			if(Apply(&value,sizeof(value),Mp,1) == 0) { MError2("Can't set the size of datatype."); RETURN(0); }
+		} break;
+
 		/*case 'A': { // direct access to data, obsolete at this point
 			CHECK_ParamsNum(2);
 			char name[ID_LENGTH] = "";
